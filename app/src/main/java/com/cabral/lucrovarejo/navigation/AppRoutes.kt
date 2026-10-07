@@ -8,6 +8,8 @@ object NotLoggedRoutes {
 
 object LoggedRoutes {
     const val HOME = "home"
+    const val SALES = "sales"
+    const val SUMMARY = "summary"
     const val CONFIG = "config"
 }
 
