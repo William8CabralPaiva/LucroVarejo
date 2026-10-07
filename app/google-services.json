@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "238907142650",
+    "project_id": "lucro-varejo",
+    "storage_bucket": "lucro-varejo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:238907142650:android:67737d149be24e5c6b3443",
+        "android_client_info": {
+          "package_name": "com.cabral.lucrovarejo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpzm2aYjUL00WX08unRecmj8kmpKjl4iA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
