@@ -31,7 +31,6 @@ import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
-import com.cabral.lucrovarejo.data.auth.FirebaseAuthRepository
 
 private data class LoggedBottomNavItem(
     val route: String,
@@ -43,10 +42,11 @@ private data class LoggedBottomNavItem(
 fun AppNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = NotLoggedRoutes.SPLASH,
+    isUserAuthenticated: Boolean = false,
+    onSignOut: () -> Unit = {},
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChanged: (ThemeMode) -> Unit = {}
 ) {
-    val authRepository = remember { FirebaseAuthRepository() }
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -54,7 +54,7 @@ fun AppNavGraph(
         composable(NotLoggedRoutes.SPLASH) {
             SplashScreen(
                 onSplashFinished = {
-                    val destination = if (authRepository.hasSession) {
+                    val destination = if (isUserAuthenticated) {
                         LoggedRoutes.HOME
                     } else {
                         NotLoggedRoutes.LOGIN
@@ -97,7 +97,7 @@ fun AppNavGraph(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = {
-                    authRepository.signOut()
+                    onSignOut()
                     navController.navigate(NotLoggedRoutes.LOGIN) {
                         popUpTo(LoggedRoutes.HOME) { inclusive = true }
                     }

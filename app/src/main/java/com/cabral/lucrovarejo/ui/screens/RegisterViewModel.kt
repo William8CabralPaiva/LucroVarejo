@@ -2,15 +2,18 @@ package com.cabral.lucrovarejo.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cabral.lucrovarejo.data.auth.AuthRepository
-import com.cabral.lucrovarejo.data.auth.FirebaseAuthRepository
-import com.cabral.lucrovarejo.data.auth.StoreAlreadyRegisteredException
+import com.cabral.lucrovarejo.domain.auth.AuthFailure
+import com.cabral.lucrovarejo.domain.auth.AuthFailureReason
+import com.cabral.lucrovarejo.domain.auth.StoreAlreadyRegisteredException
+import com.cabral.lucrovarejo.domain.auth.usecase.RegisterStoreUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
+import javax.inject.Inject
 
 data class RegisterUiState(
     val storeName: String = "",
@@ -61,8 +64,9 @@ internal object RegisterValidator {
     }
 }
 
-class RegisterViewModel(
-    private val repository: AuthRepository = FirebaseAuthRepository()
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
+    private val registerStore: RegisterStoreUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -148,7 +152,7 @@ class RegisterViewModel(
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
             try {
-                repository.register(
+                registerStore(
                     storeName = current.storeName.lowercase(Locale.ROOT),
                     email = current.email,
                     password = current.password
@@ -185,25 +189,15 @@ class RegisterViewModel(
         }
 
     private fun registerErrorMessage(exception: Exception): String {
-        val code = when (exception) {
-            is com.google.firebase.auth.FirebaseAuthException ->
-                exception.errorCode.uppercase(Locale.ROOT)
-            is com.google.firebase.firestore.FirebaseFirestoreException ->
-                exception.code.name.uppercase(Locale.ROOT)
-            else -> null
-        }
-
-        return when (code) {
-            "ERROR_OPERATION_NOT_ALLOWED" ->
+        return when ((exception as? AuthFailure)?.reason) {
+            AuthFailureReason.PROVIDER_DISABLED ->
                 "O cadastro por e-mail e senha está desativado no Firebase Authentication."
-            "ERROR_INVALID_EMAIL" ->
+            AuthFailureReason.INVALID_ACCOUNT_IDENTIFIER ->
                 "O Firebase rejeitou o identificador da conta. Confira a configuração do projeto."
-            "PERMISSION_DENIED" ->
+            AuthFailureReason.PERMISSION_DENIED ->
                 "O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas."
-            "UNAVAILABLE", "ERROR_NETWORK_REQUEST_FAILED" ->
+            AuthFailureReason.NETWORK ->
                 "Sem conexão com o Firebase. Verifique sua internet e tente novamente."
-            "ERROR_EMAIL_ALREADY_IN_USE" ->
-                "Esse nome de loja já está em uso."
             else ->
                 "Não foi possível concluir o cadastro no Firebase. Tente novamente mais tarde."
         }
