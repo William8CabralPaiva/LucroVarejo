@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -83,7 +84,8 @@ internal fun RegisterScreenContent(
             Text(
                 text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.testTag(REGISTER_TITLE_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_title_spacing)))
@@ -101,7 +103,9 @@ internal fun RegisterScreenContent(
                 isError = state.storeNameError != null,
                 singleLine = true,
                 enabled = !state.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_STORE_NAME_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
@@ -117,7 +121,9 @@ internal fun RegisterScreenContent(
                 singleLine = true,
                 enabled = !state.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_EMAIL_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
@@ -133,7 +139,9 @@ internal fun RegisterScreenContent(
                 },
                 isError = state.passwordError != null,
                 enabled = !state.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_PASSWORD_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
@@ -149,7 +157,9 @@ internal fun RegisterScreenContent(
                 },
                 isError = state.confirmPasswordError != null,
                 enabled = !state.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG)
             )
 
             state.errorMessage?.let {
@@ -171,13 +181,21 @@ internal fun RegisterScreenContent(
 
             TextButton(
                 onClick = onBackPress,
-                enabled = !state.isLoading
+                enabled = !state.isLoading,
+                modifier = Modifier.testTag(REGISTER_BACK_BUTTON_TAG)
             ) {
                 Text(stringResource(R.string.register_existing_account))
             }
         }
     }
 }
+
+internal const val REGISTER_TITLE_TAG = "register-title"
+internal const val REGISTER_STORE_NAME_FIELD_TAG = "register-store-name-field"
+internal const val REGISTER_EMAIL_FIELD_TAG = "register-email-field"
+internal const val REGISTER_PASSWORD_FIELD_TAG = "register-password-field"
+internal const val REGISTER_CONFIRM_PASSWORD_FIELD_TAG = "register-confirm-password-field"
+internal const val REGISTER_BACK_BUTTON_TAG = "register-back-button"
 
 @Preview(showBackground = true, name = "Cadastro da loja")
 @Composable

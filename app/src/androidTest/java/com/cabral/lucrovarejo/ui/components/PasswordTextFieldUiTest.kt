@@ -10,9 +10,11 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,5 +47,31 @@ class PasswordTextFieldUiTest {
         composeRule.onNodeWithContentDescription("Ocultar senha").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Ocultar senha").performClick()
         composeRule.onNodeWithContentDescription("Mostrar senha").assertIsDisplayed()
+    }
+
+    @Test
+    fun statefulFieldForwardsInputAndTogglesPasswordVisibility() {
+        var currentPassword = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                var password by remember { mutableStateOf(currentPassword) }
+                PasswordTextFieldStateful(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        currentPassword = it
+                    },
+                    labelResId = R.string.register_password_label,
+                    showPasswordDescriptionResId = R.string.register_password_show,
+                    hidePasswordDescriptionResId = R.string.register_password_hide
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Senha").performTextInput("senha123")
+        composeRule.onNodeWithContentDescription("Mostrar senha").performClick()
+        composeRule.onNodeWithContentDescription("Ocultar senha").assertIsDisplayed()
+
+        composeRule.runOnIdle { assertEquals("senha123", currentPassword) }
     }
 }

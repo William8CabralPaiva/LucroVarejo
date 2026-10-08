@@ -54,4 +54,19 @@ class LoadingButtonUiTest {
         composeRule.onNodeWithText("Cadastrar").assertIsDisplayed().performClick()
         composeRule.runOnIdle { assertEquals(1, clickCount) }
     }
+
+    @Test
+    fun disabledButtonRemainsVisibleAndDisabled() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                LoadingButton(
+                    textId = R.string.register_submit,
+                    enabled = false
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
+        composeRule.onNodeWithText("Cadastrar").assertIsDisplayed()
+    }
 }
