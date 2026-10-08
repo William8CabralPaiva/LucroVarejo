@@ -14,6 +14,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
+import com.cabral.lucrovarejo.data.auth.FirebaseAuthRepository
 
 private data class LoggedBottomNavItem(
     val route: String,
@@ -44,6 +46,7 @@ fun AppNavGraph(
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChanged: (ThemeMode) -> Unit = {}
 ) {
+    val authRepository = remember { FirebaseAuthRepository() }
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -51,7 +54,12 @@ fun AppNavGraph(
         composable(NotLoggedRoutes.SPLASH) {
             SplashScreen(
                 onSplashFinished = {
-                    navController.navigate(NotLoggedRoutes.LOGIN) {
+                    val destination = if (authRepository.hasSession) {
+                        LoggedRoutes.HOME
+                    } else {
+                        NotLoggedRoutes.LOGIN
+                    }
+                    navController.navigate(destination) {
                         popUpTo(NotLoggedRoutes.SPLASH) { inclusive = true }
                     }
                 }
@@ -75,6 +83,11 @@ fun AppNavGraph(
             RegisterScreen(
                 onBackPress = {
                     navController.popBackStack()
+                },
+                onRegisterSuccess = {
+                    navController.navigate(LoggedRoutes.HOME) {
+                        popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
+                    }
                 }
             )
         }
@@ -84,6 +97,7 @@ fun AppNavGraph(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = {
+                    authRepository.signOut()
                     navController.navigate(NotLoggedRoutes.LOGIN) {
                         popUpTo(LoggedRoutes.HOME) { inclusive = true }
                     }

@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /stores/{storeId} {
+      function ownsStore() {
+        return request.auth != null && request.auth.uid == storeId;
+      }
+
+      allow create: if ownsStore()
+        && request.resource.data.keys().hasAll(['storeName', 'email', 'createdAt'])
+        && request.resource.data.storeName is string
+        && request.resource.data.storeName.matches('^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$')
+        && request.auth.token.email == request.resource.data.storeName + '@auth.lucrovarejo.invalid'
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.createdAt == request.time;
+      allow get: if ownsStore();
+      allow update: if ownsStore()
+        && request.resource.data.storeName == resource.data.storeName
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254;
+      allow list, delete: if false;
+
+      match /{document=**} {
+        allow read, write: if ownsStore();
+      }
+    }
+  }
+}
