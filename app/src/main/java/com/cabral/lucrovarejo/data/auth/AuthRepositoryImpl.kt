@@ -3,9 +3,11 @@ package com.cabral.lucrovarejo.data.auth
 import com.cabral.lucrovarejo.data.auth.datasource.AuthRemoteDataSource
 import com.cabral.lucrovarejo.data.auth.datasource.StoreProfile
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
+import javax.inject.Singleton
 import javax.inject.Inject
 import java.util.Locale
 
+@Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val remoteDataSource: AuthRemoteDataSource
 ) : AuthRepository {

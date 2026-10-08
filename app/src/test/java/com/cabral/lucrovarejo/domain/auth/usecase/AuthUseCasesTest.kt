@@ -10,10 +10,13 @@ import org.junit.Test
 class AuthUseCasesTest {
     @Test
     fun registerNormalizesStoreNameAndTrimsEmail() = runTest {
+        // Given: a use case backed by a fake auth repository.
         val repository = FakeAuthRepository()
 
+        // When: registering with mixed-case store name and padded email.
         RegisterStoreUseCase(repository)(" My-Store.1 ", " owner@example.com ", "secret1")
 
+        // Then: normalized values are sent to the repository.
         assertEquals("my-store.1", repository.registeredStore)
         assertEquals("owner@example.com", repository.registeredEmail)
         assertEquals("secret1", repository.registeredPassword)
@@ -21,23 +24,29 @@ class AuthUseCasesTest {
 
     @Test
     fun signInNormalizesStoreNameButKeepsPassword() = runTest {
+        // Given: a sign-in use case backed by a fake repository.
         val repository = FakeAuthRepository()
 
+        // When: signing in with a mixed-case store name.
         SignInUseCase(repository)(" My-Store.1 ", "secret1")
 
+        // Then: only the store name is normalized.
         assertEquals("my-store.1", repository.signedInStore)
         assertEquals("secret1", repository.signedInPassword)
     }
 
     @Test
     fun sessionAndSignOutUseRepository() {
+        // Given: a repository that currently has an active session.
         val repository = FakeAuthRepository().apply { hasSession = true }
 
+        // When: querying the session and signing out.
         assertTrue(HasSessionUseCase(repository)())
         SignOutUseCase(repository)()
         assertTrue(repository.signedOut)
 
         repository.hasSession = false
+        // Then: the session state is false after sign-out.
         assertFalse(HasSessionUseCase(repository)())
     }
 
