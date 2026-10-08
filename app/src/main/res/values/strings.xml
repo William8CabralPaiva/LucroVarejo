@@ -1,3 +1,30 @@
 <resources>
     <string name="app_name">Lucro Varejo</string>
+    <string name="register_title">Cadastro da loja</string>
+    <string name="register_store_label">Loja</string>
+    <string name="register_store_hint">3 a 30 caracteres: letras sem acentos, números, ponto, hífen ou sublinhado. Sem espaços.</string>
+    <string name="register_email_label">E-mail</string>
+    <string name="register_password_label">Senha</string>
+    <string name="register_confirm_password_label">Confirmar senha</string>
+    <string name="register_password_hide">Ocultar senha</string>
+    <string name="register_password_show">Mostrar senha</string>
+    <string name="register_confirm_password_hide">Ocultar confirmação da senha</string>
+    <string name="register_confirm_password_show">Mostrar confirmação da senha</string>
+    <string name="register_submit">Cadastrar</string>
+    <string name="register_existing_account">Já tenho uma conta</string>
+    <string name="register_store_required">Informe o nome da loja.</string>
+    <string name="register_store_length">A loja deve ter de 3 a 30 caracteres.</string>
+    <string name="register_store_invalid">Use letras sem acentos, números, ponto, hífen ou sublinhado, sem espaços.</string>
+    <string name="register_email_required">Informe o e-mail.</string>
+    <string name="register_email_invalid">Informe um e-mail válido.</string>
+    <string name="register_password_required">Informe a senha.</string>
+    <string name="register_password_too_short">A senha deve ter pelo menos 6 caracteres.</string>
+    <string name="register_confirm_password_required">Confirme a senha.</string>
+    <string name="register_password_mismatch">As senhas não coincidem.</string>
+    <string name="register_store_taken">Esse nome de loja já está em uso.</string>
+    <string name="register_error_provider_disabled">O cadastro por e-mail e senha está desativado no Firebase Authentication.</string>
+    <string name="register_error_invalid_identifier">O Firebase rejeitou o identificador da conta. Confira a configuração do projeto.</string>
+    <string name="register_error_permission_denied">O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas.</string>
+    <string name="register_error_network">Sem conexão com o Firebase. Verifique sua internet e tente novamente.</string>
+    <string name="register_error_generic">Não foi possível concluir o cadastro no Firebase. Tente novamente mais tarde.</string>
 </resources>

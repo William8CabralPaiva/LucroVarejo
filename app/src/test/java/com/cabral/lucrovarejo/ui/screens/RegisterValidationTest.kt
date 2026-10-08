@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.ui.screens
 
+import com.cabral.lucrovarejo.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -20,11 +21,11 @@ class RegisterValidationTest {
         // When: validating the names.
         // Then: both values are rejected with the store-name rule.
         assertEquals(
-            "Use letras sem acentos, números, ponto, hífen ou sublinhado, sem espaços.",
+            R.string.register_store_invalid,
             StoreNameValidator.validate("loja central")
         )
         assertEquals(
-            "Use letras sem acentos, números, ponto, hífen ou sublinhado, sem espaços.",
+            R.string.register_store_invalid,
             StoreNameValidator.validate("lojasão")
         )
     }
@@ -35,11 +36,11 @@ class RegisterValidationTest {
         // When: validating each name.
         // Then: only the 3-30 character ASCII identifier is accepted.
         assertEquals(
-            "A loja deve ter de 3 a 30 caracteres.",
+            R.string.register_store_length,
             StoreNameValidator.validate("ab")
         )
         assertEquals(
-            "A loja deve ter de 3 a 30 caracteres.",
+            R.string.register_store_length,
             StoreNameValidator.validate("loja".repeat(8))
         )
         assertNull(StoreNameValidator.validate("loja123"))
@@ -54,10 +55,10 @@ class RegisterValidationTest {
         // When: validating their values.
         // Then: only a well-formed email and password of at least six characters pass.
         assertNull(RegisterValidator.validateEmail("owner@example.com"))
-        assertEquals("Informe um e-mail válido.", RegisterValidator.validateEmail("invalid"))
+        assertEquals(R.string.register_email_invalid, RegisterValidator.validateEmail("invalid"))
         assertNull(RegisterValidator.validatePassword("123456"))
         assertEquals(
-            "A senha deve ter pelo menos 6 caracteres.",
+            R.string.register_password_too_short,
             RegisterValidator.validatePassword("12345")
         )
     }

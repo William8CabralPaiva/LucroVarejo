@@ -2,6 +2,8 @@ package com.cabral.lucrovarejo.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.annotation.StringRes
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.auth.AuthFailure
 import com.cabral.lucrovarejo.domain.auth.AuthFailureReason
 import com.cabral.lucrovarejo.domain.auth.StoreAlreadyRegisteredException
@@ -20,11 +22,11 @@ data class RegisterUiState(
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
-    val storeNameError: String? = null,
-    val emailError: String? = null,
-    val passwordError: String? = null,
-    val confirmPasswordError: String? = null,
-    val errorMessage: String? = null,
+    @param:StringRes val storeNameError: Int? = null,
+    @param:StringRes val emailError: Int? = null,
+    @param:StringRes val passwordError: Int? = null,
+    @param:StringRes val confirmPasswordError: Int? = null,
+    @param:StringRes val errorMessage: Int? = null,
     val isLoading: Boolean = false,
     val isRegistered: Boolean = false
 ) {
@@ -38,11 +40,11 @@ data class RegisterUiState(
 object StoreNameValidator {
     fun normalize(value: String): String = value.lowercase(Locale.ROOT)
 
-    fun validate(value: String): String? = when {
-        value.isBlank() -> "Informe o nome da loja."
-        value.length !in 3..30 -> "A loja deve ter de 3 a 30 caracteres."
+    @StringRes fun validate(value: String): Int? = when {
+        value.isBlank() -> R.string.register_store_required
+        value.length !in 3..30 -> R.string.register_store_length
         !value.matches(Regex("[a-zA-Z0-9][a-zA-Z0-9._-]{1,28}[a-zA-Z0-9]")) ->
-            "Use letras sem acentos, números, ponto, hífen ou sublinhado, sem espaços."
+            R.string.register_store_invalid
         else -> null
     }
 }
@@ -51,15 +53,15 @@ internal object RegisterValidator {
     private val emailPattern =
         Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 
-    fun validateEmail(email: String): String? = when {
-        email.isBlank() -> "Informe o e-mail."
-        !emailPattern.matches(email) -> "Informe um e-mail válido."
+    @StringRes fun validateEmail(email: String): Int? = when {
+        email.isBlank() -> R.string.register_email_required
+        !emailPattern.matches(email) -> R.string.register_email_invalid
         else -> null
     }
 
-    fun validatePassword(password: String): String? = when {
-        password.isBlank() -> "Informe a senha."
-        password.length < 6 -> "A senha deve ter pelo menos 6 caracteres."
+    @StringRes fun validatePassword(password: String): Int? = when {
+        password.isBlank() -> R.string.register_password_required
+        password.length < 6 -> R.string.register_password_too_short
         else -> null
     }
 }
@@ -162,7 +164,7 @@ class RegisterViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Esse nome de loja já está em uso."
+                        errorMessage = R.string.register_store_taken
                     )
                 }
             } catch (exception: Exception) {
@@ -180,26 +182,26 @@ class RegisterViewModel @Inject constructor(
         password: String,
         confirmation: String,
         required: Boolean = true
-    ): String? =
+    ): Int? =
         when {
-            confirmation.isBlank() && required -> "Confirme a senha."
+            confirmation.isBlank() && required -> R.string.register_confirm_password_required
             confirmation.isBlank() -> null
-            password != confirmation -> "As senhas não coincidem."
+            password != confirmation -> R.string.register_password_mismatch
             else -> null
         }
 
-    private fun registerErrorMessage(exception: Exception): String {
+    @StringRes private fun registerErrorMessage(exception: Exception): Int {
         return when ((exception as? AuthFailure)?.reason) {
             AuthFailureReason.PROVIDER_DISABLED ->
-                "O cadastro por e-mail e senha está desativado no Firebase Authentication."
+                R.string.register_error_provider_disabled
             AuthFailureReason.INVALID_ACCOUNT_IDENTIFIER ->
-                "O Firebase rejeitou o identificador da conta. Confira a configuração do projeto."
+                R.string.register_error_invalid_identifier
             AuthFailureReason.PERMISSION_DENIED ->
-                "O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas."
+                R.string.register_error_permission_denied
             AuthFailureReason.NETWORK ->
-                "Sem conexão com o Firebase. Verifique sua internet e tente novamente."
+                R.string.register_error_network
             else ->
-                "Não foi possível concluir o cadastro no Firebase. Tente novamente mais tarde."
+                R.string.register_error_generic
         }
     }
 }

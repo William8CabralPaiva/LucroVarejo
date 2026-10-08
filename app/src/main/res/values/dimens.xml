@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="register_screen_padding">24dp</dimen>
+    <dimen name="register_title_spacing">28dp</dimen>
+    <dimen name="register_field_spacing">12dp</dimen>
+    <dimen name="register_section_spacing">24dp</dimen>
+</resources>

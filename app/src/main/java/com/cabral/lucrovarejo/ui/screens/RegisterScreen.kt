@@ -35,9 +35,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.R
 
 @Composable
 fun RegisterScreen(
@@ -46,6 +48,8 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isRegistered) {
         if (state.isRegistered) onRegisterSuccess()
@@ -58,7 +62,11 @@ fun RegisterScreen(
         onPasswordChange = viewModel::onPasswordChanged,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChanged,
         onSubmit = viewModel::register,
-        onBackPress = onBackPress
+        onBackPress = onBackPress,
+        passwordVisible = passwordVisible,
+        confirmPasswordVisible = confirmPasswordVisible,
+        onPasswordVisibilityChange = { passwordVisible = it },
+        onConfirmPasswordVisibilityChange = { confirmPasswordVisible = it }
     )
 }
 
@@ -70,36 +78,37 @@ internal fun RegisterScreenContent(
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
-    onBackPress: () -> Unit
+    onBackPress: () -> Unit,
+    passwordVisible: Boolean,
+    confirmPasswordVisible: Boolean,
+    onPasswordVisibilityChange: (Boolean) -> Unit,
+    onConfirmPasswordVisibilityChange: (Boolean) -> Unit
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
-
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(dimensionResource(R.dimen.register_screen_padding)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
             Text(
-                text = "Cadastro da loja",
+                text = stringResource(R.string.register_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_title_spacing)))
 
             OutlinedTextField(
                 value = state.storeName,
                 onValueChange = onStoreNameChange,
-                label = { Text("Loja") },
+                label = { Text(stringResource(R.string.register_store_label)) },
                 supportingText = {
                     Text(
-                        state.storeNameError
-                            ?: "3 a 30 caracteres: letras sem acentos, números, ponto, hífen ou sublinhado. Sem espaços."
+                        state.storeNameError?.let { stringResource(it) }
+                            ?: stringResource(R.string.register_store_hint)
                     )
                 },
                 isError = state.storeNameError != null,
@@ -108,14 +117,14 @@ internal fun RegisterScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
             OutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChange,
-                label = { Text("E-mail") },
+                label = { Text(stringResource(R.string.register_email_label)) },
                 supportingText = {
-                    state.emailError?.let { Text(it) }
+                    state.emailError?.let { Text(stringResource(it)) }
                 },
                 isError = state.emailError != null,
                 singleLine = true,
@@ -124,14 +133,14 @@ internal fun RegisterScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
             OutlinedTextField(
                 value = state.password,
                 onValueChange = onPasswordChange,
-                label = { Text("Senha") },
+                label = { Text(stringResource(R.string.register_password_label)) },
                 supportingText = {
-                    state.passwordError?.let { Text(it) }
+                    state.passwordError?.let { Text(stringResource(it)) }
                 },
                 isError = state.passwordError != null,
                 singleLine = true,
@@ -143,7 +152,7 @@ internal fun RegisterScreenContent(
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(onClick = { onPasswordVisibilityChange(!passwordVisible) }) {
                         Icon(
                             imageVector = if (passwordVisible) {
                                 Icons.Filled.VisibilityOff
@@ -151,9 +160,9 @@ internal fun RegisterScreenContent(
                                 Icons.Filled.Visibility
                             },
                             contentDescription = if (passwordVisible) {
-                                "Ocultar senha"
+                                stringResource(R.string.register_password_hide)
                             } else {
-                                "Mostrar senha"
+                                stringResource(R.string.register_password_show)
                             }
                         )
                     }
@@ -161,14 +170,14 @@ internal fun RegisterScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
             OutlinedTextField(
                 value = state.confirmPassword,
                 onValueChange = onConfirmPasswordChange,
-                label = { Text("Confirmar senha") },
+                label = { Text(stringResource(R.string.register_confirm_password_label)) },
                 supportingText = {
-                    state.confirmPasswordError?.let { Text(it) }
+                    state.confirmPasswordError?.let { Text(stringResource(it)) }
                 },
                 isError = state.confirmPasswordError != null,
                 singleLine = true,
@@ -182,7 +191,7 @@ internal fun RegisterScreenContent(
                 trailingIcon = {
                     IconButton(
                         onClick = {
-                            confirmPasswordVisible = !confirmPasswordVisible
+                            onConfirmPasswordVisibilityChange(!confirmPasswordVisible)
                         }
                     ) {
                         Icon(
@@ -192,9 +201,9 @@ internal fun RegisterScreenContent(
                                 Icons.Filled.Visibility
                             },
                             contentDescription = if (confirmPasswordVisible) {
-                                "Ocultar confirmação da senha"
+                                stringResource(R.string.register_confirm_password_hide)
                             } else {
-                                "Mostrar confirmação da senha"
+                                stringResource(R.string.register_confirm_password_show)
                             }
                         )
                     }
@@ -203,11 +212,11 @@ internal fun RegisterScreenContent(
             )
 
             state.errorMessage?.let {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(it, color = MaterialTheme.colorScheme.error)
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
+                Text(stringResource(it), color = MaterialTheme.colorScheme.error)
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_section_spacing)))
 
             Button(
                 onClick = onSubmit,
@@ -217,17 +226,17 @@ internal fun RegisterScreenContent(
                 if (state.isLoading) {
                     CircularProgressIndicator()
                 } else {
-                    Text("Cadastrar")
+                    Text(stringResource(R.string.register_submit))
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
             TextButton(
                 onClick = onBackPress,
                 enabled = !state.isLoading
             ) {
-                Text("Já tenho uma conta")
+                Text(stringResource(R.string.register_existing_account))
             }
         }
     }
@@ -249,7 +258,11 @@ private fun RegisterScreenPreview() {
             onPasswordChange = {},
             onConfirmPasswordChange = {},
             onSubmit = {},
-            onBackPress = {}
+            onBackPress = {},
+            passwordVisible = false,
+            confirmPasswordVisible = false,
+            onPasswordVisibilityChange = {},
+            onConfirmPasswordVisibilityChange = {}
         )
     }
 }
