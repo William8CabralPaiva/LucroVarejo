@@ -14,7 +14,6 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -26,7 +25,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.ui.screens.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.LoginScreen
-import com.cabral.lucrovarejo.ui.screens.RegisterScreen
+import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen

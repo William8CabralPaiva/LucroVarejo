@@ -7,11 +7,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.cabral.lucrovarejo.ui.screens.register.RegisterScreenContent
+import com.cabral.lucrovarejo.ui.screens.register.RegisterUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Rule
 import org.junit.Test
@@ -26,8 +24,6 @@ class RegisterScreenUiTest {
     fun displaysTheRequiredRegistrationFields() {
         composeRule.setContent {
             LucroVarejoTheme {
-                var passwordVisible by remember { mutableStateOf(false) }
-                var confirmPasswordVisible by remember { mutableStateOf(false) }
                 RegisterScreenContent(
                     state = RegisterUiState(),
                     onStoreNameChange = {},
@@ -35,11 +31,7 @@ class RegisterScreenUiTest {
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
                     onSubmit = {},
-                    onBackPress = {},
-                    passwordVisible = passwordVisible,
-                    confirmPasswordVisible = confirmPasswordVisible,
-                    onPasswordVisibilityChange = { passwordVisible = it },
-                    onConfirmPasswordVisibilityChange = { confirmPasswordVisible = it }
+                    onBackPress = {}
                 )
             }
         }

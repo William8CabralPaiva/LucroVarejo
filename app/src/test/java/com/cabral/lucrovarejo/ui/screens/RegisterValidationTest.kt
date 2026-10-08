@@ -1,6 +1,9 @@
 package com.cabral.lucrovarejo.ui.screens
 
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.screens.register.RegisterUiState
+import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
+import com.cabral.lucrovarejo.ui.screens.register.StoreNameValidator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens
+package com.cabral.lucrovarejo.ui.screens.register
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,13 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -26,30 +19,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.LoadingButton
+import com.cabral.lucrovarejo.ui.components.PasswordTextFieldStateful
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun RegisterScreen(
     onBackPress: () -> Unit,
     onRegisterSuccess: () -> Unit,
-    viewModel: RegisterViewModel = hiltViewModel()
+    viewModel: RegisterViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    var passwordVisible by remember { mutableStateOf(false) }
-    var confirmPasswordVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.isRegistered) {
         if (state.isRegistered) onRegisterSuccess()
@@ -62,11 +50,7 @@ fun RegisterScreen(
         onPasswordChange = viewModel::onPasswordChanged,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChanged,
         onSubmit = viewModel::register,
-        onBackPress = onBackPress,
-        passwordVisible = passwordVisible,
-        confirmPasswordVisible = confirmPasswordVisible,
-        onPasswordVisibilityChange = { passwordVisible = it },
-        onConfirmPasswordVisibilityChange = { confirmPasswordVisible = it }
+        onBackPress = onBackPress
     )
 }
 
@@ -79,10 +63,6 @@ internal fun RegisterScreenContent(
     onConfirmPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onBackPress: () -> Unit,
-    passwordVisible: Boolean,
-    confirmPasswordVisible: Boolean,
-    onPasswordVisibilityChange: (Boolean) -> Unit,
-    onConfirmPasswordVisibilityChange: (Boolean) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -135,79 +115,33 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
-            OutlinedTextField(
+            PasswordTextFieldStateful(
                 value = state.password,
                 onValueChange = onPasswordChange,
-                label = { Text(stringResource(R.string.register_password_label)) },
+                labelResId = R.string.register_password_label,
+                showPasswordDescriptionResId = R.string.register_password_show,
+                hidePasswordDescriptionResId = R.string.register_password_hide,
                 supportingText = {
                     state.passwordError?.let { Text(stringResource(it)) }
                 },
                 isError = state.passwordError != null,
-                singleLine = true,
                 enabled = !state.isLoading,
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                trailingIcon = {
-                    IconButton(onClick = { onPasswordVisibilityChange(!passwordVisible) }) {
-                        Icon(
-                            imageVector = if (passwordVisible) {
-                                Icons.Filled.VisibilityOff
-                            } else {
-                                Icons.Filled.Visibility
-                            },
-                            contentDescription = if (passwordVisible) {
-                                stringResource(R.string.register_password_hide)
-                            } else {
-                                stringResource(R.string.register_password_show)
-                            }
-                        )
-                    }
-                },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
-            OutlinedTextField(
+            PasswordTextFieldStateful(
                 value = state.confirmPassword,
                 onValueChange = onConfirmPasswordChange,
-                label = { Text(stringResource(R.string.register_confirm_password_label)) },
+                labelResId = R.string.register_confirm_password_label,
+                showPasswordDescriptionResId = R.string.register_confirm_password_show,
+                hidePasswordDescriptionResId = R.string.register_confirm_password_hide,
                 supportingText = {
                     state.confirmPasswordError?.let { Text(stringResource(it)) }
                 },
                 isError = state.confirmPasswordError != null,
-                singleLine = true,
                 enabled = !state.isLoading,
-                visualTransformation = if (confirmPasswordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            onConfirmPasswordVisibilityChange(!confirmPasswordVisible)
-                        }
-                    ) {
-                        Icon(
-                            imageVector = if (confirmPasswordVisible) {
-                                Icons.Filled.VisibilityOff
-                            } else {
-                                Icons.Filled.Visibility
-                            },
-                            contentDescription = if (confirmPasswordVisible) {
-                                stringResource(R.string.register_confirm_password_hide)
-                            } else {
-                                stringResource(R.string.register_confirm_password_show)
-                            }
-                        )
-                    }
-                },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -218,17 +152,13 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_section_spacing)))
 
-            Button(
+            LoadingButton(
+                textId = R.string.register_submit,
+                enabled = state.isFormValid,
+                isLoading = state.isLoading,
                 onClick = onSubmit,
-                enabled = state.isFormValid && !state.isLoading,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    Text(stringResource(R.string.register_submit))
-                }
-            }
+            )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
@@ -258,11 +188,7 @@ private fun RegisterScreenPreview() {
             onPasswordChange = {},
             onConfirmPasswordChange = {},
             onSubmit = {},
-            onBackPress = {},
-            passwordVisible = false,
-            confirmPasswordVisible = false,
-            onPasswordVisibilityChange = {},
-            onConfirmPasswordVisibilityChange = {}
+            onBackPress = {}
         )
     }
 }
