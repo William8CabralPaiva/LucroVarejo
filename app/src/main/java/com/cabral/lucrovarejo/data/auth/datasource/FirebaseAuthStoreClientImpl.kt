@@ -10,6 +10,7 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : FirebaseAuthStoreClient {
+
     override val hasSession: Boolean
         get() = auth.currentUser != null
 
@@ -18,13 +19,13 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
             ?: error("Firebase Auth did not return a user.")
 
     override suspend fun saveStoreProfile(uid: String, profile: StoreProfile) {
-        firestore.collection("stores")
+        firestore.collection(FIELD_STORES)
             .document(uid)
             .set(
                 mapOf(
-                    "storeName" to profile.storeName,
-                    "email" to profile.contactEmail,
-                    "createdAt" to FieldValue.serverTimestamp()
+                    FIELD_STORE_NAME to profile.storeName,
+                    FIELD_EMAIL to profile.contactEmail,
+                    FIELD_CREATED_AT to FieldValue.serverTimestamp()
                 )
             )
             .await()
@@ -40,5 +41,12 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
 
     override fun signOut() {
         auth.signOut()
+    }
+
+    private companion object {
+        const val FIELD_STORES = "stores"
+        const val FIELD_STORE_NAME = "storeName"
+        const val FIELD_EMAIL = "email"
+        const val FIELD_CREATED_AT = "createdAt"
     }
 }

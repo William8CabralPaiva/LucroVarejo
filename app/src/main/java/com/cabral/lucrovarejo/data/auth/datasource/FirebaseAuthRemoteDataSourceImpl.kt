@@ -22,7 +22,7 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
     ) {
         val uid = try {
             firebaseClient.createUser(technicalEmail, password)
-        } catch (exception: FirebaseAuthUserCollisionException) {
+        } catch (_: FirebaseAuthUserCollisionException) {
             throw StoreAlreadyRegisteredException()
         } catch (exception: Exception) {
             throw mapFailure(exception)
