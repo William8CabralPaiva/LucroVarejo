@@ -1,20 +1,18 @@
 package com.cabral.lucrovarejo.ui.screens
 
-import androidx.activity.ComponentActivity
-import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.cabral.lucrovarejo.R
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextInput
 import com.cabral.lucrovarejo.ui.components.LOADING_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.LOADING_INDICATOR_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_BACK_BUTTON_TAG
@@ -30,11 +28,14 @@ import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class RegisterScreenUiTest {
     @get:Rule
-    val composeRule = createAndroidComposeRule<ComponentActivity>()
+    val composeRule = createComposeRule()
 
     @Test
     fun displaysTheRequiredRegistrationFields() {
@@ -73,8 +74,6 @@ class RegisterScreenUiTest {
                 var formState by remember {
                     mutableStateOf(
                         RegisterUiState(
-                            storeName = "",
-                            email = "",
                             password = "senha123",
                             confirmPassword = "senha123"
                         )
@@ -100,8 +99,8 @@ class RegisterScreenUiTest {
 
         composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).performTextInput("minhaloja")
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).performTextInput("loja@example.com")
-        composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsDisplayed().performClick()
-        composeRule.onNodeWithTag(REGISTER_BACK_BUTTON_TAG).performClick()
+        composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performScrollTo().performClick()
+        composeRule.onNodeWithTag(REGISTER_BACK_BUTTON_TAG).performScrollTo().performClick()
 
         composeRule.runOnIdle {
             assertEquals("minhaloja", storeName)
@@ -133,7 +132,7 @@ class RegisterScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(LOADING_INDICATOR_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(LOADING_INDICATOR_TAG).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsNotEnabled()
@@ -148,11 +147,11 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(
-                        storeNameError = R.string.register_store_required,
-                        emailError = R.string.register_email_invalid,
-                        passwordError = R.string.register_password_too_short,
-                        confirmPasswordError = R.string.register_password_mismatch,
-                        errorMessage = R.string.register_error_network
+                        storeNameError = com.cabral.lucrovarejo.R.string.register_store_required,
+                        emailError = com.cabral.lucrovarejo.R.string.register_email_invalid,
+                        passwordError = com.cabral.lucrovarejo.R.string.register_password_too_short,
+                        confirmPasswordError = com.cabral.lucrovarejo.R.string.register_password_mismatch,
+                        errorMessage = com.cabral.lucrovarejo.R.string.register_error_network
                     ),
                     onStoreNameChange = {},
                     onEmailChange = {},
@@ -165,13 +164,13 @@ class RegisterScreenUiTest {
         }
 
         listOf(
-            R.string.register_store_required,
-            R.string.register_email_invalid,
-            R.string.register_password_too_short,
-            R.string.register_password_mismatch,
-            R.string.register_error_network
-        ).forEach { stringId ->
-            composeRule.onNodeWithText(composeRule.activity.getString(stringId)).assertIsDisplayed()
+            "Informe o nome da loja.",
+            "Informe um e-mail válido.",
+            "A senha deve ter pelo menos 6 caracteres.",
+            "As senhas não coincidem.",
+            "Sem conexão com o Firebase. Verifique sua internet e tente novamente."
+        ).forEach { message ->
+            composeRule.onNodeWithText(message).performScrollTo().assertIsDisplayed()
         }
     }
 }

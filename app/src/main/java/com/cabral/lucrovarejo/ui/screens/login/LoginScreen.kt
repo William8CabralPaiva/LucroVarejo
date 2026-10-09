@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
@@ -39,6 +40,23 @@ fun LoginScreen(
         if (state.isLoggedIn) goToLoggedFlow()
     }
 
+    LoginScreenContent(
+        state = state,
+        onStoreNameChange = viewModel::onStoreNameChanged,
+        onPasswordChange = viewModel::onPasswordChanged,
+        onSubmit = viewModel::signIn,
+        onRegister = goToRegisterScreen
+    )
+}
+
+@Composable
+internal fun LoginScreenContent(
+    state: LoginUiState,
+    onStoreNameChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onRegister: () -> Unit,
+) {
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -61,22 +79,27 @@ fun LoginScreen(
 
             OutlinedTextField(
                 value = state.storeName,
-                onValueChange = viewModel::onStoreNameChanged,
+                onValueChange = onStoreNameChange,
                 label = { Text("Loja") },
                 singleLine = true,
                 enabled = !state.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(LOGIN_STORE_NAME_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             PasswordTextField(
-                modifier = Modifier.fillMaxWidth(),
                 value = state.password,
-                onValueChange = viewModel::onPasswordChanged,
+                onValueChange = onPasswordChange,
                 labelResId = R.string.register_password_label,
                 showPasswordDescriptionResId = R.string.register_password_show,
                 hidePasswordDescriptionResId = R.string.register_password_hide,
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(LOGIN_PASSWORD_FIELD_TAG)
             )
 
             state.errorMessage?.let {
@@ -87,7 +110,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             LoadingButton(
-                onClick = viewModel::signIn,
+                onClick = onSubmit,
                 enabled = state.storeName.isNotBlank() &&
                         state.password.isNotBlank(),
                 isLoading = state.isLoading,
@@ -97,9 +120,16 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = goToRegisterScreen) {
+            TextButton(
+                onClick = onRegister,
+                modifier = Modifier.testTag(LOGIN_REGISTER_BUTTON_TAG)
+            ) {
                 Text("Criar uma conta")
             }
         }
     }
 }
+
+internal const val LOGIN_STORE_NAME_FIELD_TAG = "login-store-name-field"
+internal const val LOGIN_PASSWORD_FIELD_TAG = "login-password-field"
+internal const val LOGIN_REGISTER_BUTTON_TAG = "login-register-button"
