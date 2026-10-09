@@ -28,4 +28,6 @@
     <string name="register_error_permission_denied">O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas.</string>
     <string name="register_error_network">Sem conexão com o Firebase. Verifique sua internet e tente novamente.</string>
     <string name="register_error_generic">Não foi possível concluir o cadastro no Firebase. Tente novamente mais tarde.</string>
+    <string name="alert_profit_title">Lucro desta venda</string>
+    <string name="alert_purchase_title">Custo desta compra</string>
 </resources>
