@@ -25,12 +25,12 @@ class PasswordTextFieldUiTest {
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun statelessFieldReportsVisibilityChangesToItsOwner() {
+    fun contentFieldReportsVisibilityChangesToItsOwner() {
         composeRule.setContent {
             LucroVarejoTheme {
                 var passwordVisible by remember { mutableStateOf(false) }
 
-                PasswordTextFieldStateless(
+                PasswordTextFieldContent(
                     value = "segura123",
                     onValueChange = {},
                     labelResId = R.string.register_password_label,
@@ -55,7 +55,7 @@ class PasswordTextFieldUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 var password by remember { mutableStateOf(currentPassword) }
-                PasswordTextFieldStateful(
+                PasswordTextField(
                     value = password,
                     onValueChange = {
                         password = it

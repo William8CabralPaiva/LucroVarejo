@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens
+package com.cabral.lucrovarejo.ui.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -19,8 +19,8 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-@AndroidEntryPoint(ComponentActivity::class)
-class MainActivity : Hilt_MainActivity() {
+@AndroidEntryPoint
+class MainActivity : ComponentActivity() {
     @Inject
     lateinit var hasSession: HasSessionUseCase
 

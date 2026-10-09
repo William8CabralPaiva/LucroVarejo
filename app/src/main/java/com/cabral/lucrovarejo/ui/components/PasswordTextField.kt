@@ -25,7 +25,7 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
-fun PasswordTextFieldStateful(
+fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,
     @StringRes labelResId: Int,
@@ -38,7 +38,7 @@ fun PasswordTextFieldStateful(
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
 
-    PasswordTextFieldStateless(
+    PasswordTextFieldContent(
         value = value,
         onValueChange = onValueChange,
         labelResId = labelResId,
@@ -54,7 +54,7 @@ fun PasswordTextFieldStateful(
 }
 
 @Composable
-fun PasswordTextFieldStateless(
+fun PasswordTextFieldContent(
     value: String,
     onValueChange: (String) -> Unit,
     @StringRes labelResId: Int,
@@ -104,9 +104,9 @@ internal fun passwordVisualTransformation(passwordVisible: Boolean): VisualTrans
 
 @Preview(showBackground = true, name = "Senha stateful")
 @Composable
-private fun PasswordTextFieldStatefulPreview() {
+private fun PasswordTextFieldPreview() {
     LucroVarejoTheme {
-        PasswordTextFieldStateful(
+        PasswordTextField(
             value = "segura123",
             onValueChange = {},
             labelResId = R.string.register_password_label,
@@ -116,11 +116,11 @@ private fun PasswordTextFieldStatefulPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Senha stateless")
+@Preview(showBackground = true, name = "Conteúdo de senha")
 @Composable
-private fun PasswordTextFieldStatelessPreview() {
+private fun PasswordTextFieldContentPreview() {
     LucroVarejoTheme {
-        PasswordTextFieldStateless(
+        PasswordTextFieldContent(
             value = "segura123",
             onValueChange = {},
             labelResId = R.string.register_password_label,

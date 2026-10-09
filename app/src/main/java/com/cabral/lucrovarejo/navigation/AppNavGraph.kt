@@ -24,7 +24,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.ui.screens.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.HomeScreen
-import com.cabral.lucrovarejo.ui.screens.LoginScreen
+import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen

@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.LoadingButton
-import com.cabral.lucrovarejo.ui.components.PasswordTextFieldStateful
+import com.cabral.lucrovarejo.ui.components.PasswordTextField
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
@@ -128,7 +128,7 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
-            PasswordTextFieldStateful(
+            PasswordTextField(
                 value = state.password,
                 onValueChange = onPasswordChange,
                 labelResId = R.string.register_password_label,
@@ -146,7 +146,7 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
-            PasswordTextFieldStateful(
+            PasswordTextField(
                 value = state.confirmPassword,
                 onValueChange = onConfirmPasswordChange,
                 labelResId = R.string.register_confirm_password_label,

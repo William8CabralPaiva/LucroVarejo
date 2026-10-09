@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Lucro Varejo</string>
+    <string name="login_submit">Entrar</string>
     <string name="register_title">Cadastro da loja</string>
     <string name="register_store_label">Loja</string>
     <string name="register_store_hint">3 a 30 caracteres: letras sem acentos, números, ponto, hífen ou sublinhado. Sem espaços.</string>

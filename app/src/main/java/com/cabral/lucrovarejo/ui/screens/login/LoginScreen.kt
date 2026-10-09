@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens
+package com.cabral.lucrovarejo.ui.screens.login
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -21,16 +18,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.LoadingButton
+import com.cabral.lucrovarejo.ui.components.PasswordTextField
 
 @Composable
 fun LoginScreen(
     goToRegisterScreen: () -> Unit,
     goToLoggedFlow: () -> Unit,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -65,15 +63,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            PasswordTextField(
+                modifier = Modifier.fillMaxWidth(),
                 value = state.password,
                 onValueChange = viewModel::onPasswordChanged,
-                label = { Text("Senha") },
-                singleLine = true,
-                enabled = !state.isLoading,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth()
+                labelResId = R.string.register_password_label,
+                showPasswordDescriptionResId = R.string.register_password_show,
+                hidePasswordDescriptionResId = R.string.register_password_hide,
             )
 
             state.errorMessage?.let {
@@ -83,19 +79,14 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Button(
+            LoadingButton(
                 onClick = viewModel::signIn,
                 enabled = state.storeName.isNotBlank() &&
-                    state.password.isNotBlank() &&
-                    !state.isLoading,
+                        state.password.isNotBlank(),
+                isLoading = state.isLoading,
+                textId = R.string.login_submit,
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator()
-                } else {
-                    Text("Entrar")
-                }
-            }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
