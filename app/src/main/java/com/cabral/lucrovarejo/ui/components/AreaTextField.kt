@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,8 +35,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.R
 
 @Composable
@@ -71,13 +73,17 @@ fun AreaTextFieldContent(
     val shape = RoundedCornerShape(8.dp)
     val label = stringResource(labelResId)
     val placeholder = stringResource(placeholderResId)
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -122,7 +128,7 @@ fun AreaTextFieldContent(
                             Icon(
                                 imageVector = Icons.Outlined.Description,
                                 contentDescription = null,
-                                tint = DarkPrimaryContainer
+                                tint = accentColor
                             )
                             Text(
                                 text = placeholder,
@@ -138,6 +144,16 @@ fun AreaTextFieldContent(
         }
     }
 }
+
+internal fun formFieldAccentColor(
+    colorScheme: ColorScheme,
+    isDarkTheme: Boolean
+): Color =
+    if (isDarkTheme) {
+        colorScheme.onSurface
+    } else {
+        colorScheme.primary
+    }
 
 @Preview(showBackground = true, name = "Descrição")
 @Composable

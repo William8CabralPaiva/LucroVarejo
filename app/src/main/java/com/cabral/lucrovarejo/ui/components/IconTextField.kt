@@ -32,8 +32,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.R
 
 enum class IconTextFieldType {
@@ -96,13 +96,17 @@ fun IconTextFieldContent(
     val fieldShape = RoundedCornerShape(8.dp)
     val label = stringResource(labelResId)
     val placeholder = stringResource(placeholderResId)
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -127,7 +131,7 @@ fun IconTextFieldContent(
                     contentDescription = iconContentDescriptionResId?.let {
                         stringResource(it)
                     },
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
             },
             supportingText = supportingText,

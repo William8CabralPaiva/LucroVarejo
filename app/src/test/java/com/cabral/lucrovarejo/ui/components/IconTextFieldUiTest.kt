@@ -7,11 +7,14 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.graphics.Color
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
@@ -130,5 +133,26 @@ class IconTextFieldUiTest {
         composeRule.runOnIdle {
             assertEquals("12.34", currentValue)
         }
+    }
+
+    @Test
+    fun formFieldAccentIsGreenInLightThemeAndLightInDarkTheme() {
+        val lightPrimary = Color(0xFF0C3829)
+        val darkOnSurface = Color.White
+
+        assertEquals(
+            lightPrimary,
+            formFieldAccentColor(
+                lightColorScheme(primary = lightPrimary),
+                isDarkTheme = false
+            )
+        )
+        assertEquals(
+            darkOnSurface,
+            formFieldAccentColor(
+                darkColorScheme(onSurface = darkOnSurface),
+                isDarkTheme = true
+            )
+        )
     }
 }

@@ -12,6 +12,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -94,5 +97,21 @@ class AreaDateSpinnerUiTest {
             assertEquals("Detalhes do produto", description)
         }
         composeRule.onAllNodesWithText("Adicione detalhes sobre o produto...").assertCountEquals(0)
+    }
+
+    @Test
+    fun descriptionLabelAndIconUsePrimaryAccentInLightTheme() {
+        val primary = Color(0xFF0C3829)
+        val colorScheme = lightColorScheme(primary = primary)
+
+        assertEquals(primary, formFieldAccentColor(colorScheme, isDarkTheme = false))
+    }
+
+    @Test
+    fun descriptionLabelAndIconUseOnSurfaceInDarkTheme() {
+        val onSurface = Color.White
+        val colorScheme = darkColorScheme(onSurface = onSurface)
+
+        assertEquals(onSurface, formFieldAccentColor(colorScheme, isDarkTheme = true))
     }
 }
