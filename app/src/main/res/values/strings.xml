@@ -34,4 +34,26 @@
     <string name="sale_products">produtos vendidos</string>
     <string name="last_sale_today">Hoje</string>
     <string name="last_sale_yesterday">Ontem</string>
+    <string name="product_name_label">Nome do produto</string>
+    <string name="product_name_placeholder">Ex.: Bolsa Feminina</string>
+    <string name="product_paid_value_label">Valor pago</string>
+    <string name="product_paid_value_placeholder">0.00</string>
+    <string name="product_category_label">Categoria</string>
+    <string name="product_category_placeholder">Selecionar categoria</string>
+    <string name="product_description_label">Descrição</string>
+    <string name="product_description_placeholder">Adicione detalhes sobre o produto...</string>
+    <string name="product_sale_date_label">Data da venda</string>
+    <string name="product_sale_date_placeholder">dd/MM/aaaa</string>
+    <string name="product_quantity_label">Quantidade</string>
+    <string name="quantity_decrease_description">Diminuir quantidade</string>
+    <string name="quantity_increase_description">Aumentar quantidade</string>
+    <string name="category_open_description">Abrir categorias</string>
+    <string name="date_select_description">Selecionar data</string>
+    <string name="date_picker_confirm">OK</string>
+    <string name="date_picker_cancel">Cancelar</string>
+    <string name="sample_category_bags">Bolsas</string>
+    <string name="sample_category_backpacks">Mochilas</string>
+    <string name="sample_category_accessories">Acessórios</string>
+    <string name="field_required_marker">*</string>
+    <string name="field_optional_marker">(opcional)</string>
 </resources>
