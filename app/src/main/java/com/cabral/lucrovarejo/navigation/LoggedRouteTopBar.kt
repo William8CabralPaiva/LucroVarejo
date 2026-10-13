@@ -7,9 +7,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
+import com.cabral.lucrovarejo.ui.theme.LightMintContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,13 +32,23 @@ fun LoggedRouteTopBar(
     val showBackButton = route == LoggedRoutes.PRODUCT || route == LoggedRoutes.CONFIG
 
     TopAppBar(
-        title = { Text(stringResource(titleId)) },
+        title = {
+            Text(
+                text = stringResource(titleId),
+                color = LightMintContainer,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = DarkPrimaryContainer
+        ),
         navigationIcon = {
             if (showBackButton) {
                 IconButton(onClick = onBackPress) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.navigate_back)
+                        contentDescription = stringResource(R.string.navigate_back),
+                        tint = LightMintContainer
                     )
                 }
             }
