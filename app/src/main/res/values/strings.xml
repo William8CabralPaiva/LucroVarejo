@@ -35,6 +35,8 @@
     <string name="last_sale_today">Hoje</string>
     <string name="last_sale_yesterday">Ontem</string>
     <string name="product_name_label">Nome do produto</string>
+    <string name="new_product">Novo Produto</string>
+    <string name="navigate_back">Voltar</string>
     <string name="product_name_placeholder">Ex.: Bolsa Feminina</string>
     <string name="product_paid_value_label">Valor pago</string>
     <string name="product_paid_value_placeholder">0.00</string>

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun HomeScreen(
     goToConfigScreen: () -> Unit,
+    goToProductScreen: () -> Unit,
     onLogout: () -> Unit
 ) {
     Scaffold(
@@ -55,6 +56,15 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = goToProductScreen,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Testando navegação")
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedButton(
                 onClick = onLogout,

@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.screens.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
@@ -29,6 +30,7 @@ import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
+import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 private data class LoggedBottomNavItem(
@@ -114,6 +116,9 @@ private fun LoggedFlowScreen(
 ) {
     val innerNavController = rememberNavController()
     val dividerColor = MaterialTheme.colorScheme.outline
+    val currentRoute =
+        innerNavController.currentBackStackEntryAsState().value?.destination?.route
+            ?: LoggedRoutes.HOME
     val items = listOf(
         LoggedBottomNavItem(route = LoggedRoutes.HOME, label = "Início", icon = Icons.Default.Home),
         LoggedBottomNavItem(route = LoggedRoutes.SALES, label = "Vendas", icon = Icons.AutoMirrored.Filled.ReceiptLong),
@@ -121,9 +126,14 @@ private fun LoggedFlowScreen(
     )
 
     Scaffold(
+        topBar = {
+            LoggedRouteTopBar(
+                textId =  R.string.new_product,
+                route = currentRoute,
+                onBackPress = { innerNavController.popBackStack() }
+            )
+        },
         bottomBar = {
-            val currentRoute = innerNavController.currentBackStackEntryAsState().value?.destination?.route
-                ?: LoggedRoutes.HOME
             if (items.any { it.route == currentRoute }) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -179,8 +189,15 @@ private fun LoggedFlowScreen(
                     goToConfigScreen = {
                         innerNavController.navigate(LoggedRoutes.CONFIG)
                     },
+                    goToProductScreen = {
+                        innerNavController.navigate(LoggedRoutes.PRODUCT)
+                    },
                     onLogout = onLogout
                 )
+            }
+
+            composable(LoggedRoutes.PRODUCT) {
+                ProductScreen()
             }
 
             composable(LoggedRoutes.SALES) {
