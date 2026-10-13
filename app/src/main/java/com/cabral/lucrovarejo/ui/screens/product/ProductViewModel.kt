@@ -18,16 +18,12 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-sealed interface ProductEffect {
-    data object ProductCreated : ProductEffect
-}
-
 @HiltViewModel
 class ProductViewModel @Inject constructor(
     private val createProduct: CreateProductUseCase
 ) : ViewModel() {
-    private val effectChannel = Channel<ProductEffect>(Channel.BUFFERED)
-    val effects: Flow<ProductEffect> = effectChannel.receiveAsFlow()
+    private val effectChannel = Channel<Unit>(Channel.BUFFERED)
+    val effects: Flow<Unit> = effectChannel.receiveAsFlow()
 
     private val _uiState = MutableStateFlow(ProductUiState())
     val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
@@ -94,7 +90,7 @@ class ProductViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-                effectChannel.send(ProductEffect.ProductCreated)
+                effectChannel.send(Unit)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: ProductCreationFailure) {

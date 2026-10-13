@@ -68,7 +68,7 @@ class ProductViewModelTest {
             ),
             repository.createdProduct
         )
-        assertEquals(ProductEffect.ProductCreated, effect.await())
+        assertEquals(Unit, effect.await())
         assertEquals("", viewModel.uiState.value.name)
         assertFalse(viewModel.uiState.value.isLoading)
     }

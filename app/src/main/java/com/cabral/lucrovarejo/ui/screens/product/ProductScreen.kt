@@ -47,10 +47,8 @@ fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
     val successMessage = stringResource(R.string.product_create_success)
 
     LaunchedEffect(viewModel, successMessage) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                ProductEffect.ProductCreated -> snackbarHostState.showSnackbar(successMessage)
-            }
+        viewModel.effects.collect {
+            snackbarHostState.showSnackbar(successMessage)
         }
     }
 
