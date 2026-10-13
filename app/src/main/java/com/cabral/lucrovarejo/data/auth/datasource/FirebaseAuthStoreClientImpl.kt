@@ -14,6 +14,9 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
     override val hasSession: Boolean
         get() = auth.currentUser != null
 
+    override val storeKey: String?
+        get() = auth.currentUser?.uid
+
     override suspend fun createUser(email: String, password: String): String =
         auth.createUserWithEmailAndPassword(email, password).await().user?.uid
             ?: error("Firebase Auth did not return a user.")

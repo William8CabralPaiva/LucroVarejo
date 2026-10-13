@@ -7,6 +7,7 @@ data class StoreProfile(
 
 interface AuthRemoteDataSource {
     val hasSession: Boolean
+    val storeKey: String?
 
     suspend fun createAccount(
         technicalEmail: String,
@@ -21,6 +22,7 @@ interface AuthRemoteDataSource {
 
 interface FirebaseAuthStoreClient {
     val hasSession: Boolean
+    val storeKey: String?
 
     suspend fun createUser(email: String, password: String): String
 

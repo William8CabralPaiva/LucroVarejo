@@ -36,18 +36,24 @@ class AuthRepositoryImplTest {
         // Then: the same canonical technical address is used.
         assertEquals("my-store.1@auth.lucrovarejo.invalid", remote.signedInEmail)
         assertEquals("secret1", remote.signedInPassword)
+        assertEquals("firebase-uid-123", repository.storeKey)
     }
 
     @Test
     fun delegatesSessionAndSignOut() {
         // Given: a remote source with an active session.
-        val remote = FakeAuthRemoteDataSource().apply { hasSession = true }
+        val remote = FakeAuthRemoteDataSource().apply {
+            hasSession = true
+            storeKey = "firebase-uid-123"
+        }
         val repository = AuthRepositoryImpl(remote)
 
         // When: the session is read and sign-out is called.
         assertTrue(repository.hasSession)
+        assertEquals("firebase-uid-123", repository.storeKey)
         repository.signOut()
         assertTrue(remote.signedOut)
+        assertEquals(null, repository.storeKey)
 
         remote.hasSession = false
         // Then: session state reflects the remote source after sign-out.
@@ -56,6 +62,7 @@ class AuthRepositoryImplTest {
 
     private class FakeAuthRemoteDataSource : AuthRemoteDataSource {
         override var hasSession: Boolean = false
+        override var storeKey: String? = null
         var createdEmail: String? = null
         var createdPassword: String? = null
         var createdProfile: StoreProfile? = null
@@ -76,10 +83,12 @@ class AuthRepositoryImplTest {
         override suspend fun signIn(technicalEmail: String, password: String) {
             signedInEmail = technicalEmail
             signedInPassword = password
+            storeKey = "firebase-uid-123"
         }
 
         override fun signOut() {
             signedOut = true
+            storeKey = null
         }
     }
 }

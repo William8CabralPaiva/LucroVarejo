@@ -59,6 +59,7 @@ class FirebaseAuthRemoteDataSourceTest {
         // When: session state, sign-in, and sign-out are requested.
         assertTrue(dataSource.hasSession)
         dataSource.signIn("loja@auth.lucrovarejo.invalid", "secret1")
+        assertEquals("firebase-uid-123", dataSource.storeKey)
         dataSource.signOut()
 
         assertEquals("loja@auth.lucrovarejo.invalid", client.signedInEmail)
@@ -69,6 +70,7 @@ class FirebaseAuthRemoteDataSourceTest {
 
     private class FakeFirebaseAuthStoreClient : FirebaseAuthStoreClient {
         override var hasSession: Boolean = false
+        override var storeKey: String? = null
         var createdEmail: String? = null
         var createdPassword: String? = null
         var savedUid: String? = null
@@ -98,6 +100,7 @@ class FirebaseAuthRemoteDataSourceTest {
         override suspend fun signIn(email: String, password: String) {
             signedInEmail = email
             signedInPassword = password
+            storeKey = "firebase-uid-123"
         }
 
         override fun signOut() {

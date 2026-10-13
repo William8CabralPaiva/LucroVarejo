@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.domain.auth
 
 interface AuthRepository {
     val hasSession: Boolean
+    val storeKey: String?
 
     suspend fun registerStore(storeName: String, email: String, password: String)
 

@@ -14,6 +14,9 @@ class AuthRepositoryImpl @Inject constructor(
     override val hasSession: Boolean
         get() = remoteDataSource.hasSession
 
+    override val storeKey: String?
+        get() = remoteDataSource.storeKey
+
     override suspend fun registerStore(storeName: String, email: String, password: String) {
         val normalizedStoreName = storeName.trim().lowercase(Locale.ROOT)
         remoteDataSource.createAccount(

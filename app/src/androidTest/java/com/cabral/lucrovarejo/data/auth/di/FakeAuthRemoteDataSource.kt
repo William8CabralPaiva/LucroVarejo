@@ -8,6 +8,7 @@ import javax.inject.Inject
 @Singleton
 class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
     override var hasSession: Boolean = false
+    override var storeKey: String? = null
     var savedTechnicalEmail: String? = null
     var savedPassword: String? = null
     var savedProfile: StoreProfile? = null

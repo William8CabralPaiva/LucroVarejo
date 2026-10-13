@@ -15,6 +15,9 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
     override val hasSession: Boolean
         get() = firebaseClient.hasSession
 
+    override val storeKey: String?
+        get() = firebaseClient.storeKey
+
     override suspend fun createAccount(
         technicalEmail: String,
         password: String,

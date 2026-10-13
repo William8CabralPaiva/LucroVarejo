@@ -52,6 +52,7 @@ class AuthUseCasesTest {
 
     private class FakeAuthRepository : AuthRepository {
         override var hasSession: Boolean = false
+        override var storeKey: String? = null
         var registeredStore: String? = null
         var registeredEmail: String? = null
         var registeredPassword: String? = null
