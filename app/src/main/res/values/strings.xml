@@ -37,6 +37,10 @@
     <string name="product_name_label">Nome do produto</string>
     <string name="new_product">Novo Produto</string>
     <string name="navigate_back">Voltar</string>
+    <string name="home_title">Lucro Varejo - Home</string>
+    <string name="sales_title">Vendas</string>
+    <string name="summary_title">Resumo</string>
+    <string name="config_title">Configurações</string>
     <string name="product_name_placeholder">Ex.: Bolsa Feminina</string>
     <string name="product_paid_value_label">Valor pago</string>
     <string name="product_paid_value_placeholder">0.00</string>

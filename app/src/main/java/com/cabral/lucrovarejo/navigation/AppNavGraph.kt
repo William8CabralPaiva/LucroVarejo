@@ -22,7 +22,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.screens.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
@@ -128,7 +127,6 @@ private fun LoggedFlowScreen(
     Scaffold(
         topBar = {
             LoggedRouteTopBar(
-                textId =  R.string.new_product,
                 route = currentRoute,
                 onBackPress = { innerNavController.popBackStack() }
             )
@@ -211,10 +209,7 @@ private fun LoggedFlowScreen(
             composable(LoggedRoutes.CONFIG) {
                 ConfigScreen(
                     currentThemeMode = currentThemeMode,
-                    onThemeModeChanged = onThemeModeChanged,
-                    onBackPress = {
-                        innerNavController.popBackStack()
-                    }
+                    onThemeModeChanged = onThemeModeChanged
                 )
             }
         }
