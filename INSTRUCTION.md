@@ -49,6 +49,7 @@ Use como referencia de organizacao e estilo o projeto [Lucro de Receitas](https:
 - `SaleItem`: produto, quantidade, preco unitario vendido, desconto e alocacoes de custo por lote.
 
 Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios exatos (por exemplo, centavos em `Long` ou `BigDecimal` na camada de dominio); nao use `Float` ou `Double` para calcular dinheiro. Persistir datas com formato consistente e converter para o fuso local apenas para apresentacao e agrupamento mensal.
+- Para todos os valores em dinheiro, o model usado pelo app/UI representa o valor em unidade monetaria com `BigDecimal`, enquanto os models de request persistem o valor como inteiro em centavos (por exemplo, `R$ 12,34` corresponde a `1234`). Cada funcionalidade deve ter models separados para o app/UI e para request/persistencia, com conversoes explicitas entre eles. Converter de `BigDecimal` para centavos sem arredondamento silencioso e rejeitar valores com fracao menor que um centavo ou fora do limite do tipo inteiro usado pelo request; converter de volta com escala de duas casas. Aplicar a mesma regra a custos, precos, descontos, totais e qualquer outro valor monetario.
 
 ## Organizacao e padroes tecnicos
 
