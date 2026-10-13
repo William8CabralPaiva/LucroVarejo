@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,11 +28,14 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 fun IconButton(
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false
 ) {
     SaveProductButtonContent(
         label = stringResource(R.string.product_create_submit),
-        enabled = enabled,
+        loadingLabel = stringResource(R.string.product_create_loading),
+        enabled = enabled && !isLoading,
+        isLoading = isLoading,
         onClick = onClick,
         modifier = modifier
     )
@@ -42,7 +46,9 @@ fun SaveProductButtonContent(
     label: String,
     enabled: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    loadingLabel: String = label
 ) {
     Button(
         onClick = onClick,
@@ -60,12 +66,22 @@ fun SaveProductButtonContent(
             ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Save,
-                contentDescription = null
-            )
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .height(dimensionResource(R.dimen.product_submit_progress_size))
+                        .testTag(SAVE_PRODUCT_PROGRESS_TAG),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = dimensionResource(R.dimen.product_submit_progress_stroke)
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = null
+                )
+            }
             Text(
-                text = label,
+                text = if (isLoading) loadingLabel else label,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -74,6 +90,7 @@ fun SaveProductButtonContent(
 }
 
 internal const val SAVE_PRODUCT_BUTTON_TAG = "save-product-button"
+internal const val SAVE_PRODUCT_PROGRESS_TAG = "save-product-progress"
 
 @Preview(showBackground = true, name = "Salvar produto habilitado")
 @Composable

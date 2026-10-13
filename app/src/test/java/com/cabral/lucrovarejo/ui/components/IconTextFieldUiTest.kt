@@ -107,4 +107,28 @@ class IconTextFieldUiTest {
             assertEquals("12.34", currentValue)
         }
     }
+
+    @Test
+    fun moneyFieldNormalizesPortugueseDecimalComma() {
+        var currentValue = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                IconTextFieldContent(
+                    value = currentValue,
+                    onValueChange = { currentValue = it },
+                    labelResId = R.string.product_paid_value_label,
+                    placeholderResId = R.string.product_paid_value_placeholder,
+                    icon = Icons.Outlined.MonetizationOn,
+                    type = IconTextFieldType.MONEY,
+                    required = true
+                )
+            }
+        }
+
+        composeRule.onNode(hasSetTextAction()).performTextInput("12,34")
+
+        composeRule.runOnIdle {
+            assertEquals("12.34", currentValue)
+        }
+    }
 }

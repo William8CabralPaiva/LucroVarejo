@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.product.datasource
 
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
+import com.cabral.lucrovarejo.domain.product.ProductCreationFailure
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
@@ -12,7 +13,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
 ) : ProductRemoteDataSource {
     override suspend fun createProduct(request: ProductRequest): String {
         val storeKey = auth.currentUser?.uid
-            ?: throw IllegalStateException("A signed-in store is required to create a product.")
+            ?: throw ProductCreationFailure(ProductCreationFailure.Reason.UNAUTHENTICATED)
         val productDocument = firestore.collection(COLLECTION_STORES)
             .document(storeKey)
             .collection(COLLECTION_PRODUCTS)

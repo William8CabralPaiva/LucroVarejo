@@ -69,4 +69,17 @@ class IconButtonUiTest {
         composeRule.onNodeWithText("SALVAR ITEM").assertIsDisplayed()
         composeRule.onNodeWithTag(SAVE_PRODUCT_BUTTON_TAG).assertIsNotEnabled()
     }
+
+    @Test
+    fun loadingButtonShowsProgressAndDisablesSubmission() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                IconButton(enabled = true, isLoading = true, onClick = {})
+            }
+        }
+
+        composeRule.onNodeWithText("CADASTRANDO...").assertIsDisplayed()
+        composeRule.onNodeWithTag(SAVE_PRODUCT_PROGRESS_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(SAVE_PRODUCT_BUTTON_TAG).assertIsNotEnabled()
+    }
 }

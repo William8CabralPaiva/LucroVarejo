@@ -177,13 +177,13 @@ internal fun filterIconTextFieldInput(value: String, type: IconTextFieldType): S
             value.forEach { character ->
                 when {
                     character in '0'..'9' -> append(character)
-                    character == '.' && !decimalSeparatorAdded -> {
+                    (character == '.' || character == ',') && !decimalSeparatorAdded -> {
                         append(character)
                         decimalSeparatorAdded = true
                     }
                 }
             }
-        }
+        }.replace(',', '.')
     }
 
 @Preview(showBackground = true, name = "Campo de texto stateful")
