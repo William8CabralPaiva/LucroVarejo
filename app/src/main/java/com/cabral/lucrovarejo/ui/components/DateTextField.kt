@@ -108,6 +108,7 @@ fun DateTextFieldContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
+                modifier = modifier.clickable { showDatePicker = true },
                 imageVector = Icons.Outlined.CalendarMonth,
                 contentDescription = null,
                 tint = DarkPrimaryContainer
