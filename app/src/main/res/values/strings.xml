@@ -64,6 +64,7 @@
     <string name="purchase_profit_calculation">(Vendido: %1$s - Custo: %2$s)</string>
     <string name="purchase_create_submit">REGISTRAR VENDA</string>
     <string name="purchase_create_loading">REGISTRANDO...</string>
+    <string name="purchase_load_products_loading">Buscando produtos...</string>
     <string name="purchase_sale_price_required">Informe o valor vendido.</string>
     <string name="purchase_sale_price_invalid">Informe um valor válido, maior que zero e com até duas casas decimais.</string>
     <string name="purchase_no_products">Cadastre um produto antes de registrar uma venda.</string>

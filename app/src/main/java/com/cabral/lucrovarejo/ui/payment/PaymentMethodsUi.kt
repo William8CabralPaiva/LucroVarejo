@@ -1,7 +1,12 @@
 package com.cabral.lucrovarejo.ui.payment
 
-enum class PaymentMethodsUi(val displayName: String) {
-    CASH("Dinheiro"),
-    PIX("Pix"),
-    CARD("Cartão")
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+
+enum class PaymentMethodsUi(
+    val method: PaymentMethods,
+    val displayName: String
+) {
+    CASH(PaymentMethods.CASH, "Dinheiro"),
+    PIX(PaymentMethods.PIX, "Pix"),
+    CARD(PaymentMethods.CARD, "Cartão")
 }

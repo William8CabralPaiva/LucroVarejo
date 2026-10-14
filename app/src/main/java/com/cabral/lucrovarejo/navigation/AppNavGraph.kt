@@ -197,7 +197,7 @@ private fun LoggedFlowScreen(
             }
 
             composable(LoggedRoutes.ADD_PURCHASE) {
-                AddPurchaseScreen()
+                AddPurchaseScreen(onPurchaseSaved = { innerNavController.popBackStack() })
             }
 
             composable(LoggedRoutes.PRODUCT) {
