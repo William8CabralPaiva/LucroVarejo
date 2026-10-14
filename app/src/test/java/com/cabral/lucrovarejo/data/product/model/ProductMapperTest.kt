@@ -37,6 +37,30 @@ class ProductMapperTest {
     }
 
     @Test
+    fun mapsProductRecordIncludingFirestoreDocumentId() {
+        val model = ProductRecord(
+            documentId = "product-id",
+            request = ProductRequest(
+                cod = "A-1",
+                name = "Produto",
+                cost = 1234,
+                description = "Descricao"
+            )
+        ).toModel()
+
+        assertEquals(
+            ProductModel(
+                id = "product-id",
+                cod = "A-1",
+                name = "Produto",
+                cost = BigDecimal("12.34"),
+                description = "Descricao"
+            ),
+            model
+        )
+    }
+
+    @Test
     fun rejectsFractionsSmallerThanOneCentInsteadOfRounding() {
         val model = ProductModel(
             cod = "A-1",

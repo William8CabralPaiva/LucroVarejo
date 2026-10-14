@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.product
 
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.product.ProductCreationFailure
+import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
@@ -75,7 +75,7 @@ class ProductViewModelTest {
 
     @Test
     fun surfacesFirebaseFailureAndStopsLoading() = runTest {
-        repository.failure = ProductCreationFailure(ProductCreationFailure.Reason.NETWORK)
+        repository.failure = ProductFailure(ProductFailure.Reason.NETWORK)
         viewModel.onNameChanged("Produto")
         viewModel.onCostChanged("10.00")
 
@@ -88,12 +88,14 @@ class ProductViewModelTest {
 
     private class FakeProductRepository : ProductRepository {
         var createdProduct: ProductModel? = null
-        var failure: ProductCreationFailure? = null
+        var failure: ProductFailure? = null
 
         override suspend fun createProduct(product: ProductModel): ProductModel {
             failure?.let { throw it }
             createdProduct = product
             return product.copy(id = "generated-product-id")
         }
+
+        override suspend fun getProducts(): List<ProductModel> = emptyList()
     }
 }

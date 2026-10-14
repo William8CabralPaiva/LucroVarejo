@@ -32,5 +32,7 @@ class CreateProductUseCaseTest {
             createdProduct = product
             return product.copy(id = "generated-product-id")
         }
+
+        override suspend fun getProducts(): List<ProductModel> = emptyList()
     }
 }

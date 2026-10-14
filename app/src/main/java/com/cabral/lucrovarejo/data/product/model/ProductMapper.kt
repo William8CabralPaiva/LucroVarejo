@@ -22,4 +22,6 @@ fun ProductRequest.toModel(documentId: String): ProductModel = ProductModel(
     description = description
 )
 
+fun ProductRecord.toModel(): ProductModel = request.toModel(documentId)
+
 private const val MONEY_SCALE = 2

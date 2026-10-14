@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.product
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.product.ProductCreationFailure
+import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -93,7 +93,7 @@ class ProductViewModel @Inject constructor(
                 effectChannel.send(Unit)
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (failure: ProductCreationFailure) {
+            } catch (failure: ProductFailure) {
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = productErrorMessage(failure.reason))
                 }
@@ -101,13 +101,13 @@ class ProductViewModel @Inject constructor(
         }
     }
 
-    private fun productErrorMessage(reason: ProductCreationFailure.Reason): Int =
+    private fun productErrorMessage(reason: ProductFailure.Reason): Int =
         when (reason) {
-            ProductCreationFailure.Reason.NETWORK -> R.string.product_create_error_network
-            ProductCreationFailure.Reason.PERMISSION_DENIED ->
+            ProductFailure.Reason.NETWORK -> R.string.product_create_error_network
+            ProductFailure.Reason.PERMISSION_DENIED ->
                 R.string.product_create_error_permission
-            ProductCreationFailure.Reason.UNAUTHENTICATED ->
+            ProductFailure.Reason.UNAUTHENTICATED ->
                 R.string.product_create_error_unauthenticated
-            ProductCreationFailure.Reason.UNKNOWN -> R.string.product_create_error_generic
+            ProductFailure.Reason.UNKNOWN -> R.string.product_create_error_generic
         }
 }

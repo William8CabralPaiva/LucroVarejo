@@ -1,6 +1,6 @@
 package com.cabral.lucrovarejo.domain.product
 
-class ProductCreationFailure(
+class ProductFailure(
     val reason: Reason,
     cause: Throwable? = null
 ) : Exception(cause) {
