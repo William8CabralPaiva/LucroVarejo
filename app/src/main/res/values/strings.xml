@@ -53,6 +53,7 @@
     <string name="sales_title">Vendas</string>
     <string name="summary_title">Resumo</string>
     <string name="config_title">Configurações</string>
+    <string name="add_purchase_title">Nova Venda</string>
     <string name="product_name_placeholder">Ex.: Bolsa Feminina</string>
     <string name="product_paid_value_label">Valor pago</string>
     <string name="product_paid_value_placeholder">0.00</string>

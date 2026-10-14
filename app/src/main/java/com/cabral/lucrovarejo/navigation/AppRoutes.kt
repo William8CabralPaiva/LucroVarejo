@@ -12,9 +12,5 @@ object LoggedRoutes {
     const val SALES = "sales"
     const val SUMMARY = "summary"
     const val CONFIG = "config"
-}
-
-object AppRoutes {
-    const val NOT_LOGGED_GRAPH = "not_logged_graph"
-    const val LOGGED_GRAPH = "logged_graph"
+    const val ADD_PURCHASE = "add_purchase"
 }

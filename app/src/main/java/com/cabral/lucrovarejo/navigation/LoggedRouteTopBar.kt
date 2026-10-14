@@ -27,9 +27,10 @@ fun LoggedRouteTopBar(
         LoggedRoutes.SALES -> R.string.sales_title
         LoggedRoutes.SUMMARY -> R.string.summary_title
         LoggedRoutes.CONFIG -> R.string.config_title
+        LoggedRoutes.ADD_PURCHASE -> R.string.add_purchase_title
         else -> return
     }
-    val showBackButton = route == LoggedRoutes.PRODUCT || route == LoggedRoutes.CONFIG
+    val showBackButton = showBackButton(route)
 
     TopAppBar(
         title = {
@@ -54,4 +55,10 @@ fun LoggedRouteTopBar(
             }
         }
     )
+}
+
+private fun showBackButton(route: String): Boolean {
+    return route == LoggedRoutes.PRODUCT ||
+            route == LoggedRoutes.CONFIG ||
+            route == LoggedRoutes.ADD_PURCHASE
 }

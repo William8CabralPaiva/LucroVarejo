@@ -29,6 +29,7 @@ import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
+import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
@@ -188,10 +189,15 @@ private fun LoggedFlowScreen(
                         innerNavController.navigate(LoggedRoutes.CONFIG)
                     },
                     goToProductScreen = {
-                        innerNavController.navigate(LoggedRoutes.PRODUCT)
+                        //TODO alterar
+                        innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
                     },
                     onLogout = onLogout
                 )
+            }
+
+            composable(LoggedRoutes.ADD_PURCHASE) {
+                AddPurchaseScreen()
             }
 
             composable(LoggedRoutes.PRODUCT) {
