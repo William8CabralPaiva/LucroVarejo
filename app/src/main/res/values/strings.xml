@@ -32,6 +32,8 @@
     <string name="alert_purchase_title">Custo desta compra</string>
     <string name="alert_month_purchase">Vendas do mês</string>
     <string name="sale_products">produtos vendidos</string>
+    <string name="product">Produto</string>
+    <string name="product_placeholder">Selecionar Produto</string>
     <string name="last_sale_today">Hoje</string>
     <string name="last_sale_yesterday">Ontem</string>
     <string name="product_name_label">Nome do produto</string>
