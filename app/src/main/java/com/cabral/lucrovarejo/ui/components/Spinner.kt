@@ -67,8 +67,8 @@ fun SpinnerContent(
     items: List<String>,
     onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    @StringRes textId: Int = R.string.product_category_label,
-    @StringRes placeholderResId: Int = R.string.product_category_placeholder,
+    @StringRes textId: Int,
+    @StringRes placeholderResId: Int,
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -129,7 +129,7 @@ fun SpinnerContent(
                 )
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(R.string.category_open_description),
+                    contentDescription = stringResource(R.string.spinner_open_description),
                     tint = DarkPrimaryContainer
                 )
             }
@@ -152,19 +152,19 @@ fun SpinnerContent(
     }
 }
 
-@Preview(showBackground = true, name = "Categoria")
+@Preview(showBackground = true, name = "Produto")
 @Composable
 private fun SpinnerPreview() {
     LucroVarejoTheme {
         Spinner(
-            textId = R.string.product_category_label,
-            placeholderResId = R.string.product_category_placeholder,
+            textId = R.string.product,
+            placeholderResId = R.string.product_placeholder,
             items = listOf(
-                stringResource(R.string.sample_category_bags),
-                stringResource(R.string.sample_category_backpacks),
-                stringResource(R.string.sample_category_accessories)
+                "Bolsa",
+                "Mochila",
+                "Acessório"
             ),
-            initialValue = stringResource(R.string.sample_category_bags),
+            initialValue = "Bolsa",
             modifier = Modifier.padding(16.dp)
         )
     }

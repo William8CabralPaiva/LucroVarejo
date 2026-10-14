@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -18,32 +19,35 @@ import org.junit.runner.RunWith
 import java.time.Instant
 
 @RunWith(AndroidJUnit4::class)
-class AreaDateSpinnerInstrumentedTest {
+class SpinnerInstrumentedTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun categoryCanBeSelectedFromDropdown() {
-        var selectedCategory = ""
+    fun spinnerDisplaysLabelAndPlaceholderAndReturnsSelectedItem() {
+        var selectedItem = ""
         composeRule.setContent {
             LucroVarejoTheme {
-                var category by remember { mutableStateOf<String?>(null) }
+                var currentItem by remember { mutableStateOf<String?>(null) }
                 SpinnerContent(
-                    selectedCategory = category,
-                    categories = listOf("Bolsas", "Acessórios"),
-                    onCategorySelected = {
-                        category = it
-                        selectedCategory = it
-                    }
+                    selectedItem = currentItem,
+                    items = listOf("Bolsa", "Acessório"),
+                    onItemSelected = {
+                        currentItem = it
+                        selectedItem = it
+                    },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder
                 )
             }
         }
 
-        composeRule.onNodeWithText("Selecionar categoria").performClick()
-        composeRule.onNodeWithText("Acessórios").performClick()
-        composeRule.onNodeWithText("Acessórios").assertIsDisplayed()
+        composeRule.onNodeWithText("Produto").assertIsDisplayed()
+        composeRule.onNodeWithText("Selecionar Produto").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Acessório").performClick()
+        composeRule.onNodeWithText("Acessório").assertIsDisplayed()
         composeRule.runOnIdle {
-            assertEquals("Acessórios", selectedCategory)
+            assertEquals("Acessório", selectedItem)
         }
     }
 

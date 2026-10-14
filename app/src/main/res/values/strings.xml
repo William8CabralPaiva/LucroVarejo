@@ -68,7 +68,7 @@
     <string name="product_quantity_label">Quantidade</string>
     <string name="quantity_decrease_description">Diminuir quantidade</string>
     <string name="quantity_increase_description">Aumentar quantidade</string>
-    <string name="category_open_description">Abrir categorias</string>
+    <string name="spinner_open_description">Abrir opções</string>
     <string name="date_select_description">Selecionar data</string>
     <string name="date_picker_confirm">OK</string>
     <string name="date_picker_cancel">Cancelar</string>

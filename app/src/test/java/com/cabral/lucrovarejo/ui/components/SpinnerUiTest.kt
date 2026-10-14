@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -26,33 +27,36 @@ import java.time.Instant
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class AreaDateSpinnerUiTest {
+class SpinnerUiTest {
     @get:Rule
     val composeRule = createComposeRule()
 
     @Test
-    fun categorySpinnerDisplaysAndReturnsSelectedCategory() {
-        var selectedCategory = ""
+    fun spinnerDisplaysLabelAndPlaceholderAndReturnsSelectedItem() {
+        var selectedItem = ""
         composeRule.setContent {
             LucroVarejoTheme {
-                var category by remember { mutableStateOf<String?>(null) }
+                var currentItem by remember { mutableStateOf<String?>(null) }
                 SpinnerContent(
-                    selectedCategory = category,
-                    categories = listOf("Bolsas", "Mochilas"),
-                    onCategorySelected = {
-                        category = it
-                        selectedCategory = it
-                    }
+                    selectedItem = currentItem,
+                    items = listOf("Bolsa", "Mochila"),
+                    onItemSelected = {
+                        currentItem = it
+                        selectedItem = it
+                    },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder
                 )
             }
         }
 
+        composeRule.onNodeWithText("Produto").assertIsDisplayed()
         composeRule.onNodeWithText("(opcional)").assertIsDisplayed()
-        composeRule.onNodeWithText("Selecionar categoria").performClick()
-        composeRule.onNodeWithText("Mochilas").performClick()
+        composeRule.onNodeWithText("Selecionar Produto").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Mochila").performClick()
 
         composeRule.runOnIdle {
-            assertEquals("Mochilas", selectedCategory)
+            assertEquals("Mochila", selectedItem)
         }
     }
 
