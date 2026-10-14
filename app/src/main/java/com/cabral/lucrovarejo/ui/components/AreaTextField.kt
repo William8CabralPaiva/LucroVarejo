@@ -98,7 +98,7 @@ fun AreaTextFieldContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 160.dp)
-                .background(MaterialTheme.colorScheme.surface, shape)
+                .background(MaterialTheme.colorScheme.surfaceVariant, shape)
                 .border(
                     width = 1.dp,
                     color = if (isError) MaterialTheme.colorScheme.error

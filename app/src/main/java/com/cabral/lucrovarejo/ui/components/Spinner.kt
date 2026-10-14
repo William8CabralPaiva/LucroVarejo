@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
 
@@ -77,6 +77,10 @@ fun SpinnerContent(
     val shape = RoundedCornerShape(8.dp)
     val borderColor = if (isError) MaterialTheme.colorScheme.error
     else MaterialTheme.colorScheme.outlineVariant
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
     val label = stringResource(textId)
     val placeholder = stringResource(placeholderResId)
 
@@ -85,7 +89,7 @@ fun SpinnerContent(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -105,7 +109,7 @@ fun SpinnerContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
-                    .background(MaterialTheme.colorScheme.surface, shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, shape)
                     .border(1.dp, borderColor, shape)
                     .clickable(enabled = enabled) { expanded = true }
                     .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -114,7 +118,7 @@ fun SpinnerContent(
                 Icon(
                     imageVector = Icons.Outlined.FolderOpen,
                     contentDescription = null,
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
                 Text(
                     text = selectedItem ?: placeholder,
@@ -130,13 +134,13 @@ fun SpinnerContent(
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
                     contentDescription = stringResource(R.string.spinner_open_description),
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 items.forEach { item ->
                     DropdownMenuItem(

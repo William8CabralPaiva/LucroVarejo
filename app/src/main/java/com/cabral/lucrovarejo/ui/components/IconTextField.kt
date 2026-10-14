@@ -148,6 +148,10 @@ fun IconTextFieldContent(
             ),
             shape = fieldShape,
             colors = TextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                cursorColor = MaterialTheme.colorScheme.primary,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
@@ -159,7 +163,7 @@ fun IconTextFieldContent(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface, fieldShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant, fieldShape)
                 .border(
                     width = 1.dp,
                     color = if (isError) {
