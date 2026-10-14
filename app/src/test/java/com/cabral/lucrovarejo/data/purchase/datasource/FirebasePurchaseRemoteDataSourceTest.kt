@@ -26,7 +26,7 @@ class FirebasePurchaseRemoteDataSourceTest {
             salePrice = 1500,
             quantity = 2,
             saleDate = Date(1_735_689_600_000),
-            paymentMethods = listOf(PaymentMethods.CASH, PaymentMethods.PIX)
+            paymentMethod = PaymentMethods.PIX
         )
 
         val id = dataSource.createPurchase(request)
@@ -45,14 +45,14 @@ class FirebasePurchaseRemoteDataSourceTest {
                 "sale_price",
                 "quantity",
                 "sale_date",
-                "payment_methods"
+                "payment_method"
             ),
             fields.keys
         )
         assertTrue(fields["sale_price"] is Int)
         assertTrue(fields["quantity"] is Int)
         assertEquals(request.saleDate, fields["sale_date"])
-        assertEquals(listOf("CASH", "PIX"), fields["payment_methods"])
+        assertEquals("PIX", fields["payment_method"])
     }
 
     @Test
@@ -67,7 +67,7 @@ class FirebasePurchaseRemoteDataSourceTest {
             salePrice = 1500,
             quantity = 2,
             saleDate = Date(1_735_689_600_000),
-            paymentMethods = listOf(PaymentMethods.CARD)
+            paymentMethod = PaymentMethods.CARD
         )
 
         val failure = runCatching { dataSource.createPurchase(request) }.exceptionOrNull()

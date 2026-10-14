@@ -12,7 +12,7 @@ data class PurchaseRequest(
     val salePrice: Int,
     val quantity: Int,
     val saleDate: Date,
-    val paymentMethods: List<PaymentMethods>
+    val paymentMethod: PaymentMethods
 ) {
     fun toFirestoreFields(): Map<String, Any> = mapOf(
         FIELD_COD to cod,
@@ -22,7 +22,7 @@ data class PurchaseRequest(
         FIELD_SALE_PRICE to salePrice,
         FIELD_QUANTITY to quantity,
         FIELD_SALE_DATE to saleDate,
-        FIELD_PAYMENT_METHODS to paymentMethods.map(PaymentMethods::name)
+        FIELD_PAYMENT_METHOD to paymentMethod.name
     )
 
     companion object {
@@ -34,7 +34,7 @@ data class PurchaseRequest(
             salePrice = purchase.salePrice,
             quantity = purchase.quantity,
             saleDate = purchase.saleDate,
-            paymentMethods = purchase.paymentMethods
+            paymentMethod = purchase.paymentMethod
         )
 
         private const val FIELD_COD = "cod"
@@ -44,6 +44,6 @@ data class PurchaseRequest(
         private const val FIELD_SALE_PRICE = "sale_price"
         private const val FIELD_QUANTITY = "quantity"
         private const val FIELD_SALE_DATE = "sale_date"
-        private const val FIELD_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_PAYMENT_METHOD = "payment_method"
     }
 }

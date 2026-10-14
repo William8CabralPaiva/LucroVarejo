@@ -14,7 +14,7 @@ data class PurchaseUiModel(
     val salePrice: BigDecimal,
     val quantity: Int,
     val saleDate: Date,
-    val paymentMethods: List<PaymentMethods>
+    val paymentMethod: PaymentMethods
 )
 
 fun PurchaseModel.toUiModel(): PurchaseUiModel = PurchaseUiModel(
@@ -26,7 +26,7 @@ fun PurchaseModel.toUiModel(): PurchaseUiModel = PurchaseUiModel(
     salePrice = salePrice.toMoneyAmount(),
     quantity = quantity,
     saleDate = saleDate,
-    paymentMethods = paymentMethods
+    paymentMethod = paymentMethod
 )
 
 private fun Int.toMoneyAmount(): BigDecimal = BigDecimal.valueOf(toLong(), 2)

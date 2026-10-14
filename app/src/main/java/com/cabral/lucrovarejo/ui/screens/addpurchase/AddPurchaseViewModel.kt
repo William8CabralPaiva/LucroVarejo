@@ -109,7 +109,7 @@ class AddPurchaseViewModel @Inject constructor(
                 .intValueExact(),
             quantity = form.quantity,
             saleDate = Date(form.saleDateMillis),
-            paymentMethods = listOf(form.paymentMethod)
+            paymentMethod = form.paymentMethod
         )
         _uiState.update {
             it.copy(

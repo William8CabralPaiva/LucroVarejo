@@ -11,7 +11,7 @@ class PurchaseUiModelTest {
     @Test
     fun convertsPurchaseMoneyFromCentsAndPreservesOtherFields() {
         val saleDate = Date(1_735_689_600_000)
-        val paymentMethods = listOf(PaymentMethods.CARD, PaymentMethods.PIX)
+        val paymentMethod = PaymentMethods.PIX
         val purchase = PurchaseModel(
             id = "purchase-1",
             cod = "A-1",
@@ -21,7 +21,7 @@ class PurchaseUiModelTest {
             salePrice = 1599,
             quantity = 3,
             saleDate = saleDate,
-            paymentMethods = paymentMethods
+            paymentMethod = paymentMethod
         )
 
         assertEquals(
@@ -34,7 +34,7 @@ class PurchaseUiModelTest {
                 salePrice = BigDecimal("15.99"),
                 quantity = 3,
                 saleDate = saleDate,
-                paymentMethods = paymentMethods
+                paymentMethod = paymentMethod
             ),
             purchase.toUiModel()
         )

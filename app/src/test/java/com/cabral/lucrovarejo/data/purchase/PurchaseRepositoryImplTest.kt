@@ -15,7 +15,7 @@ class PurchaseRepositoryImplTest {
         val dataSource = FakePurchaseRemoteDataSource()
         val repository = PurchaseRepositoryImpl(dataSource)
         val saleDate = Date(1_735_689_600_000)
-        val paymentMethods = listOf(PaymentMethods.CASH, PaymentMethods.PIX)
+        val paymentMethod = PaymentMethods.PIX
         val purchase = PurchaseModel(
             cod = "A-1",
             name = "Produto",
@@ -24,7 +24,7 @@ class PurchaseRepositoryImplTest {
             salePrice = 1500,
             quantity = 3,
             saleDate = saleDate,
-            paymentMethods = paymentMethods
+            paymentMethod = paymentMethod
         )
 
         val created = repository.createPurchase(purchase)
@@ -38,7 +38,7 @@ class PurchaseRepositoryImplTest {
                 salePrice = 1500,
                 quantity = 3,
                 saleDate = saleDate,
-                paymentMethods = paymentMethods
+                paymentMethod = paymentMethod
             ),
             dataSource.savedRequest
         )

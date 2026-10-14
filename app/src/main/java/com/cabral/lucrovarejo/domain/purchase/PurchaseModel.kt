@@ -12,5 +12,5 @@ data class PurchaseModel(
     val salePrice: Int,
     val quantity: Int,
     val saleDate: Date,
-    val paymentMethods: List<PaymentMethods>
+    val paymentMethod: PaymentMethods
 )

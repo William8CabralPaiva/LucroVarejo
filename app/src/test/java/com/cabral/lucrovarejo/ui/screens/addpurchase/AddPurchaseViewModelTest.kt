@@ -143,7 +143,7 @@ class AddPurchaseViewModelTest {
                 salePrice = 8990,
                 quantity = 2,
                 saleDate = Date(saleDateMillis),
-                paymentMethods = listOf(PaymentMethods.PIX)
+                paymentMethod = PaymentMethods.PIX
             ),
             purchaseRepository.createdPurchase
         )

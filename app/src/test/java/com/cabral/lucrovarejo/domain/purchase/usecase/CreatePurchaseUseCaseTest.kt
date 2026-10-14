@@ -20,7 +20,7 @@ class CreatePurchaseUseCaseTest {
             salePrice = 1500,
             quantity = 3,
             saleDate = Date(1_735_689_600_000),
-            paymentMethods = listOf(PaymentMethods.CASH)
+            paymentMethod = PaymentMethods.CASH
         )
 
         val created = CreatePurchaseUseCase(repository)(purchase)
