@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.domain.purchase
 
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.util.Date
 
 data class PurchaseModel(
@@ -10,5 +11,6 @@ data class PurchaseModel(
     val description: String,
     val salePrice: Int,
     val quantity: Int,
-    val saleDate: Date
+    val saleDate: Date,
+    val paymentMethods: List<PaymentMethods>
 )

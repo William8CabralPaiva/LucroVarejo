@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import java.util.Date
 import kotlinx.coroutines.test.runTest
@@ -24,7 +25,8 @@ class FirebasePurchaseRemoteDataSourceTest {
             description = "Descricao",
             salePrice = 1500,
             quantity = 2,
-            saleDate = Date(1_735_689_600_000)
+            saleDate = Date(1_735_689_600_000),
+            paymentMethods = listOf(PaymentMethods.CASH, PaymentMethods.PIX)
         )
 
         val id = dataSource.createPurchase(request)
@@ -35,12 +37,22 @@ class FirebasePurchaseRemoteDataSourceTest {
 
         val fields = requireNotNull(client.request).toFirestoreFields()
         assertEquals(
-            setOf("cod", "name", "cost", "description", "sale_price", "quantity", "sale_date"),
+            setOf(
+                "cod",
+                "name",
+                "cost",
+                "description",
+                "sale_price",
+                "quantity",
+                "sale_date",
+                "payment_methods"
+            ),
             fields.keys
         )
         assertTrue(fields["sale_price"] is Int)
         assertTrue(fields["quantity"] is Int)
         assertEquals(request.saleDate, fields["sale_date"])
+        assertEquals(listOf("CASH", "PIX"), fields["payment_methods"])
     }
 
     @Test
@@ -54,7 +66,8 @@ class FirebasePurchaseRemoteDataSourceTest {
             description = "Descricao",
             salePrice = 1500,
             quantity = 2,
-            saleDate = Date(1_735_689_600_000)
+            saleDate = Date(1_735_689_600_000),
+            paymentMethods = listOf(PaymentMethods.CARD)
         )
 
         val failure = runCatching { dataSource.createPurchase(request) }.exceptionOrNull()

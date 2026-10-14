@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.addpurchase
 
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.math.BigDecimal
 import java.util.Date
 
@@ -12,7 +13,8 @@ data class PurchaseUiModel(
     val description: String,
     val salePrice: BigDecimal,
     val quantity: Int,
-    val saleDate: Date
+    val saleDate: Date,
+    val paymentMethods: List<PaymentMethods>
 )
 
 fun PurchaseModel.toUiModel(): PurchaseUiModel = PurchaseUiModel(
@@ -23,7 +25,8 @@ fun PurchaseModel.toUiModel(): PurchaseUiModel = PurchaseUiModel(
     description = description,
     salePrice = salePrice.toMoneyAmount(),
     quantity = quantity,
-    saleDate = saleDate
+    saleDate = saleDate,
+    paymentMethods = paymentMethods
 )
 
 private fun Int.toMoneyAmount(): BigDecimal = BigDecimal.valueOf(toLong(), 2)

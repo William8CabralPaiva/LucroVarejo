@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase.model
 
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.util.Date
 
 data class PurchaseRequest(
@@ -10,7 +11,8 @@ data class PurchaseRequest(
     val description: String,
     val salePrice: Int,
     val quantity: Int,
-    val saleDate: Date
+    val saleDate: Date,
+    val paymentMethods: List<PaymentMethods>
 ) {
     fun toFirestoreFields(): Map<String, Any> = mapOf(
         FIELD_COD to cod,
@@ -19,7 +21,8 @@ data class PurchaseRequest(
         FIELD_DESCRIPTION to description,
         FIELD_SALE_PRICE to salePrice,
         FIELD_QUANTITY to quantity,
-        FIELD_SALE_DATE to saleDate
+        FIELD_SALE_DATE to saleDate,
+        FIELD_PAYMENT_METHODS to paymentMethods.map(PaymentMethods::name)
     )
 
     companion object {
@@ -30,7 +33,8 @@ data class PurchaseRequest(
             description = purchase.description,
             salePrice = purchase.salePrice,
             quantity = purchase.quantity,
-            saleDate = purchase.saleDate
+            saleDate = purchase.saleDate,
+            paymentMethods = purchase.paymentMethods
         )
 
         private const val FIELD_COD = "cod"
@@ -40,5 +44,6 @@ data class PurchaseRequest(
         private const val FIELD_SALE_PRICE = "sale_price"
         private const val FIELD_QUANTITY = "quantity"
         private const val FIELD_SALE_DATE = "sale_date"
+        private const val FIELD_PAYMENT_METHODS = "payment_methods"
     }
 }

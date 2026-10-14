@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.domain.purchase.usecase
 
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.util.Date
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -18,7 +19,8 @@ class CreatePurchaseUseCaseTest {
             description = "Descricao",
             salePrice = 1500,
             quantity = 3,
-            saleDate = Date(1_735_689_600_000)
+            saleDate = Date(1_735_689_600_000),
+            paymentMethods = listOf(PaymentMethods.CASH)
         )
 
         val created = CreatePurchaseUseCase(repository)(purchase)

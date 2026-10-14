@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.addpurchase
 
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.math.BigDecimal
 import java.util.Date
 import org.junit.Assert.assertEquals
@@ -10,6 +11,7 @@ class PurchaseUiModelTest {
     @Test
     fun convertsPurchaseMoneyFromCentsAndPreservesOtherFields() {
         val saleDate = Date(1_735_689_600_000)
+        val paymentMethods = listOf(PaymentMethods.CARD, PaymentMethods.PIX)
         val purchase = PurchaseModel(
             id = "purchase-1",
             cod = "A-1",
@@ -18,7 +20,8 @@ class PurchaseUiModelTest {
             description = "Descricao",
             salePrice = 1599,
             quantity = 3,
-            saleDate = saleDate
+            saleDate = saleDate,
+            paymentMethods = paymentMethods
         )
 
         assertEquals(
@@ -30,7 +33,8 @@ class PurchaseUiModelTest {
                 description = "Descricao",
                 salePrice = BigDecimal("15.99"),
                 quantity = 3,
-                saleDate = saleDate
+                saleDate = saleDate,
+                paymentMethods = paymentMethods
             ),
             purchase.toUiModel()
         )
