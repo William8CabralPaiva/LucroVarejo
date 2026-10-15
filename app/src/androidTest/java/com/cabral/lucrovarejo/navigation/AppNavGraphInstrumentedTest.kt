@@ -12,9 +12,12 @@ import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
+import androidx.paging.PagingData
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,6 +63,7 @@ class AppNavGraphInstrumentedTest {
             end: Date
         ): MonthlyPurchaseSummary = MonthlyPurchaseSummary()
 
-        override suspend fun getLatestPurchases(): List<PurchaseModel> = emptyList()
+        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
+            flowOf(PagingData.empty())
     }
 }

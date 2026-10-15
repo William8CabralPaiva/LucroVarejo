@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase
 
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
+import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseCursor
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
@@ -8,6 +9,9 @@ import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import java.util.Date
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.testing.asSnapshot
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -104,7 +108,7 @@ class PurchaseRepositoryImplTest {
             )
         }
 
-        val purchases = PurchaseRepositoryImpl(dataSource).getLatestPurchases()
+        val purchases = PurchaseRepositoryImpl(dataSource).getLatestPurchases().asSnapshot()
 
         assertEquals(
             listOf(
@@ -154,6 +158,20 @@ class PurchaseRepositoryImplTest {
             return purchases
         }
 
-        override suspend fun getLatestPurchases(): List<PurchaseRecord> = latestPurchases
+        override fun getLatestPurchasesPagingSource():
+            PagingSource<PurchaseCursor, PurchaseRecord> =
+            object : PagingSource<PurchaseCursor, PurchaseRecord>() {
+                override suspend fun load(
+                    params: LoadParams<PurchaseCursor>
+                ): LoadResult<PurchaseCursor, PurchaseRecord> = LoadResult.Page(
+                    data = latestPurchases,
+                    prevKey = null,
+                    nextKey = null
+                )
+
+                override fun getRefreshKey(
+                    state: PagingState<PurchaseCursor, PurchaseRecord>
+                ): PurchaseCursor? = null
+            }
     }
 }

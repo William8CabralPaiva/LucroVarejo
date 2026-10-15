@@ -4,7 +4,10 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import androidx.paging.PagingData
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -41,6 +44,7 @@ class CreatePurchaseUseCaseTest {
         override suspend fun getMonthlySummary(start: Date, end: Date) =
             MonthlyPurchaseSummary()
 
-        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
+        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
+            flowOf(PagingData.empty())
     }
 }

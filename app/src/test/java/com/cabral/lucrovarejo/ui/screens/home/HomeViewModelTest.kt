@@ -5,12 +5,15 @@ import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import androidx.paging.PagingData
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import java.util.Calendar
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -103,6 +106,7 @@ class HomeViewModelTest {
             return summary
         }
 
-        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
+        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
+            flowOf(PagingData.empty())
     }
 }

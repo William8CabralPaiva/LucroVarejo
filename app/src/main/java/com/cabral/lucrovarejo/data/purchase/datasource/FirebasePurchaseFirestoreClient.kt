@@ -4,6 +4,7 @@ import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.Query
 import java.util.Date
 import javax.inject.Inject
@@ -50,19 +51,22 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
         }
     }
 
-    override suspend fun getLatestPurchases(
+    override suspend fun getLatestPurchasesPage(
         storeKey: String,
+        startAfter: com.google.firebase.firestore.DocumentSnapshot?,
         limit: Long
-    ): List<PurchaseRecord> {
-        val snapshot = firestore.collection(COLLECTION_STORES)
+    ): PurchaseFirestorePage {
+        var query = firestore.collection(COLLECTION_STORES)
             .document(storeKey)
             .collection(COLLECTION_PURCHASES)
             .orderBy(FIELD_SALE_DATE, Query.Direction.DESCENDING)
+            .orderBy(FieldPath.documentId(), Query.Direction.DESCENDING)
             .limit(limit)
-            .get()
+        if (startAfter != null) query = query.startAfter(startAfter)
+        val snapshot = query.get()
             .await()
 
-        return snapshot.documents.map { document ->
+        val purchases = snapshot.documents.map { document ->
             PurchaseRecord(
                 documentId = document.id,
                 cod = requireNotNull(document.getString(FIELD_COD)) {
@@ -91,6 +95,10 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
                 }
             )
         }
+        return PurchaseFirestorePage(
+            purchases = purchases,
+            lastDocument = snapshot.documents.lastOrNull()
+        )
     }
 
     private companion object {

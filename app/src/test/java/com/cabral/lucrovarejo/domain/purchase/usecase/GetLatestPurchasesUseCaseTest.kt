@@ -2,9 +2,13 @@ package com.cabral.lucrovarejo.domain.purchase.usecase
 
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
-import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import androidx.paging.PagingData
+import androidx.paging.testing.asSnapshot
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -38,7 +42,7 @@ class GetLatestPurchasesUseCaseTest {
         )
         val useCase = GetLatestPurchasesUseCase(FakePurchaseRepository(purchases))
 
-        assertEquals(purchases, useCase())
+        assertEquals(purchases, useCase().asSnapshot())
     }
 
     private class FakePurchaseRepository(
@@ -51,6 +55,7 @@ class GetLatestPurchasesUseCaseTest {
             end: Date
         ): MonthlyPurchaseSummary = MonthlyPurchaseSummary()
 
-        override suspend fun getLatestPurchases(): List<PurchaseModel> = latestPurchases
+        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
+            flowOf(PagingData.from(latestPurchases))
     }
 }
