@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens
+package com.cabral.lucrovarejo.ui.screens.config
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
