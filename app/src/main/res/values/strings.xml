@@ -101,6 +101,11 @@
     <string name="quantity_increase_description">Aumentar quantidade</string>
     <string name="spinner_open_description">Abrir opções</string>
     <string name="date_select_description">Selecionar data</string>
+    <string name="month_year_previous">Mês anterior</string>
+    <string name="month_year_next">Próximo mês</string>
+    <string name="month_year_calendar_description">Mês selecionado</string>
+    <string name="month_year_invalid_year">O ano deve ser maior que zero.</string>
+    <string name="month_year_invalid_month">O mês deve estar entre 1 e 12.</string>
     <string name="date_picker_confirm">OK</string>
     <string name="date_picker_cancel">Cancelar</string>
     <string name="sample_category_bags">Bolsas</string>

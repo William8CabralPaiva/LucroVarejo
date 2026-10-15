@@ -17,4 +17,9 @@
     <dimen name="product_submit_progress_stroke">1.5dp</dimen>
     <dimen name="product_snackbar_horizontal_padding">16dp</dimen>
     <dimen name="product_snackbar_vertical_padding">16dp</dimen>
+    <dimen name="month_year_selector_height">56dp</dimen>
+    <dimen name="month_year_selector_padding">8dp</dimen>
+    <dimen name="month_year_selector_icon_size">22dp</dimen>
+    <dimen name="month_year_selector_radius">12dp</dimen>
+    <dimen name="month_year_selector_border_width">1dp</dimen>
 </resources>
