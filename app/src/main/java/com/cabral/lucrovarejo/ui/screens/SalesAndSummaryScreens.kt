@@ -13,25 +13,16 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SalesScreen() {
-    TabPlaceholderScreen(
-        title = "Vendas",
-        message = "Suas vendas aparecerão aqui."
-    )
+    TabPlaceholderScreen(message = "Suas vendas aparecerão aqui.")
 }
 
 @Composable
 fun SummaryScreen() {
-    TabPlaceholderScreen(
-        title = "Resumo",
-        message = "O resumo das vendas aparecerá aqui."
-    )
+    TabPlaceholderScreen(message = "O resumo das vendas aparecerá aqui.")
 }
 
 @Composable
-private fun TabPlaceholderScreen(
-    title: String,
-    message: String
-) {
+private fun TabPlaceholderScreen(message: String) {
     Column(
         modifier = Modifier
             .fillMaxSize()

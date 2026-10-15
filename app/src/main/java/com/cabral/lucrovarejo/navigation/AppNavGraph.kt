@@ -17,6 +17,7 @@ import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
+import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
@@ -28,6 +29,7 @@ fun AppNavGraph(
     onSignOut: () -> Unit = {},
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChanged: (ThemeMode) -> Unit = {},
+    homeViewModel: HomeViewModel? = null,
 ) {
     NavHost(
         navController = navController,
@@ -78,6 +80,7 @@ fun AppNavGraph(
             LoggedFlowScreen(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
+                homeViewModel = homeViewModel,
                 onLogout = {
                     onSignOut()
                     navController.navigate(NotLoggedRoutes.LOGIN) {
@@ -94,6 +97,7 @@ private fun LoggedFlowScreen(
     currentThemeMode: ThemeMode,
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
+    homeViewModel: HomeViewModel?,
 ) {
     val innerNavController = rememberNavController()
     val currentRoute =
@@ -136,7 +140,8 @@ private fun LoggedFlowScreen(
                         //TODO alterar
                         innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
                     },
-                    onLogout = onLogout
+                    onLogout = onLogout,
+                    viewModel = homeViewModel
                 )
             }
 

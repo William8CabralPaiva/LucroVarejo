@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
+import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
@@ -77,9 +78,27 @@ class FirebasePurchaseRemoteDataSourceTest {
         assertEquals(null, client.storeKey)
     }
 
+    @Test
+    fun fetchesPurchasesForAuthenticatedStoreAndTimestampRange() = runTest {
+        val client = FakePurchaseFirestoreClient()
+        val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository("store-uid"), client)
+        val start = Date(1_760_000_000_000)
+        val end = Date(1_762_678_400_000)
+        val records = listOf(PurchaseSummaryRecord(cost = 1200, salePrice = 1500, quantity = 3))
+        client.purchases = records
+
+        val result = dataSource.getPurchasesBetween(start, end)
+
+        assertEquals("store-uid", client.storeKey)
+        assertEquals(start to end, client.requestedRange)
+        assertEquals(records, result)
+    }
+
     private class FakePurchaseFirestoreClient : PurchaseFirestoreClient {
         var storeKey: String? = null
         var request: PurchaseRequest? = null
+        var purchases: List<PurchaseSummaryRecord> = emptyList()
+        var requestedRange: Pair<Date, Date>? = null
 
         override suspend fun savePurchase(
             storeKey: String,
@@ -88,6 +107,16 @@ class FirebasePurchaseRemoteDataSourceTest {
             this.storeKey = storeKey
             this.request = request
             return "purchase-1"
+        }
+
+        override suspend fun getPurchasesBetween(
+            storeKey: String,
+            start: Date,
+            end: Date
+        ): List<PurchaseSummaryRecord> {
+            this.storeKey = storeKey
+            requestedRange = start to end
+            return purchases
         }
     }
 

@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.domain.purchase.usecase
 
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import java.util.Date
 import kotlinx.coroutines.test.runTest
@@ -36,5 +37,8 @@ class CreatePurchaseUseCaseTest {
             createdPurchase = purchase
             return purchase.copy(id = "generated-purchase-id")
         }
+
+        override suspend fun getMonthlySummary(start: Date, end: Date) =
+            MonthlyPurchaseSummary()
     }
 }

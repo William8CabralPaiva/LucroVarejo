@@ -25,6 +25,8 @@ import com.cabral.lucrovarejo.ui.theme.LightBlueContainer
 import com.cabral.lucrovarejo.ui.theme.LightGreenContainer
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ProfitGreen
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun AlertPrice(
@@ -63,8 +65,14 @@ fun AlertPrice(
     }
 }
 
-internal fun formatAlertPrice(price: Double): String =
-    "R$ ${"%.2f".format(java.util.Locale.forLanguageTag("pt-BR"), price)}"
+internal fun formatAlertPrice(price: Double): String {
+    val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("pt-BR")).apply {
+        minimumFractionDigits = 2
+        maximumFractionDigits = 2
+        isGroupingUsed = true
+    }
+    return "R$ ${formatter.format(price)}"
+}
 
 enum class AlertPriceState(val color: Color, val icon: ImageVector, val textId: Int) {
     PROFIT(LightGreenContainer, Icons.AutoMirrored.Filled.TrendingUp, R.string.alert_profit_title),

@@ -172,5 +172,8 @@ class AddPurchaseViewModelTest {
             createdPurchase = purchase
             return purchase.copy(id = "purchase-1")
         }
+
+        override suspend fun getMonthlySummary(start: Date, end: Date) =
+            com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary()
     }
 }

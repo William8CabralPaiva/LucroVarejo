@@ -58,6 +58,14 @@
     <string name="bottom_nav_config">Configurações</string>
     <string name="sales_title">Vendas</string>
     <string name="summary_title">Resumo</string>
+    <string name="summary_month_sales">Vendas do mês</string>
+    <string name="summary_total_cost">Custo total</string>
+    <string name="summary_total_profit">Lucro total</string>
+    <string name="summary_products_sold">%1$d produtos vendidos</string>
+    <string name="summary_load_error_network">Sem conexão. Não foi possível carregar o resumo.</string>
+    <string name="summary_load_error_permission">O Firebase bloqueou o acesso às vendas. Verifique as regras do Firestore.</string>
+    <string name="summary_load_error_unauthenticated">Sua sessão expirou. Entre novamente para carregar o resumo.</string>
+    <string name="summary_load_error_generic">Não foi possível carregar o resumo. Tente novamente.</string>
     <string name="config_title">Configurações</string>
     <string name="settings_dark_mode">Modo escuro</string>
     <string name="settings_dark_mode_subtitle">Altera o tema do aplicativo para uma aparência mais escura.</string>
