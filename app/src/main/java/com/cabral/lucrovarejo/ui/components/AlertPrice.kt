@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,6 +60,14 @@ fun AlertPrice(
                     fontWeight = FontWeight.Bold,
                     color = ProfitGreen
                 )
+                if (price == 0.0) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = stringResource(R.string.alert_no_products),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = ProfitGreen
+                    )
+                }
             }
         }
 
@@ -92,5 +101,21 @@ fun AlertPriceProfitPreview() {
 fun AlertPricePurchasePreview() {
     LucroVarejoTheme {
         AlertPrice(50.90, AlertPriceState.PURCHASE)
+    }
+}
+
+@Composable
+@Preview(showBackground = true, name = "Lucro sem vendas")
+fun AlertPriceProfitEmptyPreview() {
+    LucroVarejoTheme {
+        AlertPrice(0.0, AlertPriceState.PROFIT)
+    }
+}
+
+@Composable
+@Preview(showBackground = true, name = "Custo sem vendas")
+fun AlertPricePurchaseEmptyPreview() {
+    LucroVarejoTheme {
+        AlertPrice(0.0, AlertPriceState.PURCHASE)
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,7 +35,9 @@ fun AlertPurchase(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = modifier.testTag(ALERT_PURCHASE_TAG),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(ALERT_PURCHASE_TAG),
         shape = RoundedCornerShape(8.dp),
         color = MediumGreenCard
     ) {
@@ -50,7 +53,7 @@ fun AlertPurchase(
                     modifier = Modifier.size(24.dp)
                 )
             }
-            Row {
+            Row(modifier = Modifier.weight(1f)) {
                 Column {
                     Text(
                         text = stringResource(id = R.string.alert_month_purchase),
@@ -65,11 +68,19 @@ fun AlertPurchase(
                         color = TextPrimaryDark
                     )
                     Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$productsSize ${stringResource(id = R.string.sale_products)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = TextPrimaryDark
-                    )
+                    if (productsSize > 0) {
+                        Text(
+                            text = "$productsSize ${stringResource(id = R.string.sale_products)}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextPrimaryDark
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.alert_no_products),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = TextPrimaryDark
+                        )
+                    }
                 }
             }
             Row {
@@ -92,5 +103,13 @@ internal const val ALERT_PURCHASE_TAG = "alert-purchase"
 fun AlertPurchasePreview() {
     LucroVarejoTheme {
         AlertPurchase(50.90, 10)
+    }
+}
+
+@Composable
+@Preview(showBackground = true, name = "Vendas do mês sem vendas")
+fun AlertPurchaseEmptyPreview() {
+    LucroVarejoTheme {
+        AlertPurchase(price = 0.0, productsSize = 0)
     }
 }
