@@ -1,11 +1,14 @@
 package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -71,6 +74,24 @@ class IconButtonUiTest {
                     enabled = false,
                     onClick = {}
                 )
+            }
+
+            @Test
+            fun buttonShowsProvidedTextAndIcon() {
+                composeRule.setContent {
+                    LucroVarejoTheme {
+                        IconButton(
+                            enabled = true,
+                            onClick = {},
+                            text = "ADICIONAR VENDA",
+                            iconContentDescription = "Adicionar venda",
+                            icon = Icons.Filled.Add
+                        )
+                    }
+                }
+
+                composeRule.onNodeWithText("ADICIONAR VENDA").assertIsDisplayed()
+                composeRule.onNodeWithContentDescription("Adicionar venda").assertIsDisplayed()
             }
         }
 

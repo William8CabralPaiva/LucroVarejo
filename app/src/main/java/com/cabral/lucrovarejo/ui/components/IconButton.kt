@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -52,15 +53,21 @@ fun IconButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    icon: ImageVector = Icons.Default.Save,
+    iconContentDescription: String? = null,
+    text: String? = null,
+    loadingText: String? = null
 ) {
     SaveProductButtonContent(
-        label = stringResource(R.string.product_create_submit),
-        loadingLabel = stringResource(R.string.product_create_loading),
+        label = text ?: stringResource(R.string.product_create_submit),
+        loadingLabel = loadingText ?: stringResource(R.string.product_create_loading),
         enabled = enabled,
         isLoading = isLoading,
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier,
+        icon = icon,
+        iconContentDescription = iconContentDescription
     )
 }
 
@@ -71,7 +78,9 @@ fun SaveProductButtonContent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
-    loadingLabel: String = label
+    loadingLabel: String = label,
+    icon: ImageVector = Icons.Default.Save,
+    iconContentDescription: String? = null
 ) {
     val palette = saveProductButtonPalette(LocalIsDarkTheme.current)
     Button(
@@ -108,8 +117,8 @@ fun SaveProductButtonContent(
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Default.Save,
-                    contentDescription = null,
+                    imageVector = icon,
+                    contentDescription = iconContentDescription,
                     tint = LocalContentColor.current
                 )
             }

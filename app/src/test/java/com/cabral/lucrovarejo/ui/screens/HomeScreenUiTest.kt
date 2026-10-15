@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
+import com.cabral.lucrovarejo.ui.screens.home.HomeContent
 import com.cabral.lucrovarejo.ui.screens.home.HomeUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
