@@ -40,5 +40,7 @@ class CreatePurchaseUseCaseTest {
 
         override suspend fun getMonthlySummary(start: Date, end: Date) =
             MonthlyPurchaseSummary()
+
+        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
     }
 }

@@ -32,6 +32,7 @@ import com.cabral.lucrovarejo.ui.screens.home.HomeUiState
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
+//TODO VERIFICAR SE ESTA ATUALZIANDO DPS de add item
 @Composable
 fun HomeScreen(
     goToConfigScreen: () -> Unit,

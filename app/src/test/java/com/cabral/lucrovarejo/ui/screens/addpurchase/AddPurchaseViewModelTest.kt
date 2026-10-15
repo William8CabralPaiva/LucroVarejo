@@ -175,5 +175,7 @@ class AddPurchaseViewModelTest {
 
         override suspend fun getMonthlySummary(start: Date, end: Date) =
             com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary()
+
+        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
     }
 }

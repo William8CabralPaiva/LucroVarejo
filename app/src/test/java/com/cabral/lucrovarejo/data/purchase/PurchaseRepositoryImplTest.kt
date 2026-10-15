@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.data.purchase
 
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
+import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
@@ -72,10 +73,73 @@ class PurchaseRepositoryImplTest {
         )
     }
 
+    @Test
+    fun mapsLatestPurchaseRecordsToDomainModelsInReturnedOrder() = runTest {
+        val firstDate = Date(1_760_000_000_000)
+        val secondDate = Date(1_759_000_000_000)
+        val dataSource = FakePurchaseRemoteDataSource().apply {
+            latestPurchases = listOf(
+                PurchaseRecord(
+                    documentId = "latest-id",
+                    cod = "A-1",
+                    name = "Produto mais atual",
+                    cost = 1200,
+                    description = "Descricao",
+                    salePrice = 1500,
+                    quantity = 2,
+                    saleDate = firstDate,
+                    paymentMethod = "PIX"
+                ),
+                PurchaseRecord(
+                    documentId = "older-id",
+                    cod = "B-2",
+                    name = "Produto anterior",
+                    cost = 800,
+                    description = "Outra descricao",
+                    salePrice = 1000,
+                    quantity = 1,
+                    saleDate = secondDate,
+                    paymentMethod = "CASH"
+                )
+            )
+        }
+
+        val purchases = PurchaseRepositoryImpl(dataSource).getLatestPurchases()
+
+        assertEquals(
+            listOf(
+                PurchaseModel(
+                    id = "latest-id",
+                    cod = "A-1",
+                    name = "Produto mais atual",
+                    cost = 1200,
+                    description = "Descricao",
+                    salePrice = 1500,
+                    quantity = 2,
+                    saleDate = firstDate,
+                    paymentMethod = PaymentMethods.PIX
+                ),
+                PurchaseModel(
+                    id = "older-id",
+                    cod = "B-2",
+                    name = "Produto anterior",
+                    cost = 800,
+                    description = "Outra descricao",
+                    salePrice = 1000,
+                    quantity = 1,
+                    saleDate = secondDate,
+                    paymentMethod = PaymentMethods.CASH
+                )
+            ),
+            purchases
+        )
+    }
+
     private class FakePurchaseRemoteDataSource : PurchaseRemoteDataSource {
         var savedRequest: PurchaseRequest? = null
         var purchases: List<PurchaseSummaryRecord> = emptyList()
         var requestedRange: Pair<Date, Date>? = null
+        var latestPurchases: List<PurchaseRecord> = emptyList()
 
         override suspend fun createPurchase(request: PurchaseRequest): String {
             savedRequest = request
@@ -89,5 +153,7 @@ class PurchaseRepositoryImplTest {
             requestedRange = start to end
             return purchases
         }
+
+        override suspend fun getLatestPurchases(): List<PurchaseRecord> = latestPurchases
     }
 }

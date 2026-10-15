@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
+import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
@@ -94,11 +95,39 @@ class FirebasePurchaseRemoteDataSourceTest {
         assertEquals(records, result)
     }
 
+    @Test
+    fun fetchesLatestPurchasesForAuthenticatedStoreWithLimitOfFifteen() = runTest {
+        val client = FakePurchaseFirestoreClient()
+        val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository("store-uid"), client)
+        val records = listOf(
+            PurchaseRecord(
+                documentId = "latest",
+                cod = "A-1",
+                name = "Bolsa",
+                cost = 1200,
+                description = "",
+                salePrice = 1500,
+                quantity = 1,
+                saleDate = Date(1_760_000_000_000),
+                paymentMethod = "PIX"
+            )
+        )
+        client.latestPurchases = records
+
+        val result = dataSource.getLatestPurchases()
+
+        assertEquals("store-uid", client.storeKey)
+        assertEquals(15L, client.latestLimit)
+        assertEquals(records, result)
+    }
+
     private class FakePurchaseFirestoreClient : PurchaseFirestoreClient {
         var storeKey: String? = null
         var request: PurchaseRequest? = null
         var purchases: List<PurchaseSummaryRecord> = emptyList()
         var requestedRange: Pair<Date, Date>? = null
+        var latestLimit: Long? = null
+        var latestPurchases: List<PurchaseRecord> = emptyList()
 
         override suspend fun savePurchase(
             storeKey: String,
@@ -117,6 +146,15 @@ class FirebasePurchaseRemoteDataSourceTest {
             this.storeKey = storeKey
             requestedRange = start to end
             return purchases
+        }
+
+        override suspend fun getLatestPurchases(
+            storeKey: String,
+            limit: Long
+        ): List<PurchaseRecord> {
+            this.storeKey = storeKey
+            latestLimit = limit
+            return latestPurchases
         }
     }
 

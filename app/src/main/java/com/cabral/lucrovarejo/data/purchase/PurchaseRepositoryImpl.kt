@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.data.purchase
 
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
+import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
@@ -43,6 +44,10 @@ class PurchaseRepositoryImpl @Inject constructor(
                 )
             }
         }
+
+    override suspend fun getLatestPurchases(): List<PurchaseModel> = withPurchaseFailure {
+        remoteDataSource.getLatestPurchases().map(PurchaseRecord::toModel)
+    }
 
     private suspend fun <T> withPurchaseFailure(
         operation: suspend () -> T

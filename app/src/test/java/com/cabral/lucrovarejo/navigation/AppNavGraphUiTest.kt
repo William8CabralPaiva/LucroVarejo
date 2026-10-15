@@ -58,5 +58,7 @@ class AppNavGraphUiTest {
             start: Date,
             end: Date
         ): MonthlyPurchaseSummary = MonthlyPurchaseSummary()
+
+        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
     }
 }

@@ -38,5 +38,7 @@ class GetMonthlyPurchaseSummaryUseCaseTest {
             requestedRange = start to end
             return summary
         }
+
+        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
     }
 }

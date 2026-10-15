@@ -102,5 +102,7 @@ class HomeViewModelTest {
             failure?.let { throw it }
             return summary
         }
+
+        override suspend fun getLatestPurchases() = emptyList<PurchaseModel>()
     }
 }
