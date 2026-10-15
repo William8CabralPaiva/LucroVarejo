@@ -59,6 +59,5 @@ fun LoggedRouteTopBar(
 
 private fun showBackButton(route: String): Boolean {
     return route == LoggedRoutes.PRODUCT ||
-            route == LoggedRoutes.CONFIG ||
             route == LoggedRoutes.ADD_PURCHASE
 }
