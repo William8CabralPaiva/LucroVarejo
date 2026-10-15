@@ -59,6 +59,13 @@
     <string name="sales_title">Vendas</string>
     <string name="summary_title">Resumo</string>
     <string name="config_title">Configurações</string>
+    <string name="settings_dark_mode">Modo escuro</string>
+    <string name="settings_dark_mode_subtitle">Altera o tema do aplicativo para uma aparência mais escura.</string>
+    <string name="settings_logout">Desconectar</string>
+    <string name="settings_logout_subtitle">Você sairá da sua conta e precisará fazer login novamente para acessar o app.</string>
+    <string name="settings_about">Sobre o app</string>
+    <string name="settings_about_version">Versão %1$s</string>
+    <string name="dialog_close">Fechar</string>
     <string name="add_purchase_title">Nova Venda</string>
     <string name="purchase_sale_price_label">Valor vendido</string>
     <string name="purchase_payment_method_label">Pagamento</string>

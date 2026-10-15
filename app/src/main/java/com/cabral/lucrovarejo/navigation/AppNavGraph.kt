@@ -159,7 +159,8 @@ private fun LoggedFlowScreen(
             composable(LoggedRoutes.CONFIG) {
                 ConfigScreen(
                     currentThemeMode = currentThemeMode,
-                    onThemeModeChanged = onThemeModeChanged
+                    onThemeModeChanged = onThemeModeChanged,
+                    onLogout = onLogout
                 )
             }
         }

@@ -30,9 +30,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val themePreferences = getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
 
         setContent {
-            var themeMode by rememberSaveable { mutableStateOf(ThemeMode.SYSTEM) }
+            var themeMode by rememberSaveable {
+                mutableStateOf(
+                    when (themePreferences.getString(THEME_MODE_KEY, ThemeMode.SYSTEM.name)) {
+                        ThemeMode.LIGHT.name -> ThemeMode.LIGHT
+                        ThemeMode.DARK.name -> ThemeMode.DARK
+                        else -> ThemeMode.SYSTEM
+                    }
+                )
+            }
 
             LucroVarejoTheme(themeMode = themeMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -42,10 +51,18 @@ class MainActivity : ComponentActivity() {
                         currentThemeMode = themeMode,
                         onThemeModeChanged = { newMode ->
                             themeMode = newMode
+                            themePreferences.edit()
+                                .putString(THEME_MODE_KEY, newMode.name)
+                                .apply()
                         }
                     )
                 }
             }
         }
+    }
+
+    private companion object {
+        const val THEME_PREFERENCES = "lucro_varejo_preferences"
+        const val THEME_MODE_KEY = "theme_mode"
     }
 }
