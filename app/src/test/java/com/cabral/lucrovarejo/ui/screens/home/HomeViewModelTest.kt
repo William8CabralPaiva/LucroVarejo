@@ -6,6 +6,7 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import androidx.paging.PagingData
+import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import java.util.Calendar
 import java.util.Date
@@ -35,7 +36,10 @@ class HomeViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repository = FakePurchaseRepository()
-        viewModel = HomeViewModel(GetMonthlyPurchaseSummaryUseCase(repository))
+        viewModel = HomeViewModel(
+            GetMonthlyPurchaseSummaryUseCase(repository),
+            GetLatestPurchasesUseCase(repository)
+        )
     }
 
     @After

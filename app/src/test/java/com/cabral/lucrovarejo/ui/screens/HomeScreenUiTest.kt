@@ -5,10 +5,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
+import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.screens.home.HomeContent
 import com.cabral.lucrovarejo.ui.screens.home.HomeUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import java.util.Date
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -79,6 +83,47 @@ class HomeScreenUiTest {
         composeRule.onNodeWithContentDescription("Mês anterior").performClick()
         composeRule.runOnIdle {
             assertEquals(2025 to 12, selectedMonthYear)
+        }
+    }
+
+    @Test
+    fun displaysLatestSalesAndOpensSalesList() {
+        var openedSales = false
+        composeRule.setContent {
+            LucroVarejoTheme {
+                HomeContent(
+                    state = HomeUiState(year = 2026, month = 10, isLoading = false),
+                    latestPurchases = listOf(
+                        PurchaseModel(
+                            cod = "A-1",
+                            name = "Bolsa Feminina",
+                            cost = 5000,
+                            description = "",
+                            salePrice = 8990,
+                            quantity = 1,
+                            saleDate = Date(),
+                            paymentMethod = PaymentMethods.CASH
+                        )
+                    ),
+                    onMonthYearChange = { _, _ -> },
+                    goToConfigScreen = {},
+                    goToProductScreen = {},
+                    goToSalesScreen = { openedSales = true },
+                    onLogout = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Últimas vendas").assertIsDisplayed()
+        composeRule.onNodeWithText("Bolsa Feminina")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("R$ 89,90").assertIsDisplayed()
+        composeRule.onNodeWithText("Ver todas")
+            .performScrollTo()
+            .performClick()
+        composeRule.runOnIdle {
+            assertEquals(true, openedSales)
         }
     }
 }

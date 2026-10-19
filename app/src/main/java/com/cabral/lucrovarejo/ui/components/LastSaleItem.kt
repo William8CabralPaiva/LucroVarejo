@@ -3,6 +3,7 @@ package com.cabral.lucrovarejo.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
-import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -42,18 +41,19 @@ import java.util.TimeZone
 fun LastSaleItem(
     productName: String,
     priceInCents: Long,
-    timestamp: Timestamp,
+    saleDate: Date,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     image: Painter? = null
 ) {
     val todayLabel = stringResource(R.string.last_sale_today)
     val yesterdayLabel = stringResource(R.string.last_sale_yesterday)
-    val formattedDate = formatLastSaleTimestamp(timestamp, todayLabel, yesterdayLabel)
+    val formattedDate = formatLastSaleTimestamp(saleDate, todayLabel, yesterdayLabel)
     LastSaleItemContent(
         productName = productName,
         formattedPrice = formatAlertPrice(priceInCents / 100.0),
         formattedDate = formattedDate,
+
         onClick = onClick,
         modifier = modifier,
         image = image
@@ -69,88 +69,82 @@ fun LastSaleItemContent(
     modifier: Modifier = Modifier,
     image: Painter? = null
 ) {
-    Surface(
-        onClick = onClick,
+    val cardShape = RoundedCornerShape(dimensionResource(R.dimen.last_sale_card_radius))
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(dimensionResource(R.dimen.last_sale_card_radius))
-            ),
-        shape = RoundedCornerShape(dimensionResource(R.dimen.last_sale_card_radius)),
-        color = MaterialTheme.colorScheme.surface
+            .clip(cardShape)
+            .background(MaterialTheme.colorScheme.surface, cardShape)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, cardShape)
+            .clickable(onClick = onClick)
+            .padding(dimensionResource(R.dimen.last_sale_card_padding)),
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_content_spacing)),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(dimensionResource(R.dimen.last_sale_card_padding)),
-            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_content_spacing)),
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier
+                .size(dimensionResource(R.dimen.last_sale_image_size))
+                .clip(RoundedCornerShape(dimensionResource(R.dimen.last_sale_image_radius)))
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(dimensionResource(R.dimen.last_sale_image_radius))
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(dimensionResource(R.dimen.last_sale_image_size))
-                    .clip(RoundedCornerShape(dimensionResource(R.dimen.last_sale_image_radius)))
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(dimensionResource(R.dimen.last_sale_image_radius))
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (image != null) {
-                    Image(
-                        painter = image,
-                        contentDescription = productName,
-                        modifier = Modifier.size(dimensionResource(R.dimen.last_sale_image_size)),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Outlined.ShoppingBag,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_text_spacing))
-            ) {
-                Text(
-                    text = productName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+            if (image != null) {
+                Image(
+                    painter = image,
+                    contentDescription = productName,
+                    modifier = Modifier.size(dimensionResource(R.dimen.last_sale_image_size)),
+                    contentScale = ContentScale.Crop
                 )
-                Text(
-                    text = formattedPrice,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = formattedDate,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            } else {
+                Icon(
+                    imageVector = Icons.Outlined.ShoppingBag,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
 
-            Icon(
-                imageVector = Icons.Filled.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_text_spacing))
+        ) {
+            Text(
+                text = productName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = formattedPrice,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = formattedDate,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+
+        Icon(
+            imageVector = Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 internal fun formatLastSaleTimestamp(
-    timestamp: Timestamp,
+    timestamp: Date,
     todayLabel: String,
     yesterdayLabel: String,
     now: Date = Date(),
     timeZone: TimeZone = TimeZone.getDefault()
 ): String {
-    val saleDate = timestamp.toDate()
+    val saleDate = timestamp
     val saleDay = Calendar.getInstance(timeZone).apply { time = saleDate }
     val currentDay = Calendar.getInstance(timeZone).apply { time = now }
 
@@ -183,7 +177,7 @@ fun LastSaleItemPreview() {
         LastSaleItem(
             productName = "Bolsa Feminina",
             priceInCents = 8990,
-            timestamp = Timestamp.now(),
+            saleDate = Date(),
             onClick = {}
         )
     }

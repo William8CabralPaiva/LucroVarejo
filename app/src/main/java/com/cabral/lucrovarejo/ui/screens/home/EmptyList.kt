@@ -51,7 +51,7 @@ fun EmptyList(
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.size(8.dp))
-        val addPurchaseText = stringResource(R.string.purchase_create_submit)
+        val addPurchaseText = stringResource(R.string.empty_list_add_purchase)
         IconButton(
             enabled = true,
             onClick = onAddPurchase,

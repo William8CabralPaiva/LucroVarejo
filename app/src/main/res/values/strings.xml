@@ -39,6 +39,10 @@
     <string name="product_placeholder">Selecionar Produto</string>
     <string name="last_sale_today">Hoje</string>
     <string name="last_sale_yesterday">Ontem</string>
+    <string name="last_sales_title">Últimas vendas</string>
+    <string name="last_sales_see_all">Ver todas</string>
+    <string name="last_sales_empty">Nenhuma venda registrada ainda.</string>
+    <string name="last_sales_load_error">Não foi possível carregar as últimas vendas.</string>
     <string name="product_name_label">Nome do produto</string>
     <string name="product_name_required">Informe o nome do produto.</string>
     <string name="product_code_label">Código do Produto</string>

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import androidx.paging.PagingData
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
@@ -33,7 +34,8 @@ class AppNavGraphUiTest {
                 AppNavGraph(
                     startDestination = LoggedRoutes.HOME,
                     homeViewModel = HomeViewModel(
-                        GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository())
+                        GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
+                        GetLatestPurchasesUseCase(FakePurchaseRepository())
                     )
                 )
             }

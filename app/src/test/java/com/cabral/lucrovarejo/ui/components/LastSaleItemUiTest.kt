@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
-import com.google.firebase.Timestamp
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -23,20 +22,13 @@ class LastSaleItemUiTest {
 
     @Test
     fun displaysProductPriceAndTodayLabel() {
-        val saleDate = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, 14)
-            set(Calendar.MINUTE, 32)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.time
-        val saleTimestamp = Timestamp(saleDate)
-
+        val saleDate = Date()
         composeRule.setContent {
             LucroVarejoTheme {
                 LastSaleItem(
                     productName = "Bolsa Feminina",
                     priceInCents = 8990,
-                    timestamp = saleTimestamp,
+                    saleDate = saleDate,
                     onClick = {}
                 )
             }
@@ -51,16 +43,16 @@ class LastSaleItemUiTest {
     fun formatsYesterdayAndOlderDatesInBrazilianFormat() {
         val timeZone = TimeZone.getDefault()
         val now = localDate(2026, Calendar.OCTOBER, 9, 15, 0)
-        val yesterdayTimestamp = Timestamp(localDate(2026, Calendar.OCTOBER, 8, 11, 20))
-        val olderTimestamp = Timestamp(localDate(2026, Calendar.OCTOBER, 5, 16, 45))
+        val yesterdayDate = localDate(2026, Calendar.OCTOBER, 8, 11, 20)
+        val olderDate = localDate(2026, Calendar.OCTOBER, 5, 16, 45)
 
         assertEquals(
             "Ontem",
-            formatLastSaleTimestamp(yesterdayTimestamp, "Hoje", "Ontem", now, timeZone)
+            formatLastSaleTimestamp(yesterdayDate, "Hoje", "Ontem", now, timeZone)
         )
         assertEquals(
             "05/10",
-            formatLastSaleTimestamp(olderTimestamp, "Hoje", "Ontem", now, timeZone)
+            formatLastSaleTimestamp(olderDate, "Hoje", "Ontem", now, timeZone)
         )
     }
 

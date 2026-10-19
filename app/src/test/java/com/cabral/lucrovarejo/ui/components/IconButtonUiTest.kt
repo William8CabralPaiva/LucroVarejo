@@ -75,28 +75,28 @@ class IconButtonUiTest {
                     onClick = {}
                 )
             }
-
-            @Test
-            fun buttonShowsProvidedTextAndIcon() {
-                composeRule.setContent {
-                    LucroVarejoTheme {
-                        IconButton(
-                            enabled = true,
-                            onClick = {},
-                            text = "ADICIONAR VENDA",
-                            iconContentDescription = "Adicionar venda",
-                            icon = Icons.Filled.Add
-                        )
-                    }
-                }
-
-                composeRule.onNodeWithText("ADICIONAR VENDA").assertIsDisplayed()
-                composeRule.onNodeWithContentDescription("Adicionar venda").assertIsDisplayed()
-            }
         }
 
         composeRule.onNodeWithText("SALVAR ITEM").assertIsDisplayed()
         composeRule.onNodeWithTag(SAVE_PRODUCT_BUTTON_TAG).assertIsNotEnabled()
+    }
+
+    @Test
+    fun buttonShowsProvidedTextAndIcon() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                IconButton(
+                    enabled = true,
+                    onClick = {},
+                    text = "ADICIONAR VENDA",
+                    iconContentDescription = "Adicionar venda",
+                    icon = Icons.Filled.Add
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("ADICIONAR VENDA").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Adicionar venda").assertIsDisplayed()
     }
 
     @Test

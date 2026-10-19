@@ -140,6 +140,9 @@ private fun LoggedFlowScreen(
                         //TODO alterar
                         innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
                     },
+                    goToSalesScreen = {
+                        innerNavController.navigate(LoggedRoutes.SALES)
+                    },
                     onLogout = onLogout,
                     viewModel = homeViewModel
                 )
