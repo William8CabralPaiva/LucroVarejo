@@ -10,6 +10,7 @@ import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
+import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.RoundingMode
 import java.util.Calendar
@@ -75,7 +76,7 @@ class AddPurchaseViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 form = it.form.copy(
-                    saleDateMillis = mergeDateWithExistingTime(
+                    saleDateMillis = DateUtils.mergeDateWithExistingTime(
                         dateMillis = value,
                         existingDateTimeMillis = it.form.saleDateMillis
                     )
@@ -186,21 +187,3 @@ class AddPurchaseViewModel @Inject constructor(
 internal fun productDisplayName(product: ProductModel): String =
     if (product.cod.isBlank()) product.name else "${product.name} (${product.cod})"
 
-internal fun mergeDateWithExistingTime(
-    dateMillis: Long,
-    existingDateTimeMillis: Long
-): Long {
-    val selectedDate = Calendar.getInstance(UTC_TIME_ZONE).apply {
-        timeInMillis = dateMillis
-    }
-    val existingDateTime = Calendar.getInstance(UTC_TIME_ZONE).apply {
-        timeInMillis = existingDateTimeMillis
-    }
-    selectedDate.set(Calendar.HOUR_OF_DAY, existingDateTime.get(Calendar.HOUR_OF_DAY))
-    selectedDate.set(Calendar.MINUTE, existingDateTime.get(Calendar.MINUTE))
-    selectedDate.set(Calendar.SECOND, existingDateTime.get(Calendar.SECOND))
-    selectedDate.set(Calendar.MILLISECOND, existingDateTime.get(Calendar.MILLISECOND))
-    return selectedDate.timeInMillis
-}
-
-private val UTC_TIME_ZONE: TimeZone = TimeZone.getTimeZone("UTC")
