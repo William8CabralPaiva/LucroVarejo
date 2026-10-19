@@ -10,6 +10,7 @@ data class AddPurchaseUiState(
     val isLoadingProducts: Boolean = true,
     val isSaving: Boolean = false,
     val errorMessage: Int? = null,
+    val formResetCount: Int = 0,
 ) {
     val canSubmit: Boolean
         get() = form.selectedProduct != null &&

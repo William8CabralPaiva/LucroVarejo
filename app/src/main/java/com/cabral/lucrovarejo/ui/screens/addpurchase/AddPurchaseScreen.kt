@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.ui.screens.addpurchase
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,14 +15,20 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +45,7 @@ import com.cabral.lucrovarejo.ui.components.QuantityFieldContent
 import com.cabral.lucrovarejo.ui.components.SaveProductButtonContent
 import com.cabral.lucrovarejo.ui.components.SpinnerContent
 import com.cabral.lucrovarejo.ui.payment.PaymentMethodsUi
+import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -48,11 +56,17 @@ fun AddPurchaseScreen(
     viewModel: AddPurchaseViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    LaunchedEffect(viewModel) {
-        viewModel.effects.collect { onPurchaseSaved() }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val successMessage = stringResource(R.string.purchase_create_success)
+    LaunchedEffect(viewModel, successMessage) {
+        viewModel.effects.collect {
+            onPurchaseSaved()
+            snackbarHostState.showSnackbar(successMessage)
+        }
     }
     AddPurchaseScreenContent(
         state = state,
+        snackbarHostState = snackbarHostState,
         onProductSelected = viewModel::onProductSelected,
         onSalePriceChanged = viewModel::onSalePriceChanged,
         onQuantityChanged = viewModel::onQuantityChanged,
@@ -65,6 +79,7 @@ fun AddPurchaseScreen(
 @Composable
 fun AddPurchaseScreenContent(
     state: AddPurchaseUiState,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onProductSelected: (String) -> Unit = {},
     onSalePriceChanged: (String) -> Unit = {},
     onQuantityChanged: (Int) -> Unit = {},
@@ -87,11 +102,12 @@ fun AddPurchaseScreenContent(
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoadingProducts) {
             LoadingFullScreen(
                 loadingTextId = R.string.purchase_load_products_loading
             )
-        } else {
+        } else key(state.formResetCount) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -182,6 +198,23 @@ fun AddPurchaseScreenContent(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
+        }
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(
+                    horizontal = dimensionResource(R.dimen.product_snackbar_horizontal_padding),
+                    vertical = dimensionResource(R.dimen.product_snackbar_vertical_padding)
+                ),
+            snackbar = { snackbarData ->
+                Snackbar(
+                    snackbarData = snackbarData,
+                    containerColor = ForestGreenHeader,
+                    contentColor = Color.White
+                )
+            }
+        )
         }
     }
 }

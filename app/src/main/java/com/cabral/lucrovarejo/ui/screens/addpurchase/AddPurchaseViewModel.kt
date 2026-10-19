@@ -132,7 +132,13 @@ class AddPurchaseViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 createPurchase(purchase)
-                _uiState.update { it.copy(isSaving = false) }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        form = PurchaseFormState(),
+                        formResetCount = it.formResetCount + 1
+                    )
+                }
                 effectChannel.send(Unit)
             } catch (failure: PurchaseFailure) {
                 _uiState.update {

@@ -74,7 +74,6 @@ internal fun LoggedFlowScreen(
             LoggedDestinationNavHost(
                 navController = navController,
                 navigator = navigator,
-                currentRoute = currentRoute,
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
@@ -88,7 +87,6 @@ internal fun LoggedFlowScreen(
 private fun LoggedDestinationNavHost(
     navController: NavHostController,
     navigator: LoggedNavigator,
-    currentRoute: String,
     currentThemeMode: ThemeMode,
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
@@ -121,17 +119,12 @@ private fun LoggedDestinationNavHost(
 
         composable(LoggedRoutes.ADD_PURCHASE) {
             AddPurchaseScreen(
-                onPurchaseSaved = {
-                    navigator.requestHomeRefresh()
-                    navigator.navigateBack()
-                }
+                onPurchaseSaved = navigator::markSaved
             )
         }
 
         composable(LoggedRoutes.PRODUCT) {
-            ProductScreen(
-                onProductSaved = navigator::markProductSaved
-            )
+            ProductScreen(onProductSaved = navigator::markSaved)
         }
 
         composable(LoggedRoutes.SALES) {
@@ -156,7 +149,11 @@ private class LoggedNavigator(
     private val navController: NavHostController,
 ) {
     private var previousRoute: String? = null
-    private var hasSavedProduct = false
+    private var hasSavedItem = false
+
+    fun markSaved() {
+        hasSavedItem = true
+    }
 
     fun navigateTo(route: String) {
         navController.navigate(route) {
@@ -168,23 +165,13 @@ private class LoggedNavigator(
         }
     }
 
-    fun markProductSaved() {
-        hasSavedProduct = true
-    }
-
-    fun requestHomeRefresh() {
-        navController.getBackStackEntry(LoggedRoutes.HOME)
-            .savedStateHandle[HOME_REFRESH_REQUESTED_KEY] = true
-    }
-
     fun onRouteChanged(currentRoute: String) {
-        if (
-            previousRoute == LoggedRoutes.PRODUCT &&
-            currentRoute == LoggedRoutes.HOME &&
-            hasSavedProduct
-        ) {
-            requestHomeRefresh()
-            hasSavedProduct = false
+        val cameFromForm = previousRoute == LoggedRoutes.PRODUCT ||
+                previousRoute == LoggedRoutes.ADD_PURCHASE
+        if (cameFromForm && currentRoute == LoggedRoutes.HOME && hasSavedItem) {
+            navController.getBackStackEntry(LoggedRoutes.HOME)
+                .savedStateHandle[HOME_REFRESH_REQUESTED_KEY] = true
+            hasSavedItem = false
         }
         previousRoute = currentRoute
     }
