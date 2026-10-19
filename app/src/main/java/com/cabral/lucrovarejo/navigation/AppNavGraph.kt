@@ -100,6 +100,15 @@ private fun LoggedFlowScreen(
     homeViewModel: HomeViewModel?,
 ) {
     val innerNavController = rememberNavController()
+    val navigateToLoggedRoute: (String) -> Unit = { route ->
+        innerNavController.navigate(route) {
+            launchSingleTop = true
+            restoreState = true
+            popUpTo(innerNavController.graph.startDestinationId) {
+                saveState = true
+            }
+        }
+    }
     val currentRoute =
         innerNavController.currentBackStackEntryAsState().value?.destination?.route
             ?: LoggedRoutes.HOME
@@ -114,15 +123,7 @@ private fun LoggedFlowScreen(
         bottomBar = {
             BottomNavBar(
                 currentRoute = currentRoute,
-                onNavigate = { route ->
-                    innerNavController.navigate(route) {
-                        launchSingleTop = true
-                        restoreState = true
-                        popUpTo(innerNavController.graph.startDestinationId) {
-                            saveState = true
-                        }
-                    }
-                }
+                onNavigate = navigateToLoggedRoute
             )
         }
     ) { innerPadding ->
@@ -141,7 +142,7 @@ private fun LoggedFlowScreen(
                         innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
                     },
                     goToSalesScreen = {
-                        innerNavController.navigate(LoggedRoutes.SALES)
+                        navigateToLoggedRoute(LoggedRoutes.SALES)
                     },
                     onLogout = onLogout,
                     viewModel = homeViewModel

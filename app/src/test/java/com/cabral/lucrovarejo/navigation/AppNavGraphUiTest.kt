@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
@@ -54,6 +55,27 @@ class AppNavGraphUiTest {
 
         composeRule.onNodeWithText("Início").performClick()
         composeRule.onNodeWithText("Vendas do mês").assertIsDisplayed()
+    }
+
+    @Test
+    fun showAllSalesNavigatesToSalesTab() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AppNavGraph(
+                    startDestination = LoggedRoutes.HOME,
+                    homeViewModel = HomeViewModel(
+                        GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
+                        GetLatestPurchasesUseCase(FakePurchaseRepository())
+                    )
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Ver todas")
+            .performScrollTo()
+            .performClick()
+
+        composeRule.onNodeWithText("Suas vendas aparecerão aqui.").assertIsDisplayed()
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
