@@ -60,6 +60,7 @@
     <string name="product_create_loading">CADASTRANDO...</string>
     <string name="navigate_back">Voltar</string>
     <string name="home_title">Lucro Varejo - Home</string>
+    <string name="home_header_title">Controle de Vendas</string>
     <string name="bottom_nav_home">Início</string>
     <string name="bottom_nav_sales">Vendas</string>
     <string name="bottom_nav_summary">Resumo</string>

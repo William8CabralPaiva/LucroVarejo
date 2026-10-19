@@ -12,12 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,25 +44,22 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 //TODO VERIFICAR SE ESTA ATUALZIANDO DPS de add item
 @Composable
 fun HomeScreen(
-    goToConfigScreen: () -> Unit,
     goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit,
-    onLogout: () -> Unit,
     viewModel: HomeViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
     val latestSales = resolvedViewModel.latestPurchases.collectAsLazyPagingItems()
+
     HomeContent(
         state = state,
         latestPurchases = latestSales.itemSnapshotList.items.take(LATEST_SALES_LIMIT),
         isLatestSalesLoading = latestSales.loadState.refresh is LoadState.Loading,
         hasLatestSalesError = latestSales.loadState.refresh is LoadState.Error,
         onMonthYearChange = resolvedViewModel::onMonthYearChanged,
-        goToConfigScreen = goToConfigScreen,
         goToProductScreen = goToProductScreen,
         goToSalesScreen = goToSalesScreen,
-        onLogout = onLogout
     )
 }
 
@@ -75,10 +70,8 @@ fun HomeContent(
     isLatestSalesLoading: Boolean = false,
     hasLatestSalesError: Boolean = false,
     onMonthYearChange: (year: Int, month: Int) -> Unit,
-    goToConfigScreen: () -> Unit,
     goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit = {},
-    onLogout: () -> Unit,
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -86,7 +79,6 @@ fun HomeContent(
             FloatingActionButton(
                 onClick = goToProductScreen,
                 containerColor = MaterialTheme.colorScheme.primary,
-
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -99,8 +91,8 @@ fun HomeContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -150,25 +142,6 @@ fun HomeContent(
                 onShowAll = goToSalesScreen,
                 onSaleClick = goToSalesScreen
             )
-
-            Button(
-                onClick = goToConfigScreen,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Configurações & Modo Escuro")
-            }
-            Button(
-                onClick = goToProductScreen,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Testando navegação")
-            }
-            OutlinedButton(
-                onClick = onLogout,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Sair")
-            }
         }
     }
 }
@@ -247,10 +220,8 @@ private fun HomeContentPreview() {
                 isLoading = false
             ),
             onMonthYearChange = { _, _ -> },
-            goToConfigScreen = {},
             goToProductScreen = {},
             goToSalesScreen = {},
-            onLogout = {}
         )
     }
 }

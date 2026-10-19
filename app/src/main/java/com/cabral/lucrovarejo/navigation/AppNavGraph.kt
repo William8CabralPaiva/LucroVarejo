@@ -1,9 +1,14 @@
 package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -114,6 +119,7 @@ private fun LoggedFlowScreen(
             ?: LoggedRoutes.HOME
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.primary,
         topBar = {
             LoggedRouteTopBar(
                 route = currentRoute,
@@ -127,27 +133,31 @@ private fun LoggedFlowScreen(
             )
         }
     ) { innerPadding ->
-        NavHost(
-            navController = innerNavController,
-            startDestination = LoggedRoutes.HOME,
-            modifier = Modifier.padding(innerPadding)
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 4.dp
         ) {
-            composable(LoggedRoutes.HOME) {
-                HomeScreen(
-                    goToConfigScreen = {
-                        innerNavController.navigate(LoggedRoutes.CONFIG)
-                    },
-                    goToProductScreen = {
-                        //TODO alterar
-                        innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
-                    },
-                    goToSalesScreen = {
-                        navigateToLoggedRoute(LoggedRoutes.SALES)
-                    },
-                    onLogout = onLogout,
-                    viewModel = homeViewModel
-                )
-            }
+            NavHost(
+                navController = innerNavController,
+                startDestination = LoggedRoutes.HOME,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable(LoggedRoutes.HOME) {
+                    HomeScreen(
+                        goToProductScreen = {
+                            //TODO alterar
+                            innerNavController.navigate(LoggedRoutes.ADD_PURCHASE)
+                        },
+                        goToSalesScreen = {
+                            navigateToLoggedRoute(LoggedRoutes.SALES)
+                        },
+                        viewModel = homeViewModel
+                    )
+                }
 
             composable(LoggedRoutes.ADD_PURCHASE) {
                 AddPurchaseScreen(onPurchaseSaved = { innerNavController.popBackStack() })
@@ -173,5 +183,6 @@ private fun LoggedFlowScreen(
                 )
             }
         }
+    }
     }
 }

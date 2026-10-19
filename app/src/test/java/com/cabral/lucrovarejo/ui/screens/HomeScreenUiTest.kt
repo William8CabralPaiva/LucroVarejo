@@ -43,9 +43,7 @@ class HomeScreenUiTest {
                         isLoading = false
                     ),
                     onMonthYearChange = { _, _ -> },
-                    goToConfigScreen = {},
                     goToProductScreen = {},
-                    onLogout = {}
                 )
             }
         }
@@ -73,9 +71,7 @@ class HomeScreenUiTest {
                     onMonthYearChange = { year, month ->
                         selectedMonthYear = year to month
                     },
-                    goToConfigScreen = {},
                     goToProductScreen = {},
-                    onLogout = {}
                 )
             }
         }
@@ -106,10 +102,8 @@ class HomeScreenUiTest {
                         )
                     ),
                     onMonthYearChange = { _, _ -> },
-                    goToConfigScreen = {},
                     goToProductScreen = {},
                     goToSalesScreen = { openedSales = true },
-                    onLogout = {}
                 )
             }
         }
