@@ -14,18 +14,21 @@ import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel @Inject constructor(
     private val getMonthlySummary: GetMonthlyPurchaseSummaryUseCase,
-    getLatestPurchases: GetLatestPurchasesUseCase
+    private val getLatestPurchases: GetLatestPurchasesUseCase
 ) : ViewModel() {
     private val initialCalendar = Calendar.getInstance()
     private val _uiState = MutableStateFlow(
@@ -35,8 +38,10 @@ class HomeViewModel @Inject constructor(
         )
     )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-    val latestPurchases: Flow<PagingData<PurchaseModel>> =
-        getLatestPurchases().cachedIn(viewModelScope)
+    private val latestPurchasesSource = MutableStateFlow(getLatestPurchases())
+    val latestPurchases: Flow<PagingData<PurchaseModel>> = latestPurchasesSource
+        .flatMapLatest { it }
+        .cachedIn(viewModelScope)
     private var summaryJob: Job? = null
 
     init {
@@ -47,6 +52,15 @@ class HomeViewModel @Inject constructor(
         require(year > 0)
         require(month in 1..12)
         loadSummary(year, month)
+    }
+
+    fun refreshForCurrentMonth() {
+        val currentCalendar = Calendar.getInstance()
+        latestPurchasesSource.value = getLatestPurchases()
+        loadSummary(
+            year = currentCalendar.get(Calendar.YEAR),
+            month = currentCalendar.get(Calendar.MONTH) + 1
+        )
     }
 
     private fun loadSummary(year: Int, month: Int) {

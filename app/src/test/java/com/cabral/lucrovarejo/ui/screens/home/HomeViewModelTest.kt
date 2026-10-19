@@ -89,6 +89,30 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun refreshForCurrentMonthUpdatesTheSelectedMonthAndSummary() = runTest {
+        advanceUntilIdle()
+        val initialRequestCount = repository.summaryRequestCount
+        val initialLatestPurchasesRequestCount = repository.latestPurchasesRequestCount
+        val summary = MonthlyPurchaseSummary(totalSales = 123_400)
+        repository.summary = summary
+        viewModel.onMonthYearChanged(2020, 1)
+        advanceUntilIdle()
+        val currentCalendar = Calendar.getInstance()
+
+        viewModel.refreshForCurrentMonth()
+        advanceUntilIdle()
+
+        assertEquals(initialRequestCount + 2, repository.summaryRequestCount)
+        assertEquals(
+            initialLatestPurchasesRequestCount + 1,
+            repository.latestPurchasesRequestCount
+        )
+        assertEquals(summary, viewModel.uiState.value.summary)
+        assertEquals(currentCalendar.get(Calendar.YEAR), viewModel.uiState.value.year)
+        assertEquals(currentCalendar.get(Calendar.MONTH) + 1, viewModel.uiState.value.month)
+    }
+
+    @Test
     fun rejectsInvalidMonthAndYear() {
         assertTrue(runCatching { viewModel.onMonthYearChanged(0, 1) }.isFailure)
         assertTrue(runCatching { viewModel.onMonthYearChanged(2026, 13) }.isFailure)
@@ -98,6 +122,8 @@ class HomeViewModelTest {
         var summary = MonthlyPurchaseSummary()
         var failure: PurchaseFailure? = null
         var requestedRange: Pair<Date, Date>? = null
+        var summaryRequestCount = 0
+        var latestPurchasesRequestCount = 0
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
@@ -105,12 +131,15 @@ class HomeViewModelTest {
             start: Date,
             end: Date
         ): MonthlyPurchaseSummary {
+            summaryRequestCount++
             requestedRange = start to end
             failure?.let { throw it }
             return summary
         }
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
-            flowOf(PagingData.empty())
+        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> {
+            latestPurchasesRequestCount++
+            return flowOf(PagingData.empty())
+        }
     }
 }

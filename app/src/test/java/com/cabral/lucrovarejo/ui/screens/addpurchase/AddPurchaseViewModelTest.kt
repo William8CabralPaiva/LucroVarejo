@@ -127,6 +127,7 @@ class AddPurchaseViewModelTest {
     fun createsPurchaseWithSelectedProductPaymentAndAmountInCents() = runTest {
         advanceUntilIdle()
         val saleDateMillis = 1_735_689_600_000L
+        val originalSaleDateMillis = viewModel.uiState.value.form.saleDateMillis
         viewModel.onProductSelected(productDisplayName(product))
         viewModel.onSalePriceChanged("89,90")
         viewModel.onQuantityChanged(2)
@@ -145,7 +146,9 @@ class AddPurchaseViewModelTest {
                 description = "Bolsa",
                 salePrice = 8990,
                 quantity = 2,
-                saleDate = Date(saleDateMillis),
+                saleDate = Date(
+                    mergeDateWithExistingTime(saleDateMillis, originalSaleDateMillis)
+                ),
                 paymentMethod = PaymentMethods.PIX
             ),
             purchaseRepository.createdPurchase

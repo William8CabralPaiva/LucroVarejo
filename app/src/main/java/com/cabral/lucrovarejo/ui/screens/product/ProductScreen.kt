@@ -41,13 +41,17 @@ import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
-fun ProductScreen(viewModel: ProductViewModel = hiltViewModel()) {
+fun ProductScreen(
+    onProductSaved: () -> Unit = {},
+    viewModel: ProductViewModel = hiltViewModel()
+) {
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.product_create_success)
 
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
+            onProductSaved()
             snackbarHostState.showSnackbar(successMessage)
         }
     }
