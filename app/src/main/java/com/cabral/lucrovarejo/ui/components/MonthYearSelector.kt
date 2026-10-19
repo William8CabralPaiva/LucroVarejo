@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -88,6 +89,7 @@ fun MonthYearSelector(
             )
             Text(
                 text = label,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = dimensionResource(R.dimen.month_year_selector_padding)),

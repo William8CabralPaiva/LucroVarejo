@@ -35,6 +35,7 @@
     <string name="alert_no_products">Nenhuma venda registrada</string>
     <string name="purchase_area">As vendas que você fizer aparecerão aqui para acompanhar seu desempenho</string>
     <string name="empty_list_add_purchase">Adicionar venda</string>
+    <string name="add">Adicionar</string>
     <string name="product">Produto</string>
     <string name="product_placeholder">Selecionar Produto</string>
     <string name="last_sale_today">Hoje</string>

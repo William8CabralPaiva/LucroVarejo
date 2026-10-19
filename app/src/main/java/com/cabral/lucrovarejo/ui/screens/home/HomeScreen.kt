@@ -3,18 +3,22 @@ package com.cabral.lucrovarejo.ui.screens.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -46,7 +50,7 @@ fun HomeScreen(
     goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit,
     onLogout: () -> Unit,
-    viewModel: HomeViewModel? = null
+    viewModel: HomeViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
@@ -74,79 +78,97 @@ fun HomeContent(
     goToConfigScreen: () -> Unit,
     goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit = {},
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        MonthYearSelector(
-            year = state.year,
-            month = state.month,
-            onMonthYearChange = onMonthYearChange
-        )
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = goToProductScreen,
+                containerColor = MaterialTheme.colorScheme.primary,
 
-        state.errorMessage?.let { error ->
-            Text(
-                text = stringResource(error),
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        if (state.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        } else if (state.errorMessage == null) {
-            val summary = state.summary
-            AlertPurchase(
-                price = summary.totalSales.toCurrencyAmount(),
-                productsSize = summary.productsSold.toInt(),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                AlertPrice(
-                    price = summary.totalCost.toCurrencyAmount(),
-                    state = AlertPriceState.PURCHASE,
-                    modifier = Modifier.weight(1f)
-                )
-                AlertPrice(
-                    price = summary.totalProfit.toCurrencyAmount(),
-                    state = AlertPriceState.PROFIT,
-                    modifier = Modifier.weight(1f)
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.add)
                 )
             }
         }
+    )
+    { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            MonthYearSelector(
+                year = state.year,
+                month = state.month,
+                onMonthYearChange = onMonthYearChange
+            )
 
-        LatestSalesSection(
-            purchases = latestPurchases,
-            isLoading = isLatestSalesLoading,
-            hasError = hasLatestSalesError,
-            onShowAll = goToSalesScreen,
-            onSaleClick = goToSalesScreen
-        )
+            state.errorMessage?.let { error ->
+                Text(
+                    text = stringResource(error),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
 
-        Button(
-            onClick = goToConfigScreen,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Configurações & Modo Escuro")
-        }
-        Button(
-            onClick = goToProductScreen,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Testando navegação")
-        }
-        OutlinedButton(
-            onClick = onLogout,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Sair")
+            if (state.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            } else if (state.errorMessage == null) {
+                val summary = state.summary
+                AlertPurchase(
+                    price = summary.totalSales.toCurrencyAmount(),
+                    productsSize = summary.productsSold.toInt(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AlertPrice(
+                        price = summary.totalCost.toCurrencyAmount(),
+                        state = AlertPriceState.PURCHASE,
+                        modifier = Modifier.weight(1f)
+                    )
+                    AlertPrice(
+                        price = summary.totalProfit.toCurrencyAmount(),
+                        state = AlertPriceState.PROFIT,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            LatestSalesSection(
+                purchases = latestPurchases,
+                isLoading = isLatestSalesLoading,
+                hasError = hasLatestSalesError,
+                onShowAll = goToSalesScreen,
+                onSaleClick = goToSalesScreen
+            )
+
+            Button(
+                onClick = goToConfigScreen,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Configurações & Modo Escuro")
+            }
+            Button(
+                onClick = goToProductScreen,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Testando navegação")
+            }
+            OutlinedButton(
+                onClick = onLogout,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Sair")
+            }
         }
     }
 }
@@ -157,7 +179,7 @@ private fun LatestSalesSection(
     isLoading: Boolean,
     hasError: Boolean,
     onShowAll: () -> Unit,
-    onSaleClick: () -> Unit
+    onSaleClick: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -186,9 +208,11 @@ private fun LatestSalesSection(
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyMedium
             )
+
             isLoading && purchases.isEmpty() -> CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
+
             purchases.isEmpty() -> EmptyList(onAddPurchase = onShowAll)
             else -> purchases.forEach { purchase ->
                 LastSaleItem(
