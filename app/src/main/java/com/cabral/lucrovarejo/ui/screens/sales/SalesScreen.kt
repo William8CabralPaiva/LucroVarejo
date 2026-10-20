@@ -50,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.PurchaseItem
 import com.cabral.lucrovarejo.ui.components.formatSaleDatePtBr
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -177,6 +178,7 @@ fun SalesContent(
                 entries = entries,
                 listState = listState,
                 onRetry = onRetry,
+                onAddPurchase = onAddPurchase,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -214,6 +216,7 @@ private fun SalesList(
     entries: List<SalesEntry>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onRetry: () -> Unit,
+    onAddPurchase: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -242,10 +245,7 @@ private fun SalesList(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = stringResource(R.string.sales_empty),
-                style = MaterialTheme.typography.bodyLarge
-            )
+            EmptyList(onAddPurchase = onAddPurchase ?: {})
         }
 
         else -> LazyColumn(

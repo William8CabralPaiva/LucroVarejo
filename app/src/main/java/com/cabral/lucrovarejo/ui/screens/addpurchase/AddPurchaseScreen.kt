@@ -65,7 +65,7 @@ fun AddPurchaseScreen(
     }
     AddPurchaseScreenContent(
         state = state,
-        snackbarHostState = snackbarHostState,
+        snackBarHostState = snackbarHostState,
         onProductSelected = viewModel::onProductSelected,
         onSalePriceChanged = viewModel::onSalePriceChanged,
         onQuantityChanged = viewModel::onQuantityChanged,
@@ -78,7 +78,7 @@ fun AddPurchaseScreen(
 @Composable
 fun AddPurchaseScreenContent(
     state: AddPurchaseUiState,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackBarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onProductSelected: (String) -> Unit = {},
     onSalePriceChanged: (String) -> Unit = {},
     onQuantityChanged: (Int) -> Unit = {},
@@ -199,7 +199,7 @@ fun AddPurchaseScreenContent(
             }
         }
         SnackbarHost(
-            hostState = snackbarHostState,
+            hostState = snackBarHostState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(

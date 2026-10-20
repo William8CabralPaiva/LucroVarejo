@@ -35,6 +35,7 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.components.AlertPrice
 import com.cabral.lucrovarejo.ui.components.AlertPriceState
 import com.cabral.lucrovarejo.ui.components.AlertPurchase
+import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.LastSaleItem
 import com.cabral.lucrovarejo.ui.components.MonthYearSelector
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme

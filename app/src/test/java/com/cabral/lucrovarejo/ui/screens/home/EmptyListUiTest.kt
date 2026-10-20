@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
