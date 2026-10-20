@@ -166,9 +166,9 @@ fun AddProductContent(
                         horizontal = dimensionResource(R.dimen.product_snackbar_horizontal_padding),
                         vertical = dimensionResource(R.dimen.product_snackbar_vertical_padding)
                     ),
-                snackbar = { snackbarData ->
+                snackbar = { snackBarData ->
                     Snackbar(
-                        snackbarData = snackbarData,
+                        snackbarData = snackBarData,
                         containerColor = ForestGreenHeader,
                         contentColor = Color.White
                     )
