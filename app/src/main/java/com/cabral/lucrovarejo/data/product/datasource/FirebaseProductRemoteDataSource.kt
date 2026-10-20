@@ -5,7 +5,12 @@ import com.cabral.lucrovarejo.data.product.model.ProductRecord
 import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.QuerySnapshot
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseProductRemoteDataSource @Inject constructor(
@@ -24,32 +29,54 @@ class FirebaseProductRemoteDataSource @Inject constructor(
         return productDocument.id
     }
 
-    override suspend fun getProducts(): List<ProductRecord> {
+    override fun observeProducts(): Flow<List<ProductRecord>> {
         val storeKey = auth.currentUser?.uid
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
-        val snapshot = firestore.collection(COLLECTION_STORES)
+
+        return firestore.collection(COLLECTION_STORES)
             .document(storeKey)
             .collection(COLLECTION_PRODUCTS)
-            .get()
-            .await()
-
-        return snapshot.documents.map { document ->
-            val request = ProductRequest(
-                cod = requireNotNull(document.getString(FIELD_COD)) {
-                    "Product ${document.id} has no valid '$FIELD_COD' field"
-                },
-                name = requireNotNull(document.getString(FIELD_NAME)) {
-                    "Product ${document.id} has no valid '$FIELD_NAME' field"
-                },
-                cost = Math.toIntExact(requireNotNull(document.getLong(FIELD_COST)) {
-                    "Product ${document.id} has no valid '$FIELD_COST' field"
-                }),
-                description = requireNotNull(document.getString(FIELD_DESCRIPTION)) {
-                    "Product ${document.id} has no valid '$FIELD_DESCRIPTION' field"
+            .snapshotFlow { snapshot ->
+                snapshot.documents.map { document ->
+                    document.toProductRecord()
                 }
-            )
-            ProductRecord(document.id, request)
+            }
+    }
+
+    private fun Query.snapshotFlow(
+        map: (QuerySnapshot) -> List<ProductRecord>
+    ): Flow<List<ProductRecord>> = callbackFlow {
+        val registration = addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot == null) return@addSnapshotListener
+            try {
+                trySend(map(snapshot))
+            } catch (failure: Exception) {
+                close(failure)
+            }
         }
+        awaitClose { registration.remove() }
+    }
+
+    private fun com.google.firebase.firestore.DocumentSnapshot.toProductRecord(): ProductRecord {
+        val request = ProductRequest(
+            cod = requireNotNull(getString(FIELD_COD)) {
+                "Product $id has no valid '$FIELD_COD' field"
+            },
+            name = requireNotNull(getString(FIELD_NAME)) {
+                "Product $id has no valid '$FIELD_NAME' field"
+            },
+            cost = Math.toIntExact(requireNotNull(getLong(FIELD_COST)) {
+                "Product $id has no valid '$FIELD_COST' field"
+            }),
+            description = requireNotNull(getString(FIELD_DESCRIPTION)) {
+                "Product $id has no valid '$FIELD_DESCRIPTION' field"
+            }
+        )
+        return ProductRecord(id, request)
     }
 
     private companion object {

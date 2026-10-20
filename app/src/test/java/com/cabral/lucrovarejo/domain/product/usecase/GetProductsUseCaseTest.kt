@@ -3,6 +3,8 @@ package com.cabral.lucrovarejo.domain.product.usecase
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -28,7 +30,7 @@ class GetProductsUseCaseTest {
         )
         val useCase = GetProductsUseCase(FakeProductRepository(products))
 
-        assertEquals(products, useCase())
+        assertEquals(products, useCase().first())
     }
 
     private class FakeProductRepository(
@@ -36,6 +38,6 @@ class GetProductsUseCaseTest {
     ) : ProductRepository {
         override suspend fun createProduct(product: ProductModel): ProductModel = product
 
-        override suspend fun getProducts(): List<ProductModel> = products
+        override fun observeProducts() = flowOf(products)
     }
 }

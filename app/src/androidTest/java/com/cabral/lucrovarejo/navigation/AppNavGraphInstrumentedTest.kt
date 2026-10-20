@@ -16,6 +16,7 @@ import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.SalesPage
 import com.cabral.lucrovarejo.domain.purchase.SalesRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.ObserveSalesChangesUseCase
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
@@ -38,7 +39,11 @@ class AppNavGraphInstrumentedTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 AppNavGraph(
-                    startDestination = LoggedRoutes.HOME, salesViewModel = SalesViewModel(GetSalesPageUseCase(EmptySalesRepository())),
+                    startDestination = LoggedRoutes.HOME,
+                    salesViewModel = SalesViewModel(
+                        GetSalesPageUseCase(EmptySalesRepository()),
+                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                    ),
                     homeViewModel = HomeViewModel(
                         getMonthlySummary = GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
                         getLatestPurchases = GetLatestPurchasesUseCase(FakePurchaseRepository())
@@ -65,6 +70,8 @@ class AppNavGraphInstrumentedTest {
     private class EmptySalesRepository : SalesRepository {
         override suspend fun getSalesPage(filter: SalesFilter, cursor: SalesCursor?, pageSize: Int) =
             SalesPage(emptyList(), null)
+
+        override fun observeSalesChanges(filter: SalesFilter) = flowOf(Unit)
     }
 
     private class FakePurchaseRepository : PurchaseRepository {

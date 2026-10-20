@@ -3,6 +3,7 @@ package com.cabral.lucrovarejo.domain.product.usecase
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -33,6 +34,6 @@ class CreateProductUseCaseTest {
             return product.copy(id = "generated-product-id")
         }
 
-        override suspend fun getProducts(): List<ProductModel> = emptyList()
+        override fun observeProducts() = flowOf(emptyList<ProductModel>())
     }
 }

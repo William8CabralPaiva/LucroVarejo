@@ -6,6 +6,7 @@ import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.SalesPage
 import com.cabral.lucrovarejo.domain.purchase.SalesRepository
 import java.util.Date
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertSame
@@ -71,5 +72,7 @@ class GetSalesPageUseCaseTest {
             error?.let { throw it }
             return result!!
         }
+
+        override fun observeSalesChanges(filter: SalesFilter) = flowOf(Unit)
     }
 }

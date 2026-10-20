@@ -1,6 +1,8 @@
 package com.cabral.lucrovarejo.domain.product
 
+import kotlinx.coroutines.flow.Flow
+
 interface ProductRepository {
     suspend fun createProduct(product: ProductModel): ProductModel
-    suspend fun getProducts(): List<ProductModel>
+    fun observeProducts(): Flow<List<ProductModel>>
 }

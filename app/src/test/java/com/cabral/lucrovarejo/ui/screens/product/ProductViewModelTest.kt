@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -96,6 +97,6 @@ class ProductViewModelTest {
             return product.copy(id = "generated-product-id")
         }
 
-        override suspend fun getProducts(): List<ProductModel> = emptyList()
+        override fun observeProducts() = flowOf(emptyList<ProductModel>())
     }
 }

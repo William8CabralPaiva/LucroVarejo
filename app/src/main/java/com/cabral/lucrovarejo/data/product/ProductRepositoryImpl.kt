@@ -10,6 +10,9 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 
 @Singleton
 class ProductRepositoryImpl @Inject constructor(
@@ -23,9 +26,10 @@ class ProductRepositoryImpl @Inject constructor(
         return request.toModel(documentId)
     }
 
-    override suspend fun getProducts(): List<ProductModel> = withProductFailure {
-        remoteDataSource.getProducts().map { it.toModel() }
-    }
+    override fun observeProducts(): Flow<List<ProductModel>> =
+        remoteDataSource.observeProducts()
+            .map { records -> records.map { it.toModel() } }
+            .catch { failure -> throw failure.toProductFailure() }
 
     private suspend fun <T> withProductFailure(
         operation: suspend () -> T
@@ -47,4 +51,18 @@ class ProductRepositoryImpl @Inject constructor(
     } catch (failure: Exception) {
         throw ProductFailure(ProductFailure.Reason.UNKNOWN, failure)
     }
+}
+
+private fun Throwable.toProductFailure(): ProductFailure = when (this) {
+    is ProductFailure -> this
+    is FirebaseFirestoreException -> {
+        val reason = when (code) {
+            FirebaseFirestoreException.Code.PERMISSION_DENIED ->
+                ProductFailure.Reason.PERMISSION_DENIED
+            FirebaseFirestoreException.Code.UNAVAILABLE -> ProductFailure.Reason.NETWORK
+            else -> ProductFailure.Reason.UNKNOWN
+        }
+        ProductFailure(reason, this)
+    }
+    else -> ProductFailure(ProductFailure.Reason.UNKNOWN, this)
 }

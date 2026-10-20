@@ -6,6 +6,7 @@ import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import java.util.Date
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -87,5 +88,7 @@ class SalesRepositoryImplTest {
             val startIndex = after?.let { c -> sorted.indexOfFirst { it.documentId == c.documentId } + 1 } ?: 0
             return sorted.drop(startIndex).take(limit)
         }
+
+        override fun observeSalesChanges(dateStart: Date?, dateEnd: Date?) = flowOf(Unit)
     }
 }

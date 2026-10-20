@@ -9,6 +9,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.util.Date
 import javax.inject.Inject
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseSalesRemoteDataSource @Inject constructor(
@@ -24,9 +27,7 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
         val storeKey = authRepository.storeKey
             ?: throw PurchaseFailure(PurchaseFailure.Reason.UNAUTHENTICATED)
 
-        var query: Query = firestore.collection(COLLECTION_STORES)
-            .document(storeKey)
-            .collection(COLLECTION_PURCHASES)
+        var query = salesQuery(storeKey)
         dateStart?.let { query = query.whereGreaterThanOrEqualTo(FIELD_SALE_DATE, it) }
         dateEnd?.let { query = query.whereLessThan(FIELD_SALE_DATE, it) }
         query = query
@@ -36,6 +37,30 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
 
         return query.limit(limit.toLong()).get().await().documents.map { it.toPurchaseRecord() }
     }
+
+    override fun observeSalesChanges(dateStart: Date?, dateEnd: Date?): Flow<Unit> {
+        val storeKey = authRepository.storeKey
+            ?: throw PurchaseFailure(PurchaseFailure.Reason.UNAUTHENTICATED)
+
+        var query = salesQuery(storeKey)
+        dateStart?.let { query = query.whereGreaterThanOrEqualTo(FIELD_SALE_DATE, it) }
+        dateEnd?.let { query = query.whereLessThan(FIELD_SALE_DATE, it) }
+
+        return callbackFlow {
+            val registration = query.addSnapshotListener { _, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+                trySend(Unit)
+            }
+            awaitClose { registration.remove() }
+        }
+    }
+
+    private fun salesQuery(storeKey: String): Query = firestore.collection(COLLECTION_STORES)
+        .document(storeKey)
+        .collection(COLLECTION_PURCHASES)
 
     private companion object {
         const val COLLECTION_STORES = "stores"

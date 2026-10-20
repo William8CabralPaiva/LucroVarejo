@@ -19,6 +19,8 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -57,7 +59,7 @@ class AddPurchaseViewModelTest {
         Dispatchers.setMain(dispatcher)
         purchaseRepository = FakePurchaseRepository()
         viewModel = AddPurchaseViewModel(
-            getProducts = GetProductsUseCase(FakeProductRepository(listOf(product))),
+            getProducts = GetProductsUseCase(FakeProductRepository(flowOf(listOf(product)))),
             createPurchase = CreatePurchaseUseCase(purchaseRepository)
         )
     }
@@ -89,7 +91,9 @@ class AddPurchaseViewModelTest {
         viewModel = createViewModel(
             object : ProductRepository {
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
-                override suspend fun getProducts(): List<ProductModel> = products.await()
+                override fun observeProducts(): Flow<List<ProductModel>> = flow {
+                    emit(products.await())
+                }
             }
         )
 
@@ -109,7 +113,7 @@ class AddPurchaseViewModelTest {
         viewModel = createViewModel(
             object : ProductRepository {
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
-                override suspend fun getProducts(): List<ProductModel> {
+                override fun observeProducts(): Flow<List<ProductModel>> = flow {
                     throw ProductFailure(ProductFailure.Reason.NETWORK)
                 }
             }
@@ -122,6 +126,24 @@ class AddPurchaseViewModelTest {
             R.string.purchase_load_products_error_network,
             viewModel.uiState.value.errorMessage
         )
+    }
+
+    @Test
+    fun updatesProductsWhenFirestoreEmitsANewList() = runTest {
+        val products = MutableStateFlow(listOf(product))
+        viewModel = createViewModel(
+            object : ProductRepository {
+                override suspend fun createProduct(product: ProductModel): ProductModel = product
+                override fun observeProducts(): Flow<List<ProductModel>> = products
+            }
+        )
+        advanceUntilIdle()
+
+        val newProduct = product.copy(id = "product-2", name = "Carteira")
+        products.value = listOf(product, newProduct)
+        advanceUntilIdle()
+
+        assertEquals(listOf(product, newProduct), viewModel.uiState.value.products)
     }
 
     @Test
@@ -166,10 +188,10 @@ class AddPurchaseViewModelTest {
         )
 
     private class FakeProductRepository(
-        private val products: List<ProductModel>
+        private val products: Flow<List<ProductModel>>
     ) : ProductRepository {
         override suspend fun createProduct(product: ProductModel): ProductModel = product
-        override suspend fun getProducts(): List<ProductModel> = products
+        override fun observeProducts(): Flow<List<ProductModel>> = products
     }
 
     private class FakePurchaseRepository : PurchaseRepository {

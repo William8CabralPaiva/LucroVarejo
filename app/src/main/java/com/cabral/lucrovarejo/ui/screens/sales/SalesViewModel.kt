@@ -5,23 +5,31 @@ import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.ObserveSalesChangesUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class SalesViewModel @Inject constructor(
-    private val getSalesPage: GetSalesPageUseCase
+    private val getSalesPage: GetSalesPageUseCase,
+    private val observeSalesChanges: ObserveSalesChangesUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SalesUiState())
     val uiState: StateFlow<SalesUiState> = _uiState.asStateFlow()
@@ -29,9 +37,10 @@ class SalesViewModel @Inject constructor(
     private var cursor: SalesCursor? = null
     private var loadJob: Job? = null
     private var searchJob: Job? = null
+    private val selectedFilter = MutableStateFlow(SalesFilter())
 
     init {
-        reload()
+        observeSales()
     }
 
     fun onQueryChange(query: String) {
@@ -39,7 +48,7 @@ class SalesViewModel @Inject constructor(
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_MILLIS.milliseconds)
-            reload()
+            selectedFilter.value = currentFilter()
         }
     }
 
@@ -47,7 +56,7 @@ class SalesViewModel @Inject constructor(
     fun onDateSelected(utcMillis: Long?) {
         _uiState.update { it.copy(selectedDateMillis = utcMillis) }
         searchJob?.cancel()
-        reload()
+        selectedFilter.value = currentFilter()
     }
 
     fun loadNextPage() {
@@ -66,7 +75,21 @@ class SalesViewModel @Inject constructor(
         }
     }
 
-    private fun reload() {
+    private fun observeSales() {
+        selectedFilter
+            .flatMapLatest { filter ->
+                observeSalesChanges(filter)
+                    .onEach { reload(filter) }
+            }
+            .catch {
+                _uiState.update {
+                    it.copy(isLoading = false, isLoadingMore = false, hasError = true)
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun reload(filter: SalesFilter = currentFilter()) {
         loadJob?.cancel()
         cursor = null
         _uiState.update {
@@ -78,11 +101,10 @@ class SalesViewModel @Inject constructor(
                 hasError = false
             )
         }
-        loadPage()
+        loadPage(filter)
     }
 
-    private fun loadPage() {
-        val filter = currentFilter()
+    private fun loadPage(filter: SalesFilter = currentFilter()) {
         loadJob = viewModelScope.launch {
             try {
                 val page = getSalesPage(filter, cursor)

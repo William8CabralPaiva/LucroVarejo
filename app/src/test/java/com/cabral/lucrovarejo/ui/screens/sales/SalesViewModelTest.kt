@@ -7,9 +7,12 @@ import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.SalesPage
 import com.cabral.lucrovarejo.domain.purchase.SalesRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.ObserveSalesChangesUseCase
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -36,7 +39,7 @@ class SalesViewModelTest {
     @Test
     fun loadsFirstPageThenNextPageUntilEnd() = runTest(dispatcher) {
         val repository = FakeRepository(pages = mutableListOf(page(10, true), page(3, false)))
-        val viewModel = SalesViewModel(GetSalesPageUseCase(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         assertEquals(10, viewModel.uiState.value.items.size)
@@ -53,7 +56,7 @@ class SalesViewModelTest {
     @Test
     fun searchIsDebouncedAndRestartsFromFirstPage() = runTest(dispatcher) {
         val repository = FakeRepository(pages = mutableListOf(page(10, true), page(2, false)))
-        val viewModel = SalesViewModel(GetSalesPageUseCase(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         viewModel.onQueryChange("bol")
@@ -71,7 +74,7 @@ class SalesViewModelTest {
     @Test
     fun dateFilterSendsOneDayRange() = runTest(dispatcher) {
         val repository = FakeRepository(pages = mutableListOf(page(1, false)))
-        val viewModel = SalesViewModel(GetSalesPageUseCase(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         viewModel.onDateSelected(1_759_708_800_000L)
@@ -84,7 +87,7 @@ class SalesViewModelTest {
     @Test
     fun failureShowsErrorAndRetryRecovers() = runTest(dispatcher) {
         val repository = FakeRepository(pages = mutableListOf(page(2, false)), failuresLeft = 1)
-        val viewModel = SalesViewModel(GetSalesPageUseCase(repository))
+        val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
         assertTrue(viewModel.uiState.value.hasError)
@@ -95,6 +98,23 @@ class SalesViewModelTest {
         assertFalse(viewModel.uiState.value.hasError)
         assertEquals(2, viewModel.uiState.value.items.size)
     }
+
+    @Test
+    fun reloadsSalesWhenFirestoreEmitsAChange() = runTest(dispatcher) {
+        val repository = FakeRepository(pages = mutableListOf(page(1, false), page(2, false)))
+        val viewModel = createViewModel(repository)
+        advanceUntilIdle()
+
+        repository.emitSalesChange()
+        advanceUntilIdle()
+
+        assertEquals(2, viewModel.uiState.value.items.size)
+    }
+
+    private fun createViewModel(repository: SalesRepository) = SalesViewModel(
+        getSalesPage = GetSalesPageUseCase(repository),
+        observeSalesChanges = ObserveSalesChangesUseCase(repository)
+    )
 
     private fun page(size: Int, hasMore: Boolean) = SalesPage(
         items = (1..size).map {
@@ -119,6 +139,7 @@ class SalesViewModelTest {
     ) : SalesRepository {
         val filters = mutableListOf<SalesFilter>()
         val cursors = mutableListOf<SalesCursor?>()
+        private val salesChanges = MutableSharedFlow<Unit>(replay = 1).apply { tryEmit(Unit) }
 
         override suspend fun getSalesPage(
             filter: SalesFilter,
@@ -132,6 +153,12 @@ class SalesViewModelTest {
                 error("boom")
             }
             return if (pages.size > 1) pages.removeAt(0) else pages.first()
+        }
+
+        override fun observeSalesChanges(filter: SalesFilter): Flow<Unit> = salesChanges
+
+        fun emitSalesChange() {
+            salesChanges.tryEmit(Unit)
         }
     }
 

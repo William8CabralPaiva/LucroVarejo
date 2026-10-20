@@ -10,6 +10,8 @@ import java.text.Normalizer
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 
 @Singleton
 class SalesRepositoryImpl @Inject constructor(
@@ -62,6 +64,10 @@ class SalesRepositoryImpl @Inject constructor(
             throw failure.toPurchaseFailure()
         }
     }
+
+    override fun observeSalesChanges(filter: SalesFilter): Flow<Unit> =
+        remoteDataSource.observeSalesChanges(filter.dateStart, filter.dateEnd)
+            .catch { failure -> throw failure.toPurchaseFailure() }
 
     private fun String.normalizeForSearch(): String =
         Normalizer.normalize(trim(), Normalizer.Form.NFD)

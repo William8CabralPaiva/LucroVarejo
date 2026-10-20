@@ -12,25 +12,25 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.RoundingMode
-import java.util.Calendar
-import java.util.Date
-import java.util.TimeZone
-import java.util.concurrent.CancellationException
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.RoundingMode
+import java.util.Date
+import javax.inject.Inject
 
 @HiltViewModel
 class AddPurchaseViewModel @Inject constructor(
     private val getProducts: GetProductsUseCase,
-    private val createPurchase: CreatePurchaseUseCase
+    private val createPurchase: CreatePurchaseUseCase,
 ) : ViewModel() {
     private val effectChannel = Channel<Unit>(Channel.BUFFERED)
     val effects: Flow<Unit> = effectChannel.receiveAsFlow()
@@ -39,7 +39,7 @@ class AddPurchaseViewModel @Inject constructor(
     val uiState: StateFlow<AddPurchaseUiState> = _uiState.asStateFlow()
 
     init {
-        loadProducts()
+        observeProducts()
     }
 
     fun onProductSelected(displayName: String) {
@@ -148,31 +148,31 @@ class AddPurchaseViewModel @Inject constructor(
         }
     }
 
-    private fun loadProducts() {
-        viewModelScope.launch {
-            try {
-                val products = getProducts()
+    private fun observeProducts() {
+        getProducts()
+            .onEach { products ->
                 _uiState.update {
                     it.copy(products = products, isLoadingProducts = false, errorMessage = null)
                 }
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (failure: ProductFailure) {
-                _uiState.update {
-                    it.copy(
-                        isLoadingProducts = false,
-                        errorMessage = productErrorMessage(failure.reason)
-                    )
-                }
-            } catch (failure: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoadingProducts = false,
-                        errorMessage = R.string.purchase_load_products_error_generic
-                    )
+            }
+            .catch { failure ->
+                when (failure) {
+                    is ProductFailure -> _uiState.update {
+                        it.copy(
+                            isLoadingProducts = false,
+                            errorMessage = productErrorMessage(failure.reason)
+                        )
+                    }
+
+                    else -> _uiState.update {
+                        it.copy(
+                            isLoadingProducts = false,
+                            errorMessage = R.string.purchase_load_products_error_generic
+                        )
+                    }
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
 
     private fun productErrorMessage(reason: ProductFailure.Reason): Int = when (reason) {
@@ -192,4 +192,3 @@ class AddPurchaseViewModel @Inject constructor(
 
 internal fun productDisplayName(product: ProductModel): String =
     if (product.cod.isBlank()) product.name else "${product.name} (${product.cod})"
-
