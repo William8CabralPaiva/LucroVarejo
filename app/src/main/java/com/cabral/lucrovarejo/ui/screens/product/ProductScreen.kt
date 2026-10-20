@@ -42,7 +42,6 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun ProductScreen(
-    onProductSaved: () -> Unit = {},
     viewModel: ProductViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -51,7 +50,7 @@ fun ProductScreen(
 
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
-            onProductSaved()
+            // Sem callback de atualizacao: as demais telas observam o Firestore em tempo real.
             snackbarHostState.showSnackbar(successMessage)
         }
     }

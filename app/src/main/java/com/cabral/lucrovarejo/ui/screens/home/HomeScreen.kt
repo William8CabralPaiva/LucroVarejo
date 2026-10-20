@@ -20,7 +20,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,8 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.paging.LoadState
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
@@ -42,31 +39,20 @@ import com.cabral.lucrovarejo.ui.components.LastSaleItem
 import com.cabral.lucrovarejo.ui.components.MonthYearSelector
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
-//TODO VERIFICAR SE ESTA ATUALZIANDO DPS de add item
 @Composable
 fun HomeScreen(
     goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit,
-    refreshRequested: Boolean = false,
-    onRefreshHandled: () -> Unit = {},
     viewModel: HomeViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
-    val latestSales = resolvedViewModel.latestPurchases.collectAsLazyPagingItems()
-
-    LaunchedEffect(refreshRequested) {
-        if (refreshRequested) {
-            resolvedViewModel.refreshForCurrentMonth()
-            onRefreshHandled()
-        }
-    }
 
     HomeContent(
         state = state,
-        latestPurchases = latestSales.itemSnapshotList.items.take(LATEST_SALES_LIMIT),
-        isLatestSalesLoading = latestSales.loadState.refresh is LoadState.Loading,
-        hasLatestSalesError = latestSales.loadState.refresh is LoadState.Error,
+        latestPurchases = state.latestPurchases,
+        isLatestSalesLoading = state.isLatestPurchasesLoading,
+        hasLatestSalesError = state.hasLatestPurchasesError,
         onMonthYearChange = resolvedViewModel::onMonthYearChanged,
         goToProductScreen = goToProductScreen,
         goToSalesScreen = goToSalesScreen,
@@ -210,8 +196,6 @@ private fun LatestSalesSection(
 }
 
 private fun Long.toCurrencyAmount(): Double = toDouble() / 100.0
-
-private const val LATEST_SALES_LIMIT = 4
 
 @Preview(showBackground = true, name = "Home - resumo mensal")
 @Composable

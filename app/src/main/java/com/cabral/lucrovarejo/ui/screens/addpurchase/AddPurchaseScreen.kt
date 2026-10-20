@@ -52,7 +52,6 @@ import java.util.Locale
 
 @Composable
 fun AddPurchaseScreen(
-    onPurchaseSaved: () -> Unit = {},
     viewModel: AddPurchaseViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -60,7 +59,7 @@ fun AddPurchaseScreen(
     val successMessage = stringResource(R.string.purchase_create_success)
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
-            onPurchaseSaved()
+            // Sem callback de atualizacao: o Home observa o Firestore e se atualiza sozinho.
             snackbarHostState.showSnackbar(successMessage)
         }
     }

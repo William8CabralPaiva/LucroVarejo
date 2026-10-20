@@ -1,20 +1,21 @@
 package com.cabral.lucrovarejo.ui.screens.home
 
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
-import androidx.paging.PagingData
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import java.util.Calendar
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -56,7 +57,7 @@ class HomeViewModelTest {
             totalProfit = 325_000,
             productsSold = 32
         )
-        repository.summary = summary
+        repository.summary.value = summary
 
         viewModel.onMonthYearChanged(2026, 10)
         advanceUntilIdle()
@@ -77,11 +78,28 @@ class HomeViewModelTest {
     }
 
     @Test
+    fun updatesSummaryAndLatestPurchasesWhenRepositoryEmitsNewData() = runTest {
+        advanceUntilIdle()
+        val requestCount = repository.summaryRequestCount
+        val purchase = purchase("new-sale")
+
+        repository.summary.value = MonthlyPurchaseSummary(totalSales = 123_400)
+        repository.latestPurchases.value = listOf(purchase)
+        advanceUntilIdle()
+
+        assertEquals(123_400L, viewModel.uiState.value.summary.totalSales)
+        assertEquals(listOf(purchase), viewModel.uiState.value.latestPurchases)
+        assertFalse(viewModel.uiState.value.isLatestPurchasesLoading)
+        assertEquals(requestCount, repository.summaryRequestCount)
+        assertEquals(4, repository.requestedLatestLimit)
+    }
+
+    @Test
     fun reportsPurchaseFailuresInUiState() = runTest {
         advanceUntilIdle()
         repository.failure = PurchaseFailure(PurchaseFailure.Reason.NETWORK)
 
-        viewModel.onMonthYearChanged(2026, 10)
+        viewModel.onMonthYearChanged(2020, 1)
         advanceUntilIdle()
 
         assertEquals(R.string.summary_load_error_network, viewModel.uiState.value.errorMessage)
@@ -89,27 +107,17 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun refreshForCurrentMonthUpdatesTheSelectedMonthAndSummary() = runTest {
-        advanceUntilIdle()
-        val initialRequestCount = repository.summaryRequestCount
-        val initialLatestPurchasesRequestCount = repository.latestPurchasesRequestCount
-        val summary = MonthlyPurchaseSummary(totalSales = 123_400)
-        repository.summary = summary
-        viewModel.onMonthYearChanged(2020, 1)
-        advanceUntilIdle()
-        val currentCalendar = Calendar.getInstance()
-
-        viewModel.refreshForCurrentMonth()
-        advanceUntilIdle()
-
-        assertEquals(initialRequestCount + 2, repository.summaryRequestCount)
-        assertEquals(
-            initialLatestPurchasesRequestCount + 1,
-            repository.latestPurchasesRequestCount
+    fun reportsLatestPurchasesFailure() = runTest {
+        repository.latestFailure = PurchaseFailure(PurchaseFailure.Reason.NETWORK)
+        val failingViewModel = HomeViewModel(
+            GetMonthlyPurchaseSummaryUseCase(repository),
+            GetLatestPurchasesUseCase(repository)
         )
-        assertEquals(summary, viewModel.uiState.value.summary)
-        assertEquals(currentCalendar.get(Calendar.YEAR), viewModel.uiState.value.year)
-        assertEquals(currentCalendar.get(Calendar.MONTH) + 1, viewModel.uiState.value.month)
+
+        advanceUntilIdle()
+
+        assertTrue(failingViewModel.uiState.value.hasLatestPurchasesError)
+        assertFalse(failingViewModel.uiState.value.isLatestPurchasesLoading)
     }
 
     @Test
@@ -118,28 +126,47 @@ class HomeViewModelTest {
         assertTrue(runCatching { viewModel.onMonthYearChanged(2026, 13) }.isFailure)
     }
 
+    private fun purchase(id: String) = PurchaseModel(
+        id = id,
+        cod = "A-1",
+        name = "Produto",
+        cost = 1000,
+        description = "",
+        salePrice = 1500,
+        quantity = 1,
+        saleDate = Date(1_760_000_000_000),
+        paymentMethod = PaymentMethods.PIX
+    )
+
     private class FakePurchaseRepository : PurchaseRepository {
-        var summary = MonthlyPurchaseSummary()
+        val summary = MutableStateFlow(MonthlyPurchaseSummary())
+        val latestPurchases = MutableStateFlow<List<PurchaseModel>>(emptyList())
         var failure: PurchaseFailure? = null
+        var latestFailure: PurchaseFailure? = null
         var requestedRange: Pair<Date, Date>? = null
+        var requestedLatestLimit: Int? = null
         var summaryRequestCount = 0
-        var latestPurchasesRequestCount = 0
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
-        override suspend fun getMonthlySummary(
+        override fun observeMonthlySummary(
             start: Date,
             end: Date
-        ): MonthlyPurchaseSummary {
+        ): Flow<MonthlyPurchaseSummary> {
             summaryRequestCount++
             requestedRange = start to end
-            failure?.let { throw it }
-            return summary
+            return flow {
+                failure?.let { throw it }
+                summary.collect { emit(it) }
+            }
         }
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> {
-            latestPurchasesRequestCount++
-            return flowOf(PagingData.empty())
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> {
+            requestedLatestLimit = limit
+            return flow {
+                latestFailure?.let { throw it }
+                latestPurchases.collect { emit(it) }
+            }
         }
     }
 }

@@ -4,10 +4,9 @@ import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
-import androidx.paging.PagingData
-import androidx.paging.testing.asSnapshot
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -15,7 +14,7 @@ import org.junit.Test
 
 class GetLatestPurchasesUseCaseTest {
     @Test
-    fun returnsLatestPurchasesInRepositoryOrder() = runTest {
+    fun returnsLatestPurchasesInRepositoryOrderUsingRequestedLimit() = runTest {
         val purchases = listOf(
             PurchaseModel(
                 id = "latest",
@@ -40,22 +39,29 @@ class GetLatestPurchasesUseCaseTest {
                 paymentMethod = PaymentMethods.CASH
             )
         )
-        val useCase = GetLatestPurchasesUseCase(FakePurchaseRepository(purchases))
+        val repository = FakePurchaseRepository(purchases)
 
-        assertEquals(purchases, useCase().asSnapshot())
+        val result = GetLatestPurchasesUseCase(repository)(4).first()
+
+        assertEquals(purchases, result)
+        assertEquals(4, repository.requestedLimit)
     }
 
     private class FakePurchaseRepository(
         private val latestPurchases: List<PurchaseModel>
     ) : PurchaseRepository {
+        var requestedLimit: Int? = null
+
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
-        override suspend fun getMonthlySummary(
+        override fun observeMonthlySummary(
             start: Date,
             end: Date
-        ): MonthlyPurchaseSummary = MonthlyPurchaseSummary()
+        ): Flow<MonthlyPurchaseSummary> = flowOf(MonthlyPurchaseSummary())
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
-            flowOf(PagingData.from(latestPurchases))
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> {
+            requestedLimit = limit
+            return flowOf(latestPurchases)
+        }
     }
 }

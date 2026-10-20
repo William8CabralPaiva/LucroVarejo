@@ -3,33 +3,21 @@ package com.cabral.lucrovarejo.data.purchase.datasource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
-import com.google.firebase.firestore.DocumentSnapshot
-import androidx.paging.PagingSource
 import java.util.Date
+import kotlinx.coroutines.flow.Flow
 
 interface PurchaseRemoteDataSource {
     suspend fun createPurchase(request: PurchaseRequest): String
-    suspend fun getPurchasesBetween(start: Date, end: Date): List<PurchaseSummaryRecord>
-    fun getLatestPurchasesPagingSource(): PagingSource<PurchaseCursor, PurchaseRecord>
+    fun observePurchasesBetween(start: Date, end: Date): Flow<List<PurchaseSummaryRecord>>
+    fun observeLatestPurchases(limit: Int): Flow<List<PurchaseRecord>>
 }
 
 interface PurchaseFirestoreClient {
     suspend fun savePurchase(storeKey: String, request: PurchaseRequest): String
-    suspend fun getPurchasesBetween(
+    fun observePurchasesBetween(
         storeKey: String,
         start: Date,
         end: Date
-    ): List<PurchaseSummaryRecord>
-    suspend fun getLatestPurchasesPage(
-        storeKey: String,
-        startAfter: DocumentSnapshot?,
-        limit: Long
-    ): PurchaseFirestorePage
+    ): Flow<List<PurchaseSummaryRecord>>
+    fun observeLatestPurchases(storeKey: String, limit: Int): Flow<List<PurchaseRecord>>
 }
-
-data class PurchaseCursor(val document: DocumentSnapshot?)
-
-data class PurchaseFirestorePage(
-    val purchases: List<PurchaseRecord>,
-    val lastDocument: DocumentSnapshot?
-)

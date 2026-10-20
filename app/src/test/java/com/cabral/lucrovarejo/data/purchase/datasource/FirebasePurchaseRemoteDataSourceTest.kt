@@ -3,12 +3,13 @@ package com.cabral.lucrovarejo.data.purchase.datasource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
-import com.google.firebase.firestore.DocumentSnapshot
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import java.util.Date
-import androidx.paging.PagingSource
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -82,15 +83,15 @@ class FirebasePurchaseRemoteDataSourceTest {
     }
 
     @Test
-    fun fetchesPurchasesForAuthenticatedStoreAndTimestampRange() = runTest {
+    fun observesPurchasesForAuthenticatedStoreAndTimestampRange() = runTest {
         val client = FakePurchaseFirestoreClient()
         val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository("store-uid"), client)
         val start = Date(1_760_000_000_000)
         val end = Date(1_762_678_400_000)
         val records = listOf(PurchaseSummaryRecord(cost = 1200, salePrice = 1500, quantity = 3))
-        client.purchases = records
+        client.purchases.value = records
 
-        val result = dataSource.getPurchasesBetween(start, end)
+        val result = dataSource.observePurchasesBetween(start, end).first()
 
         assertEquals("store-uid", client.storeKey)
         assertEquals(start to end, client.requestedRange)
@@ -98,7 +99,7 @@ class FirebasePurchaseRemoteDataSourceTest {
     }
 
     @Test
-    fun fetchesFirstLatestPurchasesPageForAuthenticatedStoreWithPageSizeTen() = runTest {
+    fun observesLatestPurchasesForAuthenticatedStoreWithRequestedLimit() = runTest {
         val client = FakePurchaseFirestoreClient()
         val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository("store-uid"), client)
         val records = listOf(
@@ -114,50 +115,34 @@ class FirebasePurchaseRemoteDataSourceTest {
                 paymentMethod = "PIX"
             )
         )
-        client.latestPurchases = records
+        client.latestPurchases.value = records
 
-        val source = dataSource.getLatestPurchasesPagingSource()
-        val result = source.load(
-            PagingSource.LoadParams.Refresh(
-                key = null,
-                loadSize = 50,
-                placeholdersEnabled = false
-            )
-        )
+        val result = dataSource.observeLatestPurchases(4).first()
 
-        assertTrue(result is PagingSource.LoadResult.Page)
         assertEquals("store-uid", client.storeKey)
-        assertEquals(10L, client.pageLimit)
-        assertEquals(records, (result as PagingSource.LoadResult.Page).data)
+        assertEquals(4, client.limit)
+        assertEquals(records, result)
     }
 
     @Test
-    fun latestPurchasesPagingRequiresAuthenticatedStore() = runTest {
+    fun observingRequiresAuthenticatedStore() = runTest {
         val client = FakePurchaseFirestoreClient()
         val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository(null), client)
 
-        val result = dataSource.getLatestPurchasesPagingSource().load(
-            PagingSource.LoadParams.Refresh(
-                key = null,
-                loadSize = 10,
-                placeholdersEnabled = false
-            )
-        )
+        val failure = runCatching { dataSource.observeLatestPurchases(4).first() }.exceptionOrNull()
 
-        assertTrue(result is PagingSource.LoadResult.Error)
-        assertTrue(
-            (result as PagingSource.LoadResult.Error).throwable is PurchaseFailure
-        )
+        assertTrue(failure is PurchaseFailure)
+        assertEquals(PurchaseFailure.Reason.UNAUTHENTICATED, (failure as PurchaseFailure).reason)
         assertEquals(null, client.storeKey)
     }
 
     private class FakePurchaseFirestoreClient : PurchaseFirestoreClient {
         var storeKey: String? = null
         var request: PurchaseRequest? = null
-        var purchases: List<PurchaseSummaryRecord> = emptyList()
+        val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())
         var requestedRange: Pair<Date, Date>? = null
-        var pageLimit: Long? = null
-        var latestPurchases: List<PurchaseRecord> = emptyList()
+        var limit: Int? = null
+        val latestPurchases = MutableStateFlow<List<PurchaseRecord>>(emptyList())
 
         override suspend fun savePurchase(
             storeKey: String,
@@ -168,27 +153,25 @@ class FirebasePurchaseRemoteDataSourceTest {
             return "purchase-1"
         }
 
-        override suspend fun getPurchasesBetween(
+        override fun observePurchasesBetween(
             storeKey: String,
             start: Date,
             end: Date
-        ): List<PurchaseSummaryRecord> {
+        ): Flow<List<PurchaseSummaryRecord>> {
             this.storeKey = storeKey
             requestedRange = start to end
             return purchases
         }
 
-        override suspend fun getLatestPurchasesPage(
+        override fun observeLatestPurchases(
             storeKey: String,
-            startAfter: DocumentSnapshot?,
-            limit: Long
-        ): PurchaseFirestorePage {
+            limit: Int
+        ): Flow<List<PurchaseRecord>> {
             this.storeKey = storeKey
-            pageLimit = limit
-            return PurchaseFirestorePage(latestPurchases, null)
+            this.limit = limit
+            return latestPurchases
         }
     }
-
     private class FakeAuthRepository(
         override val storeKey: String?
     ) : AuthRepository {

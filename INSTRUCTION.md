@@ -91,3 +91,12 @@ Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios 
 - O resumo de cada mes confere com a soma das receitas liquidas menos o CMV das vendas daquele mes, inclusive quando os custos de compra variam entre lotes.
 - Regras de calculo, arredondamento, validacao de saldo e agrupamento mensal possuem testes unitarios.
 - Dados financeiros nao podem ser lidos ou alterados por sessoes sem autorizacao nas regras do Firebase.
+
+
+## Atualizacao reativa de dados
+
+- O Firestore e a fonte de verdade. Telas que exibem dados que mudam apos um cadastro (resumo mensal, ultimas vendas, listas) devem observar um `Flow` exposto pelo Repository, alimentado por `addSnapshotListener` via `callbackFlow` com `awaitClose` para remover o listener.
+- Nao usar `ActivityResult`, `onResume()`, flags em `savedStateHandle` ou chamadas de "refresh" manuais para sincronizar telas apos salvar uma venda/compra. A tela de cadastro apenas salva e exibe o feedback; as demais telas atualizam por observacao.
+- Manter uma ViewModel por tela, convertendo o `Flow` em estado observavel (`StateFlow`). Valores derivados (lucro total, agregacoes mensais) devem ser recalculados a cada nova emissao.
+- Cada tela observa so as consultas de que precisa; compartilhar fluxos entre telas apenas se houver listeners ou consultas redundantes.
+- Testes de ViewModel e Repository devem usar fluxos falsos (por exemplo, `MutableStateFlow`) e verificar que uma nova emissao atualiza o estado.

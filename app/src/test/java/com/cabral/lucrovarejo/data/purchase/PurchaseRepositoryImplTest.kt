@@ -1,7 +1,6 @@
 package com.cabral.lucrovarejo.data.purchase
 
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
-import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseCursor
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
@@ -9,11 +8,15 @@ import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import java.util.Date
-import androidx.paging.PagingSource
-import androidx.paging.PagingState
-import androidx.paging.testing.asSnapshot
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
+import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PurchaseRepositoryImplTest {
@@ -58,12 +61,12 @@ class PurchaseRepositoryImplTest {
         val repository = PurchaseRepositoryImpl(dataSource)
         val start = Date(1_760_000_000_000)
         val end = Date(1_762_678_400_000)
-        dataSource.purchases = listOf(
+        dataSource.purchases.value = listOf(
             PurchaseSummaryRecord(cost = 1200, salePrice = 1500, quantity = 3),
             PurchaseSummaryRecord(cost = 500, salePrice = 800, quantity = 2)
         )
 
-        val summary = repository.getMonthlySummary(start, end)
+        val summary = repository.observeMonthlySummary(start, end).first()
 
         assertEquals(start to end, dataSource.requestedRange)
         assertEquals(
@@ -78,7 +81,7 @@ class PurchaseRepositoryImplTest {
     }
 
     @Test
-    fun mapsLatestPurchaseRecordsToDomainModelsInReturnedOrder() = runTest {
+    fun mapsLatestPurchaseRecordsToDomainModelsInReturnedOrderUsingLimit() = runTest {
         val firstDate = Date(1_760_000_000_000)
         val secondDate = Date(1_759_000_000_000)
         val dataSource = FakePurchaseRemoteDataSource().apply {
@@ -108,7 +111,7 @@ class PurchaseRepositoryImplTest {
             )
         }
 
-        val purchases = PurchaseRepositoryImpl(dataSource).getLatestPurchases().asSnapshot()
+        val purchases = PurchaseRepositoryImpl(dataSource).observeLatestPurchases(4).first()
 
         assertEquals(
             listOf(
@@ -137,41 +140,75 @@ class PurchaseRepositoryImplTest {
             ),
             purchases
         )
+        assertEquals(4, dataSource.requestedLimit)
     }
 
+    @Test
+    fun recalculatesSummaryWhenRemoteDataChanges() = runTest {
+        val dataSource = FakePurchaseRemoteDataSource()
+        val repository = PurchaseRepositoryImpl(dataSource)
+        val firstSnapshot = listOf(PurchaseSummaryRecord(cost = 1000, salePrice = 1500, quantity = 1))
+        val secondSnapshot = firstSnapshot +
+            PurchaseSummaryRecord(cost = 500, salePrice = 800, quantity = 2)
+        dataSource.purchases.value = firstSnapshot
+
+        val summaries = mutableListOf<MonthlyPurchaseSummary>()
+        repository.observeMonthlySummary(Date(1_760_000_000_000), Date(1_762_678_400_000))
+            .take(2)
+            .collect {
+                summaries += it
+                if (summaries.size == 1) dataSource.purchases.value = secondSnapshot
+            }
+
+        assertEquals(
+            listOf(
+                MonthlyPurchaseSummary(1500, 1000, 500, 1),
+                MonthlyPurchaseSummary(3100, 2000, 1100, 3)
+            ),
+            summaries
+        )
+    }
+
+    @Test
+    fun mapsRemoteFailuresToPurchaseFailure() = runTest {
+        val dataSource = FakePurchaseRemoteDataSource().apply {
+            error = IllegalStateException("boom")
+        }
+
+        val failure = runCatching {
+            PurchaseRepositoryImpl(dataSource).observeLatestPurchases(4).first()
+        }.exceptionOrNull()
+
+        assertTrue(failure is PurchaseFailure)
+        assertEquals(PurchaseFailure.Reason.UNKNOWN, (failure as PurchaseFailure).reason)
+    }
     private class FakePurchaseRemoteDataSource : PurchaseRemoteDataSource {
         var savedRequest: PurchaseRequest? = null
-        var purchases: List<PurchaseSummaryRecord> = emptyList()
+        val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())
         var requestedRange: Pair<Date, Date>? = null
         var latestPurchases: List<PurchaseRecord> = emptyList()
+        var requestedLimit: Int? = null
+        var error: Exception? = null
 
         override suspend fun createPurchase(request: PurchaseRequest): String {
             savedRequest = request
             return "generated-purchase-id"
         }
 
-        override suspend fun getPurchasesBetween(
+        override fun observePurchasesBetween(
             start: Date,
             end: Date
-        ): List<PurchaseSummaryRecord> {
+        ): Flow<List<PurchaseSummaryRecord>> {
             requestedRange = start to end
             return purchases
         }
 
-        override fun getLatestPurchasesPagingSource():
-            PagingSource<PurchaseCursor, PurchaseRecord> =
-            object : PagingSource<PurchaseCursor, PurchaseRecord>() {
-                override suspend fun load(
-                    params: LoadParams<PurchaseCursor>
-                ): LoadResult<PurchaseCursor, PurchaseRecord> = LoadResult.Page(
-                    data = latestPurchases,
-                    prevKey = null,
-                    nextKey = null
-                )
-
-                override fun getRefreshKey(
-                    state: PagingState<PurchaseCursor, PurchaseRecord>
-                ): PurchaseCursor? = null
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseRecord>> {
+            requestedLimit = limit
+            return flow {
+                error?.let { throw it }
+                emit(latestPurchases)
             }
+        }
     }
 }

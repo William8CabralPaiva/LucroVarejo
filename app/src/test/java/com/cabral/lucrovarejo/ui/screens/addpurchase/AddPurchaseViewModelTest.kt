@@ -6,10 +6,11 @@ import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
+import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
-import androidx.paging.PagingData
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
+import com.cabral.lucrovarejo.ui.utils.DateUtils
 import java.math.BigDecimal
 import java.util.Date
 import kotlinx.coroutines.Dispatchers
@@ -147,15 +148,15 @@ class AddPurchaseViewModelTest {
                 salePrice = 8990,
                 quantity = 2,
                 saleDate = Date(
-                    mergeDateWithExistingTime(saleDateMillis, originalSaleDateMillis)
+                    DateUtils.mergeDateWithExistingTime(saleDateMillis, originalSaleDateMillis)
                 ),
                 paymentMethod = PaymentMethods.PIX
             ),
             purchaseRepository.createdPurchase
         )
         assertEquals(Unit, effect.await())
-        assertEquals(BigDecimal("79.80"), viewModel.uiState.value.profit)
-        assertTrue(viewModel.uiState.value.canSubmit)
+        assertNull(viewModel.uiState.value.profit)
+        assertFalse(viewModel.uiState.value.canSubmit)
     }
 
     private fun createViewModel(productRepository: ProductRepository): AddPurchaseViewModel =
@@ -179,10 +180,10 @@ class AddPurchaseViewModelTest {
             return purchase.copy(id = "purchase-1")
         }
 
-        override suspend fun getMonthlySummary(start: Date, end: Date) =
-            com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary()
+        override fun observeMonthlySummary(start: Date, end: Date) =
+            flowOf(MonthlyPurchaseSummary())
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
-            flowOf(PagingData.empty())
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> =
+            flowOf(emptyList())
     }
 }

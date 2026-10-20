@@ -4,7 +4,6 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
-import androidx.paging.PagingData
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -41,10 +40,10 @@ class CreatePurchaseUseCaseTest {
             return purchase.copy(id = "generated-purchase-id")
         }
 
-        override suspend fun getMonthlySummary(start: Date, end: Date) =
-            MonthlyPurchaseSummary()
+        override fun observeMonthlySummary(start: Date, end: Date) =
+            flowOf(MonthlyPurchaseSummary())
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
-            flowOf(PagingData.empty())
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> =
+            flowOf(emptyList())
     }
 }

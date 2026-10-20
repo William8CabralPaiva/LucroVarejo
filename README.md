@@ -47,3 +47,15 @@ stores/{storeId}
 Os valores monetarios persistidos sao inteiros em centavos; a interface converte-os para valores monetarios. A senha e gerenciada pelo Firebase Authentication e nao e armazenada no Firestore.
 
 As regras em `firestore.rules` restringem o acesso aos dados da loja a uma sessao autenticada cujo UID corresponda ao `storeId`. A estrutura acima descreve o que o app persiste atualmente; vendas e relatorios ainda nao possuem colecoes implementadas.
+
+
+## Atualizacao reativa das telas
+
+Ao cadastrar uma compra/venda, as demais telas (como o Home) se atualizam sozinhas, sem `ActivityResult`, `onResume()` ou recarga manual:
+
+1. A tela de cadastro grava o documento no Firestore por meio de um caso de uso.
+2. O `addSnapshotListener` (em `FirebasePurchaseFirestoreClient`) detecta a mudanca e emite os dados novos em um `Flow`.
+3. O Repository repassa o `Flow` e a ViewModel (por exemplo, `HomeViewModel`) atualiza seu `StateFlow`.
+4. O Compose observa o estado e recompoe a interface.
+
+O resumo mensal e as ultimas vendas sao observados por `observeMonthlySummary` e `observeLatestPurchases`. Cada ViewModel observa apenas os dados de que a sua tela precisa, e o listener e removido via `awaitClose` quando o fluxo deixa de ser coletado. O Firestore pode emitir primeiro dados do cache local, antes da confirmacao do servidor. Detalhes em `docs/atualizacao_reativa_lucro_varejo.md`.

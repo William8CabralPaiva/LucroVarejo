@@ -13,7 +13,6 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
-import androidx.paging.PagingData
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
@@ -60,12 +59,12 @@ class AppNavGraphInstrumentedTest {
     private class FakePurchaseRepository : PurchaseRepository {
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
-        override suspend fun getMonthlySummary(
+        override fun observeMonthlySummary(
             start: Date,
             end: Date
-        ): MonthlyPurchaseSummary = MonthlyPurchaseSummary()
+        ): Flow<MonthlyPurchaseSummary> = flowOf(MonthlyPurchaseSummary())
 
-        override fun getLatestPurchases(): Flow<PagingData<PurchaseModel>> =
-            flowOf(PagingData.empty())
+        override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> =
+            flowOf(emptyList())
     }
 }

@@ -2,27 +2,24 @@ package com.cabral.lucrovarejo.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
-import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Calendar
 import java.util.Date
-import java.util.concurrent.CancellationException
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -38,61 +35,67 @@ class HomeViewModel @Inject constructor(
         )
     )
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
-    private val latestPurchasesSource = MutableStateFlow(getLatestPurchases())
-    val latestPurchases: Flow<PagingData<PurchaseModel>> = latestPurchasesSource
-        .flatMapLatest { it }
-        .cachedIn(viewModelScope)
-    private var summaryJob: Job? = null
+    private val selectedMonth = MutableStateFlow(_uiState.value.year to _uiState.value.month)
 
     init {
-        loadSummary(_uiState.value.year, _uiState.value.month)
+        observeSummary()
+        observeLatestPurchases()
     }
 
     fun onMonthYearChanged(year: Int, month: Int) {
         require(year > 0)
         require(month in 1..12)
-        loadSummary(year, month)
+        _uiState.update { it.copy(year = year, month = month) }
+        selectedMonth.value = year to month
     }
 
-    fun refreshForCurrentMonth() {
-        val currentCalendar = Calendar.getInstance()
-        latestPurchasesSource.value = getLatestPurchases()
-        loadSummary(
-            year = currentCalendar.get(Calendar.YEAR),
-            month = currentCalendar.get(Calendar.MONTH) + 1
-        )
+    // Observa o Firestore em tempo real: ao cadastrar uma venda, o snapshot listener emite os
+    // dados novos e o Home atualiza sozinho, sem refresh manual nem ActivityResult.
+    private fun observeSummary() {
+        selectedMonth
+            .flatMapLatest { (year, month) ->
+                val (start, end) = monthRange(year, month)
+                getMonthlySummary(start, end)
+                    .onStart {
+                        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                    }
+                    .onEach { summary ->
+                        _uiState.update {
+                            it.copy(summary = summary, isLoading = false, errorMessage = null)
+                        }
+                    }
+                    .catch { failure ->
+                        _uiState.update {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = (failure as? PurchaseFailure)
+                                    ?.let { purchaseErrorMessage(it.reason) }
+                                    ?: R.string.summary_load_error_generic
+                            )
+                        }
+                    }
+            }
+            .launchIn(viewModelScope)
     }
 
-    private fun loadSummary(year: Int, month: Int) {
-        summaryJob?.cancel()
-        _uiState.update {
-            it.copy(year = year, month = month, isLoading = true, errorMessage = null)
-        }
-        val (start, end) = monthRange(year, month)
-        summaryJob = viewModelScope.launch {
-            try {
-                val summary = getMonthlySummary(start, end)
-                _uiState.update {
-                    it.copy(summary = summary, isLoading = false, errorMessage = null)
-                }
-            } catch (cancellation: CancellationException) {
-                throw cancellation
-            } catch (failure: PurchaseFailure) {
+    // Mesmo mecanismo do resumo: novas vendas aparecem aqui assim que o Firestore as emite.
+    private fun observeLatestPurchases() {
+        getLatestPurchases(LATEST_PURCHASES_LIMIT)
+            .onEach { purchases ->
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
-                        errorMessage = purchaseErrorMessage(failure.reason)
-                    )
-                }
-            } catch (failure: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = R.string.summary_load_error_generic
+                        latestPurchases = purchases,
+                        isLatestPurchasesLoading = false,
+                        hasLatestPurchasesError = false
                     )
                 }
             }
-        }
+            .catch {
+                _uiState.update {
+                    it.copy(isLatestPurchasesLoading = false, hasLatestPurchasesError = true)
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun purchaseErrorMessage(reason: PurchaseFailure.Reason): Int = when (reason) {
@@ -110,5 +113,9 @@ class HomeViewModel @Inject constructor(
         val end = start.clone() as Calendar
         end.add(Calendar.MONTH, 1)
         return start.time to end.time
+    }
+
+    private companion object {
+        const val LATEST_PURCHASES_LIMIT = 4
     }
 }
