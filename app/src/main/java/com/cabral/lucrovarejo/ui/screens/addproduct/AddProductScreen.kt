@@ -45,19 +45,19 @@ fun AddProductScreen(
     viewModel: AddProductViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.product_create_success)
 
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
             // Sem callback de atualizacao: as demais telas observam o Firestore em tempo real.
-            snackbarHostState.showSnackbar(successMessage)
+            snackBarHostState.showSnackbar(successMessage)
         }
     }
 
     AddProductContent(
         state = state,
-        snackbarHostState = snackbarHostState,
+        snackBarHostState = snackBarHostState,
         onNameChange = viewModel::onNameChanged,
         onCodeChange = viewModel::onCodeChanged,
         onCostChange = viewModel::onCostChanged,
@@ -69,7 +69,7 @@ fun AddProductScreen(
 @Composable
 fun AddProductContent(
     state: AddProductUiState,
-    snackbarHostState: SnackbarHostState,
+    snackBarHostState: SnackbarHostState,
     onNameChange: (String) -> Unit,
     onCodeChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
@@ -159,7 +159,7 @@ fun AddProductContent(
             }
 
             SnackbarHost(
-                hostState = snackbarHostState,
+                hostState = snackBarHostState,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(
@@ -184,7 +184,7 @@ fun AddProductScreenPreview() {
     LucroVarejoTheme {
         AddProductContent(
             state = AddProductUiState(),
-            snackbarHostState = remember { SnackbarHostState() },
+            snackBarHostState = remember { SnackbarHostState() },
             onNameChange = {},
             onCodeChange = {},
             onCostChange = {},

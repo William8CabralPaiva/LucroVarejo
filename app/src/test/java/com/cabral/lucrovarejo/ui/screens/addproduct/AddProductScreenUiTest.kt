@@ -36,7 +36,7 @@ class AddProductScreenUiTest {
             LucroVarejoTheme {
                 AddProductContent(
                     state = AddProductUiState(),
-                    snackbarHostState = remember { SnackbarHostState() },
+                    snackBarHostState = remember { SnackbarHostState() },
                     onNameChange = {},
                     onCodeChange = {},
                     onCostChange = {},
@@ -64,7 +64,7 @@ class AddProductScreenUiTest {
                 }
                 AddProductContent(
                     state = state,
-                    snackbarHostState = remember { SnackbarHostState() },
+                    snackBarHostState = remember { SnackbarHostState() },
                     onNameChange = {},
                     onCodeChange = {},
                     onCostChange = {},
@@ -95,7 +95,7 @@ class AddProductScreenUiTest {
                 }
                 AddProductContent(
                     state = AddProductUiState(),
-                    snackbarHostState = snackbarHostState,
+                    snackBarHostState = snackbarHostState,
                     onNameChange = {},
                     onCodeChange = {},
                     onCostChange = {},
