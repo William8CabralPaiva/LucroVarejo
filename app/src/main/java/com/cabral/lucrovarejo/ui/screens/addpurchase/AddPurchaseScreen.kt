@@ -55,17 +55,17 @@ fun AddPurchaseScreen(
     viewModel: AddPurchaseViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.purchase_create_success)
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
             // Sem callback de atualizacao: o Home observa o Firestore e se atualiza sozinho.
-            snackbarHostState.showSnackbar(successMessage)
+            snackBarHostState.showSnackbar(successMessage)
         }
     }
     AddPurchaseScreenContent(
         state = state,
-        snackBarHostState = snackbarHostState,
+        snackBarHostState = snackBarHostState,
         onProductSelected = viewModel::onProductSelected,
         onSalePriceChanged = viewModel::onSalePriceChanged,
         onQuantityChanged = viewModel::onQuantityChanged,
