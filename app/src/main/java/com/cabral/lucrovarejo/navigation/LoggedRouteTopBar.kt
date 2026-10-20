@@ -22,7 +22,8 @@ fun LoggedRouteTopBar(
 ) {
     val titleId = when (route) {
         LoggedRoutes.HOME -> R.string.home_header_title
-        LoggedRoutes.PRODUCT -> R.string.new_product
+        LoggedRoutes.PRODUCTS -> R.string.products_title
+        LoggedRoutes.ADD_PRODUCT -> R.string.new_product
         LoggedRoutes.SALES -> R.string.sales_title
         LoggedRoutes.SUMMARY -> R.string.summary_title
         LoggedRoutes.CONFIG -> R.string.config_title
@@ -55,6 +56,6 @@ fun LoggedRouteTopBar(
 }
 
 private fun showBackButton(route: String): Boolean {
-    return route == LoggedRoutes.PRODUCT ||
+    return route == LoggedRoutes.ADD_PRODUCT ||
             route == LoggedRoutes.ADD_PURCHASE
 }

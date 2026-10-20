@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.data.product.model
 
 import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.google.firebase.firestore.FieldValue
 import java.math.BigDecimal
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -21,6 +22,7 @@ class ProductMapperTest {
         assertEquals(1234, request.cost)
         assertEquals(1234, request.toFirestoreFields()["cost"])
         assertTrue(request.toFirestoreFields()["cost"] is Int)
+        assertTrue(request.toFirestoreFields()["createdAt"] is FieldValue)
     }
 
     @Test

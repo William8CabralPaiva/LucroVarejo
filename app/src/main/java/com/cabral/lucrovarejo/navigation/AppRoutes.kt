@@ -8,7 +8,9 @@ object NotLoggedRoutes {
 
 object LoggedRoutes {
     const val HOME = "home"
-    const val PRODUCT = "product"
+    const val PRODUCTS = "products"
+    const val ADD_PRODUCT = "add_product"
+    const val PRODUCT = ADD_PRODUCT
     const val SALES = "sales"
     const val SUMMARY = "summary"
     const val CONFIG = "config"

@@ -37,9 +37,9 @@ class FirebaseProductRemoteDataSource @Inject constructor(
             .document(storeKey)
             .collection(COLLECTION_PRODUCTS)
             .snapshotFlow { snapshot ->
-                snapshot.documents.map { document ->
-                    document.toProductRecord()
-                }
+                snapshot.documents
+                    .map { document -> document.toProductRecord() }
+                    .sortedByDescending { it.createdAt }
             }
     }
 
@@ -76,7 +76,11 @@ class FirebaseProductRemoteDataSource @Inject constructor(
                 "Product $id has no valid '$FIELD_DESCRIPTION' field"
             }
         )
-        return ProductRecord(id, request)
+        return ProductRecord(
+            documentId = id,
+            request = request,
+            createdAt = getTimestamp(FIELD_CREATED_AT)?.toDate()
+        )
     }
 
     private companion object {
@@ -86,5 +90,6 @@ class FirebaseProductRemoteDataSource @Inject constructor(
         const val FIELD_NAME = "name"
         const val FIELD_COST = "cost"
         const val FIELD_DESCRIPTION = "description"
+        const val FIELD_CREATED_AT = "createdAt"
     }
 }

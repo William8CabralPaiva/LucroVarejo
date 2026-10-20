@@ -18,8 +18,12 @@ import com.cabral.lucrovarejo.domain.purchase.usecase.ObserveSalesChangesUseCase
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
+import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.domain.product.ProductRepository
+import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
+import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +51,7 @@ class AppNavGraphUiTest {
                         GetSalesPageUseCase(EmptySalesRepository()),
                         ObserveSalesChangesUseCase(EmptySalesRepository())
                     ),
+                    productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
                     homeViewModel = HomeViewModel(
                         GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
                         GetLatestPurchasesUseCase(FakePurchaseRepository())
@@ -59,6 +64,9 @@ class AppNavGraphUiTest {
 
         composeRule.onNodeWithText("Vendas").performClick()
         composeRule.onNodeWithText("Buscar produto...").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Produtos").performClick()
+        composeRule.onNodeWithText("Nenhum produto encontrado.").assertIsDisplayed()
 
         composeRule.onNodeWithText("Resumo").performClick()
         composeRule.onNodeWithText("O resumo das vendas aparecerá aqui.").assertIsDisplayed()
@@ -101,6 +109,12 @@ class AppNavGraphUiTest {
             SalesPage(emptyList(), null)
 
         override fun observeSalesChanges(filter: SalesFilter) = flowOf(Unit)
+    }
+
+    private class EmptyProductRepository : ProductRepository {
+        override suspend fun createProduct(product: ProductModel): ProductModel = product
+
+        override fun observeProducts() = flowOf(emptyList<ProductModel>())
     }
 
     private class FakePurchaseRepository : PurchaseRepository {

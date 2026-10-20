@@ -139,7 +139,6 @@ fun PurchaseItemContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
     }
 }
 

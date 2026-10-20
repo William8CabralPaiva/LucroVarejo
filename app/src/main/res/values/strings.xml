@@ -63,9 +63,17 @@
     <string name="home_header_title">Controle de Vendas</string>
     <string name="bottom_nav_home">Início</string>
     <string name="bottom_nav_sales">Vendas</string>
+    <string name="bottom_nav_products">Produtos</string>
     <string name="bottom_nav_summary">Resumo</string>
     <string name="bottom_nav_config">Configurações</string>
     <string name="sales_title">Vendas</string>
+    <string name="products_title">Produtos</string>
+    <string name="products_search_placeholder">Buscar produto...</string>
+    <string name="products_empty">Nenhum produto encontrado.</string>
+    <string name="products_load_error">Não foi possível carregar os produtos.</string>
+    <string name="products_retry">Tentar novamente</string>
+    <string name="products_add">Novo produto</string>
+    <string name="product_code_value">Código: %1$s</string>
     <string name="summary_title">Resumo</string>
     <string name="summary_month_sales">Vendas do mês</string>
     <string name="summary_total_cost">Custo total</string>

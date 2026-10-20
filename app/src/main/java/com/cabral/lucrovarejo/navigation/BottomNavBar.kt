@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +39,7 @@ fun BottomNavBar(
             R.string.bottom_nav_sales,
             Icons.AutoMirrored.Filled.ReceiptLong
         ),
+        BottomNavItem(LoggedRoutes.PRODUCTS, R.string.bottom_nav_products, Icons.Outlined.Inventory2),
         BottomNavItem(LoggedRoutes.SUMMARY, R.string.bottom_nav_summary, Icons.Default.BarChart),
         BottomNavItem(LoggedRoutes.CONFIG, R.string.bottom_nav_config, Icons.Default.Settings)
     )

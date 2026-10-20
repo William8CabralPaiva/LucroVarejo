@@ -21,6 +21,8 @@ import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.addproduct.AddProductScreen
+import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
+import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
@@ -33,6 +35,7 @@ internal fun LoggedFlowScreen(
     onLogout: () -> Unit,
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
+    productViewModel: ProductViewModel?,
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) { LoggedNavigator(navController) }
@@ -72,7 +75,8 @@ internal fun LoggedFlowScreen(
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
                 homeViewModel = homeViewModel,
-                salesViewModel = salesViewModel
+                salesViewModel = salesViewModel,
+                productViewModel = productViewModel
             )
         }
     }
@@ -87,6 +91,7 @@ private fun LoggedDestinationNavHost(
     onLogout: () -> Unit,
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
+    productViewModel: ProductViewModel?,
 ) {
     // O Home recebe novas vendas por Flow (listener do Firestore); por isso a navegacao nao
     // precisa sinalizar "salvou" nem pedir refresh ao voltar do cadastro.
@@ -111,7 +116,14 @@ private fun LoggedDestinationNavHost(
             AddPurchaseScreen()
         }
 
-        composable(LoggedRoutes.PRODUCT) {
+        composable(LoggedRoutes.PRODUCTS) {
+            ProductScreen(
+                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                viewModel = productViewModel
+            )
+        }
+
+        composable(LoggedRoutes.ADD_PRODUCT) {
             AddProductScreen()
         }
 
