@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -16,12 +16,12 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class ProductRouteTest {
+class AddProductRouteTest {
     @get:Rule
     val composeRule = createComposeRule()
 
     @Test
-    fun productRouteHeaderShowsTitleAndInvokesBackAction() {
+    fun addProductRouteHeaderShowsTitleAndInvokesBackAction() {
         var backPressCount = 0
         composeRule.setContent {
             LucroVarejoTheme {

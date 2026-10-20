@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
@@ -41,8 +41,8 @@ import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
-fun ProductScreen(
-    viewModel: ProductViewModel = hiltViewModel()
+fun AddProductScreen(
+    viewModel: AddProductViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -55,7 +55,7 @@ fun ProductScreen(
         }
     }
 
-    ProductContent(
+    AddProductContent(
         state = state,
         snackbarHostState = snackbarHostState,
         onNameChange = viewModel::onNameChanged,
@@ -67,8 +67,8 @@ fun ProductScreen(
 }
 
 @Composable
-fun ProductContent(
-    state: ProductUiState,
+fun AddProductContent(
+    state: AddProductUiState,
     snackbarHostState: SnackbarHostState,
     onNameChange: (String) -> Unit,
     onCodeChange: (String) -> Unit,
@@ -180,10 +180,10 @@ fun ProductContent(
 
 @Preview(showBackground = true)
 @Composable
-fun ProductScreenPreview() {
+fun AddProductScreenPreview() {
     LucroVarejoTheme {
-        ProductContent(
-            state = ProductUiState(),
+        AddProductContent(
+            state = AddProductUiState(),
             snackbarHostState = remember { SnackbarHostState() },
             onNameChange = {},
             onCodeChange = {},

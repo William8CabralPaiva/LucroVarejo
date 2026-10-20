@@ -20,7 +20,7 @@ import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
-import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
+import com.cabral.lucrovarejo.ui.screens.addproduct.AddProductScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
@@ -112,7 +112,7 @@ private fun LoggedDestinationNavHost(
         }
 
         composable(LoggedRoutes.PRODUCT) {
-            ProductScreen()
+            AddProductScreen()
         }
 
         composable(LoggedRoutes.SALES) {

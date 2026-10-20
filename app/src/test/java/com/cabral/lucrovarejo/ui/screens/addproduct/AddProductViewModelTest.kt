@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductFailure
@@ -25,16 +25,16 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProductViewModelTest {
+class AddProductViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private lateinit var repository: FakeProductRepository
-    private lateinit var viewModel: ProductViewModel
+    private lateinit var viewModel: AddProductViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repository = FakeProductRepository()
-        viewModel = ProductViewModel(CreateProductUseCase(repository))
+        viewModel = AddProductViewModel(CreateProductUseCase(repository))
     }
 
     @After

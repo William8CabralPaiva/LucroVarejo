@@ -1,10 +1,10 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import androidx.annotation.StringRes
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-data class ProductUiState(
+data class AddProductUiState(
     val name: String = "",
     val cod: String = "",
     val cost: String = "",

@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,14 +19,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class ProductViewModel @Inject constructor(
+class AddProductViewModel @Inject constructor(
     private val createProduct: CreateProductUseCase
 ) : ViewModel() {
     private val effectChannel = Channel<Unit>(Channel.BUFFERED)
     val effects: Flow<Unit> = effectChannel.receiveAsFlow()
 
-    private val _uiState = MutableStateFlow(ProductUiState())
-    val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AddProductUiState())
+    val uiState: StateFlow<AddProductUiState> = _uiState.asStateFlow()
 
     fun onNameChanged(value: String) {
         _uiState.update {

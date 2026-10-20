@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.product
+package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
-class ProductScreenUiTest {
+class AddProductScreenUiTest {
     @get:Rule
     val composeRule = createComposeRule()
 
@@ -34,8 +34,8 @@ class ProductScreenUiTest {
     fun displaysRequiredAndOptionalProductFields() {
         composeRule.setContent {
             LucroVarejoTheme {
-                ProductContent(
-                    state = ProductUiState(),
+                AddProductContent(
+                    state = AddProductUiState(),
                     snackbarHostState = remember { SnackbarHostState() },
                     onNameChange = {},
                     onCodeChange = {},
@@ -60,9 +60,9 @@ class ProductScreenUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 var state by remember {
-                    mutableStateOf(ProductUiState(name = "Produto", cost = "12.34"))
+                    mutableStateOf(AddProductUiState(name = "Produto", cost = "12.34"))
                 }
-                ProductContent(
+                AddProductContent(
                     state = state,
                     snackbarHostState = remember { SnackbarHostState() },
                     onNameChange = {},
@@ -93,8 +93,8 @@ class ProductScreenUiTest {
                 LaunchedEffect(snackbarHostState) {
                     snackbarHostState.showSnackbar("Item adicionado com sucesso")
                 }
-                ProductContent(
-                    state = ProductUiState(),
+                AddProductContent(
+                    state = AddProductUiState(),
                     snackbarHostState = snackbarHostState,
                     onNameChange = {},
                     onCodeChange = {},
