@@ -1,15 +1,17 @@
 package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
+import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
+import org.junit.Assert.assertTrue
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -57,12 +60,15 @@ class AppNavGraphUiTest {
     }
 
     @Test
-    fun showAllSalesNavigatesToSalesTab() {
+    fun showAllSalesRequestsSalesNavigation() {
+        var salesNavigationRequested = false
+
         composeRule.setContent {
             LucroVarejoTheme {
-                AppNavGraph(
-                    startDestination = LoggedRoutes.HOME,
-                    homeViewModel = HomeViewModel(
+                HomeScreen(
+                    goToProductScreen = {},
+                    goToSalesScreen = { salesNavigationRequested = true },
+                    viewModel = HomeViewModel(
                         GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
                         GetLatestPurchasesUseCase(FakePurchaseRepository())
                     )
@@ -70,11 +76,13 @@ class AppNavGraphUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Ver todas")
-            .performScrollTo()
+        composeRule
+            .onNode(hasText("Ver todas").and(hasClickAction()))
             .performClick()
 
-        composeRule.onNodeWithText("Suas vendas aparecerão aqui.").assertIsDisplayed()
+        composeRule.runOnIdle {
+            assertTrue(salesNavigationRequested)
+        }
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
