@@ -53,7 +53,7 @@ internal fun LoggedFlowScreen(
         bottomBar = {
             BottomNavBar(
                 currentRoute = currentRoute,
-                onNavigate = navigator::navigateTo
+                onNavigate = navigator::navigateToTab
             )
         }
     ) { innerPadding ->
@@ -101,7 +101,7 @@ private fun LoggedDestinationNavHost(
                     navigator.navigateTo(LoggedRoutes.ADD_PURCHASE)
                 },
                 goToSalesScreen = {
-                    navigator.navigateTo(LoggedRoutes.SALES)
+                    navigator.navigateToTab(LoggedRoutes.SALES)
                 },
                 viewModel = homeViewModel
             )
@@ -139,7 +139,8 @@ private fun LoggedDestinationNavHost(
 private class LoggedNavigator(
     private val navController: NavHostController,
 ) {
-    fun navigateTo(route: String) {
+    // Abas da bottom navigation: nunca empilham uma sobre a outra, apenas trocam de aba.
+    fun navigateToTab(route: String) {
         navController.navigate(route) {
             launchSingleTop = true
             restoreState = true
@@ -147,6 +148,11 @@ private class LoggedNavigator(
                 saveState = true
             }
         }
+    }
+
+    // Telas fora da bottom navigation: abrem por cima da atual e o voltar retorna a ela.
+    fun navigateTo(route: String) {
+        navController.navigate(route) { launchSingleTop = true }
     }
 
     fun navigateBack() {

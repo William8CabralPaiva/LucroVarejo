@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.Calendar
-import java.util.TimeZone
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -112,22 +111,8 @@ class SalesViewModel @Inject constructor(
         val state = _uiState.value
         val utcMillis = state.selectedDateMillis ?: return SalesFilter(nameQuery = state.query)
 
-        val utcDay = Calendar.getInstance(TimeZone.getTimeZone("UTC")).apply {
-            timeInMillis = utcMillis
-        }
-        val start = Calendar.getInstance().apply {
-            clear()
-            set(
-                utcDay.get(Calendar.YEAR),
-                utcDay.get(Calendar.MONTH),
-                utcDay.get(Calendar.DAY_OF_MONTH),
-                0,
-                0,
-                0
-            )
-        }
-        val end = (start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
-        return SalesFilter(nameQuery = state.query, dateStart = start.time, dateEnd = end.time)
+        val (start, end) = DateUtils.localDayRangeFromUtcMillis(utcMillis)
+        return SalesFilter(nameQuery = state.query, dateStart = start, dateEnd = end)
     }
 
     private companion object {

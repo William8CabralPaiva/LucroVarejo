@@ -53,10 +53,8 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.components.PurchaseItem
 import com.cabral.lucrovarejo.ui.components.formatSaleDatePtBr
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
-import java.text.SimpleDateFormat
+import com.cabral.lucrovarejo.ui.utils.DateUtils
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import java.util.TimeZone
 
 private const val LOAD_MORE_THRESHOLD = 3
@@ -158,7 +156,12 @@ fun SalesContent(
                 AssistChip(
                     onClick = { onDateSelected(null) },
                     label = {
-                        Text(stringResource(R.string.sales_date_filter_label, formatSaleDatePtBr(dateMillis)))
+                        Text(
+                            stringResource(
+                                R.string.sales_date_filter_label,
+                                formatSaleDatePtBr(dateMillis)
+                            )
+                        )
                     },
                     trailingIcon = {
                         Icon(
@@ -180,7 +183,8 @@ fun SalesContent(
     }
 
     if (showDatePicker) {
-        val pickerState = rememberDatePickerState(initialSelectedDateMillis = state.selectedDateMillis)
+        val pickerState =
+            rememberDatePickerState(initialSelectedDateMillis = state.selectedDateMillis)
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
@@ -213,7 +217,10 @@ private fun SalesList(
     modifier: Modifier = Modifier,
 ) {
     when {
-        state.isLoading -> Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        state.isLoading -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularProgressIndicator()
         }
 
@@ -231,7 +238,10 @@ private fun SalesList(
             }
         }
 
-        state.items.isEmpty() -> Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        state.items.isEmpty() -> Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 text = stringResource(R.string.sales_empty),
                 style = MaterialTheme.typography.bodyLarge
@@ -270,7 +280,12 @@ private fun SalesList(
             }
             if (state.isLoadingMore) {
                 item(key = "loading-more") {
-                    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator()
                     }
                 }
@@ -294,20 +309,15 @@ private fun SalesList(
     }
 }
 
-internal sealed interface SalesEntry {
-    data class Header(val label: String) : SalesEntry
-    data class Sale(val purchase: PurchaseModel) : SalesEntry
-}
-
 // Agrupa vendas consecutivas do mesmo dia sob um cabeçalho "06 OUTUBRO 2026".
-internal fun buildSalesEntries(
+fun buildSalesEntries(
     purchases: List<PurchaseModel>,
-    timeZone: TimeZone = TimeZone.getDefault()
+    timeZone: TimeZone = TimeZone.getDefault(),
 ): List<SalesEntry> {
     val entries = mutableListOf<SalesEntry>()
     var currentLabel: String? = null
     purchases.forEach { purchase ->
-        val label = formatSalesDayHeader(purchase.saleDate, timeZone)
+        val label = DateUtils.formatDayHeader(purchase.saleDate, timeZone)
         if (label != currentLabel) {
             entries += SalesEntry.Header(label)
             currentLabel = label
@@ -315,13 +325,6 @@ internal fun buildSalesEntries(
         entries += SalesEntry.Sale(purchase)
     }
     return entries
-}
-
-internal fun formatSalesDayHeader(date: Date, timeZone: TimeZone = TimeZone.getDefault()): String {
-    val locale = Locale.forLanguageTag("pt-BR")
-    return SimpleDateFormat("dd MMMM yyyy", locale).apply {
-        this.timeZone = timeZone
-    }.format(date).uppercase(locale)
 }
 
 @Preview(showBackground = true, name = "Vendas")
