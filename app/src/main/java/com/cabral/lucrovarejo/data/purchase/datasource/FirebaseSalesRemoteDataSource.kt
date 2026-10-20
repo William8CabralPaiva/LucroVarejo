@@ -47,6 +47,8 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
         dateEnd?.let { query = query.whereLessThan(FIELD_SALE_DATE, it) }
 
         return callbackFlow {
+            // Este listener vincula a tela de Vendas à coleção "purchases": cada alteração no
+            // Firestore envia uma emissão ao Flow, que faz o SalesViewModel recarregar a lista.
             val registration = query.addSnapshotListener { _, error ->
                 if (error != null) {
                     close(error)

@@ -100,3 +100,10 @@ Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios 
 - Manter uma ViewModel por tela, convertendo o `Flow` em estado observavel (`StateFlow`). Valores derivados (lucro total, agregacoes mensais) devem ser recalculados a cada nova emissao.
 - Cada tela observa so as consultas de que precisa; compartilhar fluxos entre telas apenas se houver listeners ou consultas redundantes.
 - Testes de ViewModel e Repository devem usar fluxos falsos (por exemplo, `MutableStateFlow`) e verificar que uma nova emissao atualiza o estado.
+- O vínculo com o Firestore deve ficar no datasource: para a tela de Vendas,
+  `FirebaseSalesRemoteDataSource.observeSalesChanges` observa
+  `stores/{storeKey}/purchases` com `addSnapshotListener` e converte cada alteração em uma
+  emissão de `callbackFlow`. `ObserveSalesChangesUseCase` apenas repassa o `Flow` do Repository
+  para `SalesViewModel`; ele não deve conhecer Firebase nem criar listeners.
+- Produtos e vendas observam coleções distintas. Mudanças em `products` atualizam quem observa
+  produtos; Home e Vendas devem reagir a alterações em `purchases` após salvar uma venda.

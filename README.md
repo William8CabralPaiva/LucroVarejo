@@ -59,3 +59,20 @@ Ao cadastrar uma compra/venda, as demais telas (como o Home) se atualizam sozinh
 4. O Compose observa o estado e recompoe a interface.
 
 O resumo mensal e as ultimas vendas sao observados por `observeMonthlySummary` e `observeLatestPurchases`. Cada ViewModel observa apenas os dados de que a sua tela precisa, e o listener e removido via `awaitClose` quando o fluxo deixa de ser coletado. O Firestore pode emitir primeiro dados do cache local, antes da confirmacao do servidor. Detalhes em `docs/atualizacao_reativa_lucro_varejo.md`.
+
+### Vínculo da tela de Vendas
+
+O vínculo real entre o Firestore e a tela de Vendas está em
+`FirebaseSalesRemoteDataSource.observeSalesChanges`: o `addSnapshotListener` observa a
+coleção `stores/{storeKey}/purchases` e envia uma emissão pelo `callbackFlow` a cada mudança.
+O `ObserveSalesChangesUseCase` não se conecta diretamente ao Firebase; ele apenas repassa esse
+`Flow` do Repository para o `SalesViewModel`, que recarrega a lista preservando os filtros ativos.
+
+```text
+Firestore purchases -> addSnapshotListener -> callbackFlow -> Repository
+-> ObserveSalesChangesUseCase -> SalesViewModel -> SalesScreen
+```
+
+O listener de produtos segue o mesmo padrão, mas observa `stores/{storeKey}/products`. Criar um
+produto não altera Home ou Vendas; essas telas reagem apenas quando uma venda é gravada em
+`purchases`.
