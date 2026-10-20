@@ -74,7 +74,7 @@ class PurchaseRepositoryImpl @Inject constructor(
     }
 }
 
-private fun Throwable.toPurchaseFailure(): PurchaseFailure = when (this) {
+internal fun Throwable.toPurchaseFailure(): PurchaseFailure = when (this) {
     is PurchaseFailure -> this
     is FirebaseFirestoreException -> {
         val reason = when (code) {

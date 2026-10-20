@@ -11,6 +11,12 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.SalesCursor
+import com.cabral.lucrovarejo.domain.purchase.SalesFilter
+import com.cabral.lucrovarejo.domain.purchase.SalesPage
+import com.cabral.lucrovarejo.domain.purchase.SalesRepository
+import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
@@ -32,7 +38,7 @@ class AppNavGraphInstrumentedTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 AppNavGraph(
-                    startDestination = LoggedRoutes.HOME,
+                    startDestination = LoggedRoutes.HOME, salesViewModel = SalesViewModel(GetSalesPageUseCase(EmptySalesRepository())),
                     homeViewModel = HomeViewModel(
                         getMonthlySummary = GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
                         getLatestPurchases = GetLatestPurchasesUseCase(FakePurchaseRepository())
@@ -45,7 +51,7 @@ class AppNavGraphInstrumentedTest {
             label(R.string.month_year_calendar_description)
         ).assertIsDisplayed()
         composeRule.onNodeWithText(label(R.string.bottom_nav_sales)).performClick()
-        composeRule.onNodeWithText("Suas vendas aparecerão aqui.").assertIsDisplayed()
+        composeRule.onNodeWithText("Buscar produto...").assertIsDisplayed()
         composeRule.onNodeWithText(label(R.string.bottom_nav_config)).performClick()
         composeRule.onNodeWithText("Modo escuro").assertIsDisplayed()
         composeRule.onNodeWithText(label(R.string.bottom_nav_home)).performClick()
@@ -55,6 +61,11 @@ class AppNavGraphInstrumentedTest {
     }
 
     private fun label(resourceId: Int) = composeRule.activity.getString(resourceId)
+
+    private class EmptySalesRepository : SalesRepository {
+        override suspend fun getSalesPage(filter: SalesFilter, cursor: SalesCursor?, pageSize: Int) =
+            SalesPage(emptyList(), null)
+    }
 
     private class FakePurchaseRepository : PurchaseRepository {
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase

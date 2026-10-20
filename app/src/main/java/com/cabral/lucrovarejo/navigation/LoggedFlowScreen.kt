@@ -15,13 +15,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.cabral.lucrovarejo.ui.screens.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
+import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
+import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 
@@ -31,6 +32,7 @@ internal fun LoggedFlowScreen(
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     homeViewModel: HomeViewModel?,
+    salesViewModel: SalesViewModel?,
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) { LoggedNavigator(navController) }
@@ -69,7 +71,8 @@ internal fun LoggedFlowScreen(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
-                homeViewModel = homeViewModel
+                homeViewModel = homeViewModel,
+                salesViewModel = salesViewModel
             )
         }
     }
@@ -83,6 +86,7 @@ private fun LoggedDestinationNavHost(
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     homeViewModel: HomeViewModel?,
+    salesViewModel: SalesViewModel?,
 ) {
     // O Home recebe novas vendas por Flow (listener do Firestore); por isso a navegacao nao
     // precisa sinalizar "salvou" nem pedir refresh ao voltar do cadastro.
@@ -112,7 +116,10 @@ private fun LoggedDestinationNavHost(
         }
 
         composable(LoggedRoutes.SALES) {
-            SalesScreen()
+            SalesScreen(
+                onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
+                viewModel = salesViewModel
+            )
         }
 
         composable(LoggedRoutes.SUMMARY) {

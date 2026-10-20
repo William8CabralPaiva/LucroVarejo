@@ -1,11 +1,15 @@
 package com.cabral.lucrovarejo.data.purchase.di
 
 import com.cabral.lucrovarejo.data.purchase.PurchaseRepositoryImpl
+import com.cabral.lucrovarejo.data.purchase.SalesRepositoryImpl
 import com.cabral.lucrovarejo.data.purchase.datasource.FirebasePurchaseFirestoreClient
 import com.cabral.lucrovarejo.data.purchase.datasource.FirebasePurchaseRemoteDataSource
+import com.cabral.lucrovarejo.data.purchase.datasource.FirebaseSalesRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseFirestoreClient
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
+import com.cabral.lucrovarejo.data.purchase.datasource.SalesRemoteDataSource
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.SalesRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -32,4 +36,16 @@ abstract class PurchaseModule {
     abstract fun bindPurchaseRepository(
         implementation: PurchaseRepositoryImpl
     ): PurchaseRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSalesRemoteDataSource(
+        implementation: FirebaseSalesRemoteDataSource
+    ): SalesRemoteDataSource
+
+    @Binds
+    @Singleton
+    abstract fun bindSalesRepository(
+        implementation: SalesRepositoryImpl
+    ): SalesRepository
 }

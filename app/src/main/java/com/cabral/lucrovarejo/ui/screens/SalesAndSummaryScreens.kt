@@ -12,11 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SalesScreen() {
-    TabPlaceholderScreen(message = "Suas vendas aparecerão aqui.")
-}
-
-@Composable
 fun SummaryScreen() {
     TabPlaceholderScreen(message = "O resumo das vendas aparecerá aqui.")
 }

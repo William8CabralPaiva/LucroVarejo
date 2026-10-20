@@ -9,6 +9,12 @@ import androidx.compose.ui.test.performClick
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
+import com.cabral.lucrovarejo.domain.purchase.SalesCursor
+import com.cabral.lucrovarejo.domain.purchase.SalesFilter
+import com.cabral.lucrovarejo.domain.purchase.SalesPage
+import com.cabral.lucrovarejo.domain.purchase.SalesRepository
+import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
+import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
@@ -35,7 +41,7 @@ class AppNavGraphUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 AppNavGraph(
-                    startDestination = LoggedRoutes.HOME,
+                    startDestination = LoggedRoutes.HOME, salesViewModel = SalesViewModel(GetSalesPageUseCase(EmptySalesRepository())),
                     homeViewModel = HomeViewModel(
                         GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
                         GetLatestPurchasesUseCase(FakePurchaseRepository())
@@ -47,7 +53,7 @@ class AppNavGraphUiTest {
         composeRule.onNodeWithText("Vendas do mês").assertIsDisplayed()
 
         composeRule.onNodeWithText("Vendas").performClick()
-        composeRule.onNodeWithText("Suas vendas aparecerão aqui.").assertIsDisplayed()
+        composeRule.onNodeWithText("Buscar produto...").assertIsDisplayed()
 
         composeRule.onNodeWithText("Resumo").performClick()
         composeRule.onNodeWithText("O resumo das vendas aparecerá aqui.").assertIsDisplayed()
@@ -83,6 +89,11 @@ class AppNavGraphUiTest {
         composeRule.runOnIdle {
             assertTrue(salesNavigationRequested)
         }
+    }
+
+    private class EmptySalesRepository : SalesRepository {
+        override suspend fun getSalesPage(filter: SalesFilter, cursor: SalesCursor?, pageSize: Int) =
+            SalesPage(emptyList(), null)
     }
 
     private class FakePurchaseRepository : PurchaseRepository {

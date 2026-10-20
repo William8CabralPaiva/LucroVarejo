@@ -131,4 +131,15 @@
     <string name="sample_category_accessories">Acessórios</string>
     <string name="field_required_marker">*</string>
     <string name="field_optional_marker">(opcional)</string>
+    <string name="purchase_item_cost_profit">Custo: %1$s  •  Lucro: %2$s</string>
+    <string name="purchase_item_quantity">%1$d un.</string>
+    <string name="purchase_item_options">Mais opções</string>
+    <string name="sales_search_placeholder">Buscar produto...</string>
+    <string name="sales_filter_by_date">Filtrar por data</string>
+    <string name="sales_date_filter_label">Data: %1$s</string>
+    <string name="sales_date_filter_clear">Remover filtro de data</string>
+    <string name="sales_empty">Nenhuma venda encontrada.</string>
+    <string name="sales_retry">Tentar novamente</string>
+    <string name="sales_load_error">Não foi possível carregar as vendas.</string>
+    <string name="sales_add">Nova venda</string>
 </resources>

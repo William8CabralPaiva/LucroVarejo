@@ -56,37 +56,7 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
             .orderBy(FieldPath.documentId(), Query.Direction.DESCENDING)
             .limit(limit.toLong())
             .snapshotFlow { snapshot ->
-                snapshot.documents.map { document ->
-                    PurchaseRecord(
-                        documentId = document.id,
-                        cod = requireNotNull(document.getString(FIELD_COD)) {
-                            "Purchase ${document.id} has no valid '$FIELD_COD' field"
-                        },
-                        name = requireNotNull(document.getString(FIELD_NAME)) {
-                            "Purchase ${document.id} has no valid '$FIELD_NAME' field"
-                        },
-                        cost = Math.toIntExact(requireNotNull(document.getLong(FIELD_COST)) {
-                            "Purchase ${document.id} has no valid '$FIELD_COST' field"
-                        }),
-                        description = requireNotNull(document.getString(FIELD_DESCRIPTION)) {
-                            "Purchase ${document.id} has no valid '$FIELD_DESCRIPTION' field"
-                        },
-                        salePrice = Math.toIntExact(
-                            requireNotNull(document.getLong(FIELD_SALE_PRICE)) {
-                                "Purchase ${document.id} has no valid '$FIELD_SALE_PRICE' field"
-                            }
-                        ),
-                        quantity = Math.toIntExact(requireNotNull(document.getLong(FIELD_QUANTITY)) {
-                            "Purchase ${document.id} has no valid '$FIELD_QUANTITY' field"
-                        }),
-                        saleDate = requireNotNull(document.getTimestamp(FIELD_SALE_DATE)) {
-                            "Purchase ${document.id} has no valid '$FIELD_SALE_DATE' field"
-                        }.toDate(),
-                        paymentMethod = requireNotNull(document.getString(FIELD_PAYMENT_METHOD)) {
-                            "Purchase ${document.id} has no valid '$FIELD_PAYMENT_METHOD' field"
-                        }
-                    )
-                }
+                snapshot.documents.map { it.toPurchaseRecord() }
             }
 
     private fun purchasesCollection(storeKey: String) = firestore.collection(COLLECTION_STORES)
@@ -117,9 +87,5 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
         const val FIELD_SALE_PRICE = "sale_price"
         const val FIELD_QUANTITY = "quantity"
         const val FIELD_SALE_DATE = "sale_date"
-        const val FIELD_COD = "cod"
-        const val FIELD_NAME = "name"
-        const val FIELD_DESCRIPTION = "description"
-        const val FIELD_PAYMENT_METHOD = "payment_method"
     }
 }

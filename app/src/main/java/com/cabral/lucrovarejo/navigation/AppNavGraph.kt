@@ -9,6 +9,7 @@ import com.cabral.lucrovarejo.ui.screens.SplashScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
+import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 @Composable
@@ -20,6 +21,7 @@ fun AppNavGraph(
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
     onThemeModeChanged: (ThemeMode) -> Unit = {},
     homeViewModel: HomeViewModel? = null,
+    salesViewModel: SalesViewModel? = null,
 ) {
     NavHost(
         navController = navController,
@@ -66,6 +68,7 @@ fun AppNavGraph(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 homeViewModel = homeViewModel,
+                salesViewModel = salesViewModel,
                 onLogout = {
                     onSignOut()
                     navController.navigate(NotLoggedRoutes.LOGIN) {
