@@ -5,6 +5,8 @@ import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
+import com.cabral.lucrovarejo.domain.product.usecase.DeleteProductUseCase
+import com.cabral.lucrovarejo.domain.product.usecase.UpdateProductUseCase
 import java.math.BigDecimal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,7 +36,11 @@ class AddProductViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repository = FakeProductRepository()
-        viewModel = AddProductViewModel(CreateProductUseCase(repository))
+        viewModel = AddProductViewModel(
+            CreateProductUseCase(repository),
+            UpdateProductUseCase(repository),
+            DeleteProductUseCase(repository)
+        )
     }
 
     @After
@@ -87,16 +93,88 @@ class AddProductViewModelTest {
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
+    @Test
+    fun loadProductFillsFieldsAndEntersEditMode() = runTest {
+        viewModel.loadProduct(existingProduct)
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isEditing)
+        assertEquals("Bolsa", state.name)
+        assertEquals("A-1", state.cod)
+        assertEquals("89.90", state.cost)
+        assertEquals("Couro", state.description)
+    }
+
+    @Test
+    fun savingInEditModeUpdatesProductByKeyAndCompletes() = runTest {
+        viewModel.loadProduct(existingProduct)
+        viewModel.onNameChanged("Bolsa Nova")
+        val completion = async { viewModel.completions.first() }
+
+        viewModel.saveProduct()
+        advanceUntilIdle()
+
+        assertEquals(existingProduct.copy(name = "Bolsa Nova"), repository.updatedProduct)
+        assertNull(repository.createdProduct)
+        assertEquals(Unit, completion.await())
+    }
+
+    @Test
+    fun deleteRequiresConfirmationBeforeDeletingByKey() = runTest {
+        viewModel.loadProduct(existingProduct)
+        val completion = async { viewModel.completions.first() }
+
+        viewModel.onDeleteRequested()
+        assertTrue(viewModel.uiState.value.showDeleteDialog)
+        assertNull(repository.deletedKey)
+
+        viewModel.confirmDelete()
+        advanceUntilIdle()
+
+        assertEquals("product-key", repository.deletedKey)
+        assertFalse(viewModel.uiState.value.showDeleteDialog)
+        assertEquals(Unit, completion.await())
+    }
+
+    @Test
+    fun dismissingDeleteDialogKeepsProduct() = runTest {
+        viewModel.loadProduct(existingProduct)
+        viewModel.onDeleteRequested()
+
+        viewModel.onDeleteDismissed()
+
+        assertFalse(viewModel.uiState.value.showDeleteDialog)
+        assertNull(repository.deletedKey)
+    }
+
+    private val existingProduct = ProductModel(
+        key = "product-key",
+        cod = "A-1",
+        name = "Bolsa",
+        cost = BigDecimal("89.90"),
+        description = "Couro"
+    )
     private class FakeProductRepository : ProductRepository {
-    override suspend fun updateProduct(product: ProductModel): ProductModel = product
-    override suspend fun deleteProduct(key: String) = Unit
         var createdProduct: ProductModel? = null
+        var updatedProduct: ProductModel? = null
+        var deletedKey: String? = null
         var failure: ProductFailure? = null
 
         override suspend fun createProduct(product: ProductModel): ProductModel {
             failure?.let { throw it }
             createdProduct = product
             return product.copy(key = "generated-product-id")
+        }
+
+        override suspend fun updateProduct(product: ProductModel): ProductModel {
+            failure?.let { throw it }
+            updatedProduct = product
+            return product
+        }
+
+        override suspend fun deleteProduct(key: String) {
+            failure?.let { throw it }
+            deletedKey = key
         }
 
         override fun observeProducts() = flowOf(emptyList<ProductModel>())

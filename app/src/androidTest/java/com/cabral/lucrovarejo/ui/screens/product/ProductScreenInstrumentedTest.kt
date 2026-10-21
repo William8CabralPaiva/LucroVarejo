@@ -10,6 +10,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.math.BigDecimal
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -49,6 +50,34 @@ class ProductScreenInstrumentedTest {
 
         composeRule.runOnIdle {
             assertTrue(addProductRequested)
+        }
+    }
+
+    @Test
+    fun clickingProductReportsItForEditing() {
+        var edited: ProductModel? = null
+        val product = ProductModel(
+            key = "1",
+            cod = "7891000123456",
+            name = "Bolsa Feminina",
+            cost = BigDecimal("89.90"),
+            description = ""
+        )
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false, items = listOf(product)),
+                    onQueryChange = {},
+                    onAddProduct = {},
+                    onEditProduct = { edited = it }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Bolsa Feminina").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(product, edited)
         }
     }
 }

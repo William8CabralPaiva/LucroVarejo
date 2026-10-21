@@ -56,6 +56,15 @@
     <string name="product_create_error_unauthenticated">Sua sessão expirou. Entre novamente para cadastrar o produto.</string>
     <string name="product_create_error_generic">Não foi possível cadastrar o produto. Tente novamente.</string>
     <string name="new_product">Novo Produto</string>
+    <string name="edit_product">Editar Produto</string>
+    <string name="product_edit_submit">EDITAR</string>
+    <string name="product_edit_loading">EDITANDO...</string>
+    <string name="product_edit_error_generic">Não foi possível salvar as alterações. Tente novamente.</string>
+    <string name="product_delete_submit">DELETAR</string>
+    <string name="product_delete_dialog_title">Deletar produto</string>
+    <string name="product_delete_dialog_message">Tem certeza que deseja deletar %1$s? Essa ação não pode ser desfeita.</string>
+    <string name="product_delete_dialog_confirm">Deletar</string>
+    <string name="product_delete_error_generic">Não foi possível deletar o produto. Tente novamente.</string>
     <string name="product_create_submit">CADASTRAR PRODUTO</string>
     <string name="product_create_loading">CADASTRANDO...</string>
     <string name="navigate_back">Voltar</string>

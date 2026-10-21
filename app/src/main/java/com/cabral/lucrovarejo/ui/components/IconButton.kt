@@ -57,7 +57,9 @@ fun IconButton(
     icon: ImageVector = Icons.Default.Save,
     iconContentDescription: String? = null,
     text: String? = null,
-    loadingText: String? = null
+    loadingText: String? = null,
+    containerColor: Color? = null,
+    testTag: String = SAVE_PRODUCT_BUTTON_TAG
 ) {
     SaveProductButtonContent(
         label = text ?: stringResource(R.string.product_create_submit),
@@ -67,7 +69,9 @@ fun IconButton(
         onClick = onClick,
         modifier = modifier,
         icon = icon,
-        iconContentDescription = iconContentDescription
+        iconContentDescription = iconContentDescription,
+        containerColor = containerColor,
+        testTag = testTag
     )
 }
 
@@ -80,16 +84,19 @@ fun SaveProductButtonContent(
     isLoading: Boolean = false,
     loadingLabel: String = label,
     icon: ImageVector = Icons.Default.Save,
-    iconContentDescription: String? = null
+    iconContentDescription: String? = null,
+    containerColor: Color? = null,
+    testTag: String = SAVE_PRODUCT_BUTTON_TAG
 ) {
     val palette = saveProductButtonPalette(LocalIsDarkTheme.current)
+        .let { if (containerColor != null) it.copy(container = containerColor) else it }
     Button(
         onClick = onClick,
         enabled = enabled && !isLoading,
         modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(R.dimen.product_submit_button_height))
-            .testTag(SAVE_PRODUCT_BUTTON_TAG),
+            .testTag(testTag),
         shape = RoundedCornerShape(dimensionResource(R.dimen.product_submit_button_radius)),
         contentPadding = PaddingValues(
             horizontal = dimensionResource(R.dimen.product_submit_button_horizontal_padding)
@@ -132,6 +139,7 @@ fun SaveProductButtonContent(
 }
 
 internal const val SAVE_PRODUCT_BUTTON_TAG = "save-product-button"
+internal const val DELETE_PRODUCT_BUTTON_TAG = "delete-product-button"
 internal const val SAVE_PRODUCT_PROGRESS_TAG = "save-product-progress"
 
 @Preview(showBackground = true, name = "Salvar produto habilitado")

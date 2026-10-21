@@ -38,7 +38,7 @@ import java.math.BigDecimal
 @Composable
 fun ProductScreen(
     onAddProduct: () -> Unit,
-    onEditProduct: () -> Unit = {},
+    onEditProduct: (ProductModel) -> Unit = {},
     viewModel: ProductViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -56,7 +56,7 @@ fun ProductContent(
     state: ProductUiState,
     onQueryChange: (String) -> Unit,
     onAddProduct: () -> Unit,
-    onEditProduct: () -> Unit = {},
+    onEditProduct: (ProductModel) -> Unit = {},
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -126,7 +126,7 @@ fun ProductContent(
                 } else {
                     items(state.items, key = { it.key ?: "${it.cod}-${it.name}" }) { product ->
                         ProdCodPrice(
-                            onClick = onEditProduct,
+                            onClick = { onEditProduct(product) },
                             name = product.name,
                             code = product.cod,
                             cost = product.cost
@@ -158,6 +158,30 @@ private fun ProductContentPreview() {
             onQueryChange = {},
             onAddProduct = {},
             onEditProduct = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Produtos vazio")
+@Composable
+private fun ProductContentEmptyPreview() {
+    LucroVarejoTheme {
+        ProductContent(
+            state = ProductUiState(isLoading = false),
+            onQueryChange = {},
+            onAddProduct = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Produtos com erro")
+@Composable
+private fun ProductContentErrorPreview() {
+    LucroVarejoTheme {
+        ProductContent(
+            state = ProductUiState(isLoading = false, hasError = true),
+            onQueryChange = {},
+            onAddProduct = {}
         )
     }
 }

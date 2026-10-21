@@ -6,6 +6,8 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
+import com.cabral.lucrovarejo.domain.product.usecase.DeleteProductUseCase
+import com.cabral.lucrovarejo.domain.product.usecase.UpdateProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.concurrent.CancellationException
 import javax.inject.Inject
@@ -20,13 +22,32 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class AddProductViewModel @Inject constructor(
-    private val createProduct: CreateProductUseCase
+    private val createProduct: CreateProductUseCase,
+    private val updateProduct: UpdateProductUseCase,
+    private val deleteProduct: DeleteProductUseCase
 ) : ViewModel() {
     private val effectChannel = Channel<Unit>(Channel.BUFFERED)
     val effects: Flow<Unit> = effectChannel.receiveAsFlow()
 
+    // Emitido apos editar/deletar com sucesso: a tela deve voltar para a lista.
+    private val completionChannel = Channel<Unit>(Channel.BUFFERED)
+    val completions: Flow<Unit> = completionChannel.receiveAsFlow()
+
     private val _uiState = MutableStateFlow(AddProductUiState())
     val uiState: StateFlow<AddProductUiState> = _uiState.asStateFlow()
+
+    fun loadProduct(product: ProductModel?) {
+        if (product?.key == null || _uiState.value.key == product.key) return
+        _uiState.update {
+            AddProductUiState(
+                key = product.key,
+                name = product.name,
+                cod = product.cod,
+                cost = product.cost.toPlainString(),
+                description = product.description
+            )
+        }
+    }
 
     fun onNameChanged(value: String) {
         _uiState.update {
@@ -68,6 +89,7 @@ class AddProductViewModel @Inject constructor(
         }
 
         val product = ProductModel(
+            key = current.key,
             cod = current.cod.trim(),
             name = current.name.trim(),
             cost = requireNotNull(parseProductCost(current.cost)),
@@ -78,6 +100,12 @@ class AddProductViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
+                if (product.key != null) {
+                    updateProduct(product)
+                    _uiState.update { it.copy(isLoading = false) }
+                    completionChannel.send(Unit)
+                    return@launch
+                }
                 createProduct(product)
                 _uiState.update {
                     it.copy(
@@ -95,19 +123,62 @@ class AddProductViewModel @Inject constructor(
                 throw cancellation
             } catch (failure: ProductFailure) {
                 _uiState.update {
-                    it.copy(isLoading = false, errorMessage = productErrorMessage(failure.reason))
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = productErrorMessage(
+                            failure.reason,
+                            R.string.product_edit_error_generic.takeIf { product.key != null }
+                        )
+                    )
                 }
             }
         }
     }
 
-    private fun productErrorMessage(reason: ProductFailure.Reason): Int =
+    fun onDeleteRequested() {
+        if (_uiState.value.key == null || _uiState.value.isLoading) return
+        _uiState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun onDeleteDismissed() {
+        _uiState.update { it.copy(showDeleteDialog = false) }
+    }
+
+    fun confirmDelete() {
+        val current = _uiState.value
+        val key = current.key ?: return
+        if (current.isLoading) return
+
+        _uiState.update { it.copy(showDeleteDialog = false, isLoading = true, errorMessage = null) }
+        viewModelScope.launch {
+            try {
+                deleteProduct(key)
+                _uiState.update { it.copy(isLoading = false) }
+                completionChannel.send(Unit)
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (failure: ProductFailure) {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = productErrorMessage(
+                            failure.reason,
+                            R.string.product_delete_error_generic
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun productErrorMessage(reason: ProductFailure.Reason, unknownOverride: Int? = null): Int =
         when (reason) {
             ProductFailure.Reason.NETWORK -> R.string.product_create_error_network
             ProductFailure.Reason.PERMISSION_DENIED ->
                 R.string.product_create_error_permission
             ProductFailure.Reason.UNAUTHENTICATED ->
                 R.string.product_create_error_unauthenticated
-            ProductFailure.Reason.UNKNOWN -> R.string.product_create_error_generic
+            ProductFailure.Reason.UNKNOWN ->
+                unknownOverride ?: R.string.product_create_error_generic
         }
 }

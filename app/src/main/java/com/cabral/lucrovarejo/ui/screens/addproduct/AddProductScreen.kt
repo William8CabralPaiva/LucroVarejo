@@ -3,6 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.addproduct
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,10 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material.icons.outlined.Numbers
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -33,6 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.ui.components.DELETE_PRODUCT_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.IconButton
 import com.cabral.lucrovarejo.ui.components.AreaTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
@@ -42,11 +49,21 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun AddProductScreen(
+    product: ProductModel? = null,
+    onFinished: () -> Unit = {},
     viewModel: AddProductViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.product_create_success)
+
+    LaunchedEffect(viewModel, product) {
+        viewModel.loadProduct(product)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.completions.collect { onFinished() }
+    }
 
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
@@ -62,7 +79,10 @@ fun AddProductScreen(
         onCodeChange = viewModel::onCodeChanged,
         onCostChange = viewModel::onCostChanged,
         onDescriptionChange = viewModel::onDescriptionChanged,
-        onSave = viewModel::saveProduct
+        onSave = viewModel::saveProduct,
+        onDelete = viewModel::onDeleteRequested,
+        onDeleteConfirm = viewModel::confirmDelete,
+        onDeleteDismiss = viewModel::onDeleteDismissed
     )
 }
 
@@ -74,8 +94,33 @@ fun AddProductContent(
     onCodeChange: (String) -> Unit,
     onCostChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    onSave: () -> Unit
+    onSave: () -> Unit,
+    onDelete: () -> Unit = {},
+    onDeleteConfirm: () -> Unit = {},
+    onDeleteDismiss: () -> Unit = {}
 ) {
+    if (state.showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = onDeleteDismiss,
+            title = { Text(stringResource(R.string.product_delete_dialog_title)) },
+            text = {
+                Text(stringResource(R.string.product_delete_dialog_message, state.name))
+            },
+            confirmButton = {
+                TextButton(onClick = onDeleteConfirm) {
+                    Text(
+                        text = stringResource(R.string.product_delete_dialog_confirm),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDeleteDismiss) {
+                    Text(stringResource(R.string.date_picker_cancel))
+                }
+            }
+        )
+    }
     Surface(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -151,11 +196,34 @@ fun AddProductContent(
                     )
                 }
                 Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
-                IconButton(
-                    enabled = state.canSubmit,
-                    onClick = onSave,
-                    isLoading = state.isLoading
-                )
+                if (state.isEditing) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IconButton(
+                            enabled = !state.isLoading,
+                            onClick = onDelete,
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Delete,
+                            text = stringResource(R.string.product_delete_submit),
+                            containerColor = MaterialTheme.colorScheme.error,
+                            testTag = DELETE_PRODUCT_BUTTON_TAG
+                        )
+                        IconButton(
+                            enabled = state.canSubmit,
+                            onClick = onSave,
+                            modifier = Modifier.weight(1f),
+                            isLoading = state.isLoading,
+                            icon = Icons.Default.Edit,
+                            text = stringResource(R.string.product_edit_submit),
+                            loadingText = stringResource(R.string.product_edit_loading)
+                        )
+                    }
+                } else {
+                    IconButton(
+                        enabled = state.canSubmit,
+                        onClick = onSave,
+                        isLoading = state.isLoading
+                    )
+                }
             }
 
             SnackbarHost(
@@ -175,6 +243,51 @@ fun AddProductContent(
                 }
             )
         }
+    }
+}
+
+@Preview(showBackground = true, heightDp = 900, name = "Editar produto")
+@Composable
+private fun EditProductScreenPreview() {
+    LucroVarejoTheme {
+        AddProductContent(
+            state = AddProductUiState(
+                key = "1",
+                name = "Bolsa Feminina",
+                cod = "7891000123456",
+                cost = "89.90",
+                description = "Bolsa de couro"
+            ),
+            snackBarHostState = remember { SnackbarHostState() },
+            onNameChange = {},
+            onCodeChange = {},
+            onCostChange = {},
+            onDescriptionChange = {},
+            onSave = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, heightDp = 900, name = "Confirmar exclusão")
+@Composable
+private fun DeleteProductDialogPreview() {
+    LucroVarejoTheme {
+        AddProductContent(
+            state = AddProductUiState(
+                key = "1",
+                name = "Bolsa Feminina",
+                cod = "7891000123456",
+                cost = "89.90",
+                description = "Bolsa de couro",
+                showDeleteDialog = true
+            ),
+            snackBarHostState = remember { SnackbarHostState() },
+            onNameChange = {},
+            onCodeChange = {},
+            onCostChange = {},
+            onDescriptionChange = {},
+            onSave = {}
+        )
     }
 }
 

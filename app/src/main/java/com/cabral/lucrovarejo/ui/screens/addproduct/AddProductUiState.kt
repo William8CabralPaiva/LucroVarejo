@@ -5,6 +5,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 data class AddProductUiState(
+    val key: String? = null,
     val name: String = "",
     val cod: String = "",
     val cost: String = "",
@@ -12,8 +13,12 @@ data class AddProductUiState(
     @param:StringRes val nameError: Int? = null,
     @param:StringRes val costError: Int? = null,
     @param:StringRes val errorMessage: Int? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showDeleteDialog: Boolean = false
 ) {
+    val isEditing: Boolean
+        get() = key != null
+
     val canSubmit: Boolean
         get() = name.isNotBlank() && parseProductCost(cost) != null && !isLoading
 }

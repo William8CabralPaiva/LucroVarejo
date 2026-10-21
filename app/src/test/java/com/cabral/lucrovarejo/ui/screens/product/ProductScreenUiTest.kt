@@ -90,6 +90,34 @@ class ProductScreenUiTest {
     }
 
     @Test
+    fun clickingProductReportsItForEditing() {
+        var edited: ProductModel? = null
+        val product = ProductModel(
+            key = "1",
+            cod = "7891000123456",
+            name = "Bolsa Feminina",
+            cost = BigDecimal("89.90"),
+            description = ""
+        )
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false, items = listOf(product)),
+                    onQueryChange = {},
+                    onAddProduct = {},
+                    onEditProduct = { edited = it }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Bolsa Feminina").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals(product, edited)
+        }
+    }
+
+    @Test
     fun displaysEmptyMessageWhenThereAreNoProducts() {
         composeRule.setContent {
             LucroVarejoTheme {
