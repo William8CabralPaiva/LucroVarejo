@@ -25,7 +25,19 @@ class PurchaseRepositoryImpl @Inject constructor(
         val documentId = withPurchaseFailure {
             remoteDataSource.createPurchase(request)
         }
-        return purchase.copy(id = documentId)
+        return purchase.copy(key = documentId)
+    }
+
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
+        val key = requireNotNull(purchase.key) { "Purchase key is required to update" }
+        withPurchaseFailure {
+            remoteDataSource.updatePurchase(key, PurchaseRequest.from(purchase))
+        }
+        return purchase.copy(key = key)
+    }
+
+    override suspend fun deletePurchase(key: String) {
+        withPurchaseFailure { remoteDataSource.deletePurchase(key) }
     }
 
     override fun observeMonthlySummary(start: Date, end: Date): Flow<MonthlyPurchaseSummary> {

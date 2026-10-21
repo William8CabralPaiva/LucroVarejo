@@ -52,7 +52,7 @@ class PurchaseRepositoryImplTest {
             ),
             dataSource.savedRequest
         )
-        assertEquals(purchase.copy(id = "generated-purchase-id"), created)
+        assertEquals(purchase.copy(key = "generated-purchase-id"), created)
     }
 
     @Test
@@ -116,7 +116,7 @@ class PurchaseRepositoryImplTest {
         assertEquals(
             listOf(
                 PurchaseModel(
-                    id = "latest-id",
+                    key = "latest-id",
                     cod = "A-1",
                     name = "Produto mais atual",
                     cost = 1200,
@@ -127,7 +127,7 @@ class PurchaseRepositoryImplTest {
                     paymentMethod = PaymentMethods.PIX
                 ),
                 PurchaseModel(
-                    id = "older-id",
+                    key = "older-id",
                     cod = "B-2",
                     name = "Produto anterior",
                     cost = 800,
@@ -183,6 +183,8 @@ class PurchaseRepositoryImplTest {
         assertEquals(PurchaseFailure.Reason.UNKNOWN, (failure as PurchaseFailure).reason)
     }
     private class FakePurchaseRemoteDataSource : PurchaseRemoteDataSource {
+    override suspend fun updatePurchase(key: String, request: PurchaseRequest) = Unit
+    override suspend fun deletePurchase(key: String) = Unit
         var savedRequest: PurchaseRequest? = null
         val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())
         var requestedRange: Pair<Date, Date>? = null

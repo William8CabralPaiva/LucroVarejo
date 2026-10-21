@@ -88,13 +88,15 @@ class AddProductViewModelTest {
     }
 
     private class FakeProductRepository : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         var createdProduct: ProductModel? = null
         var failure: ProductFailure? = null
 
         override suspend fun createProduct(product: ProductModel): ProductModel {
             failure?.let { throw it }
             createdProduct = product
-            return product.copy(id = "generated-product-id")
+            return product.copy(key = "generated-product-id")
         }
 
         override fun observeProducts() = flowOf(emptyList<ProductModel>())

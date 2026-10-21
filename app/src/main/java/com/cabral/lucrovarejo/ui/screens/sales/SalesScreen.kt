@@ -266,7 +266,7 @@ private fun SalesList(
                         )
                     }
 
-                    is SalesEntry.Sale -> item(key = "sale-${entry.purchase.id ?: entry.hashCode()}") {
+                    is SalesEntry.Sale -> item(key = "sale-${entry.purchase.key ?: entry.hashCode()}") {
                         val purchase = entry.purchase
                         PurchaseItem(
                             productName = purchase.name,
@@ -337,7 +337,7 @@ private fun SalesContentPreview() {
                 isLoading = false,
                 items = listOf(
                     PurchaseModel(
-                        id = "1",
+                        key = "1",
                         cod = "001",
                         name = "Bolsa Feminina",
                         cost = 5000,

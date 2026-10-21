@@ -14,14 +14,14 @@ class GetProductsUseCaseTest {
     fun returnsAllProductsFromRepository() = runTest {
         val products = listOf(
             ProductModel(
-                id = "product-1",
+                key = "product-1",
                 cod = "A-1",
                 name = "Produto 1",
                 cost = BigDecimal("12.34"),
                 description = "Descricao 1"
             ),
             ProductModel(
-                id = "product-2",
+                key = "product-2",
                 cod = "B-2",
                 name = "Produto 2",
                 cost = BigDecimal("56.78"),
@@ -36,6 +36,8 @@ class GetProductsUseCaseTest {
     private class FakeProductRepository(
         private val products: List<ProductModel>
     ) : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         override suspend fun createProduct(product: ProductModel): ProductModel = product
 
         override fun observeProducts() = flowOf(products)

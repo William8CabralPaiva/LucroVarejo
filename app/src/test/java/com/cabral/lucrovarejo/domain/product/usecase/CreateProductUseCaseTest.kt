@@ -22,16 +22,18 @@ class CreateProductUseCaseTest {
         val created = CreateProductUseCase(repository)(product)
 
         assertEquals(product, repository.createdProduct)
-        assertEquals("generated-product-id", created.id)
-        assertEquals(product.copy(id = "generated-product-id"), created)
+        assertEquals("generated-product-id", created.key)
+        assertEquals(product.copy(key = "generated-product-id"), created)
     }
 
     private class FakeProductRepository : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         var createdProduct: ProductModel? = null
 
         override suspend fun createProduct(product: ProductModel): ProductModel {
             createdProduct = product
-            return product.copy(id = "generated-product-id")
+            return product.copy(key = "generated-product-id")
         }
 
         override fun observeProducts() = flowOf(emptyList<ProductModel>())

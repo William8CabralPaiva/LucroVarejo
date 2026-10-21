@@ -116,7 +116,7 @@ fun ProductContent(
                         )
                     }
                 } else {
-                    items(state.items, key = { it.id ?: "${it.cod}-${it.name}" }) { product ->
+                    items(state.items, key = { it.key ?: "${it.cod}-${it.name}" }) { product ->
                         ProdCodPrice(
                             name = product.name,
                             code = product.cod,

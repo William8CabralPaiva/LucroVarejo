@@ -15,7 +15,7 @@ fun ProductModel.toRequest(): ProductRequest = ProductRequest(
 )
 
 fun ProductRequest.toModel(documentId: String): ProductModel = ProductModel(
-    id = documentId,
+    key = documentId,
     cod = cod,
     name = name,
     cost = BigDecimal.valueOf(cost.toLong(), MONEY_SCALE),

@@ -27,6 +27,14 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
         return purchaseDocument.id
     }
 
+    override suspend fun updatePurchase(storeKey: String, key: String, request: PurchaseRequest) {
+        purchasesCollection(storeKey).document(key).update(request.toFirestoreFields()).await()
+    }
+
+    override suspend fun deletePurchase(storeKey: String, key: String) {
+        purchasesCollection(storeKey).document(key).delete().await()
+    }
+
     override fun observePurchasesBetween(
         storeKey: String,
         start: Date,

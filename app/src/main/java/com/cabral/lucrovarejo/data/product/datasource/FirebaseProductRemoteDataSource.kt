@@ -4,6 +4,7 @@ import com.cabral.lucrovarejo.data.product.model.ProductRequest
 import com.cabral.lucrovarejo.data.product.model.ProductRecord
 import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
@@ -27,6 +28,23 @@ class FirebaseProductRemoteDataSource @Inject constructor(
 
         productDocument.set(request.toFirestoreFields()).await()
         return productDocument.id
+    }
+
+    override suspend fun updateProduct(key: String, request: ProductRequest) {
+        productDocument(key).update(request.toFirestoreUpdateFields()).await()
+    }
+
+    override suspend fun deleteProduct(key: String) {
+        productDocument(key).delete().await()
+    }
+
+    private fun productDocument(key: String): DocumentReference {
+        val storeKey = auth.currentUser?.uid
+            ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
+        return firestore.collection(COLLECTION_STORES)
+            .document(storeKey)
+            .collection(COLLECTION_PRODUCTS)
+            .document(key)
     }
 
     override fun observeProducts(): Flow<List<ProductRecord>> {

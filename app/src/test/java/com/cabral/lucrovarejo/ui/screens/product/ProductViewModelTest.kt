@@ -39,7 +39,7 @@ class ProductViewModelTest {
         val viewModel = ProductViewModel(GetProductsUseCase(repository))
         advanceUntilIdle()
 
-        assertEquals(listOf("2", "1"), viewModel.uiState.value.items.map { it.id })
+        assertEquals(listOf("2", "1"), viewModel.uiState.value.items.map { it.key })
 
         viewModel.onQueryChange("78910")
         advanceUntilIdle()
@@ -62,7 +62,7 @@ class ProductViewModelTest {
     }
 
     private fun product(id: String, cod: String, name: String) = ProductModel(
-        id = id,
+        key = id,
         cod = cod,
         name = name,
         cost = BigDecimal("10.00"),
@@ -70,6 +70,8 @@ class ProductViewModelTest {
     )
 
     private class FakeProductRepository : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         val products = MutableStateFlow(emptyList<ProductModel>())
 
         override suspend fun createProduct(product: ProductModel): ProductModel = product

@@ -13,7 +13,7 @@ class PurchaseUiModelTest {
         val saleDate = Date(1_735_689_600_000)
         val paymentMethod = PaymentMethods.PIX
         val purchase = PurchaseModel(
-            id = "purchase-1",
+            key = "purchase-1",
             cod = "A-1",
             name = "Produto",
             cost = 1234,
@@ -26,7 +26,7 @@ class PurchaseUiModelTest {
 
         assertEquals(
             PurchaseUiModel(
-                id = "purchase-1",
+                key = "purchase-1",
                 cod = "A-1",
                 name = "Produto",
                 cost = BigDecimal("12.34"),

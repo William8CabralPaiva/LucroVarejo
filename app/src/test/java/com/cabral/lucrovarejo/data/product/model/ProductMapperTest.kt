@@ -34,7 +34,7 @@ class ProductMapperTest {
             description = "Descricao"
         ).toModel("product-id")
 
-        assertEquals("product-id", model.id)
+        assertEquals("product-id", model.key)
         assertEquals(BigDecimal("12.34"), model.cost)
     }
 
@@ -52,7 +52,7 @@ class ProductMapperTest {
 
         assertEquals(
             ProductModel(
-                id = "product-id",
+                key = "product-id",
                 cod = "A-1",
                 name = "Produto",
                 cost = BigDecimal("12.34"),

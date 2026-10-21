@@ -28,7 +28,7 @@ class AddPurchaseScreenUiTest {
     val composeRule = createComposeRule()
 
     private val product = ProductModel(
-        id = "product-1",
+        key = "product-1",
         cod = "A-1",
         name = "Bolsa Feminina",
         cost = BigDecimal("50.00"),

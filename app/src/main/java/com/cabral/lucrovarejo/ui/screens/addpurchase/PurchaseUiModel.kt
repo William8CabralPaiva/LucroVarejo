@@ -6,7 +6,7 @@ import java.math.BigDecimal
 import java.util.Date
 
 data class PurchaseUiModel(
-    val id: String?,
+    val key: String?,
     val cod: String,
     val name: String,
     val cost: BigDecimal,
@@ -18,7 +18,7 @@ data class PurchaseUiModel(
 )
 
 fun PurchaseModel.toUiModel(): PurchaseUiModel = PurchaseUiModel(
-    id = id,
+    key = key,
     cod = cod,
     name = name,
     cost = cost.toMoneyAmount(),

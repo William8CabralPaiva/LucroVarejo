@@ -8,12 +8,16 @@ import kotlinx.coroutines.flow.Flow
 
 interface PurchaseRemoteDataSource {
     suspend fun createPurchase(request: PurchaseRequest): String
+    suspend fun updatePurchase(key: String, request: PurchaseRequest)
+    suspend fun deletePurchase(key: String)
     fun observePurchasesBetween(start: Date, end: Date): Flow<List<PurchaseSummaryRecord>>
     fun observeLatestPurchases(limit: Int): Flow<List<PurchaseRecord>>
 }
 
 interface PurchaseFirestoreClient {
     suspend fun savePurchase(storeKey: String, request: PurchaseRequest): String
+    suspend fun updatePurchase(storeKey: String, key: String, request: PurchaseRequest)
+    suspend fun deletePurchase(storeKey: String, key: String)
     fun observePurchasesBetween(
         storeKey: String,
         start: Date,

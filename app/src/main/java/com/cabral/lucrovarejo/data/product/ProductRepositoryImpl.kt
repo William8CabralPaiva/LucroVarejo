@@ -26,6 +26,17 @@ class ProductRepositoryImpl @Inject constructor(
         return request.toModel(documentId)
     }
 
+    override suspend fun updateProduct(product: ProductModel): ProductModel {
+        val key = requireNotNull(product.key) { "Product key is required to update" }
+        val request = product.toRequest()
+        withProductFailure { remoteDataSource.updateProduct(key, request) }
+        return request.toModel(key)
+    }
+
+    override suspend fun deleteProduct(key: String) {
+        withProductFailure { remoteDataSource.deleteProduct(key) }
+    }
+
     override fun observeProducts(): Flow<List<ProductModel>> =
         remoteDataSource.observeProducts()
             .map { records -> records.map { it.toModel() } }

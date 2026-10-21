@@ -75,6 +75,8 @@ class AppNavGraphInstrumentedTest {
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
         override fun observeMonthlySummary(

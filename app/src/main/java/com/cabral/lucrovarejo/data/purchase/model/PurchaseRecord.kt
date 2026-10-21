@@ -16,7 +16,7 @@ data class PurchaseRecord(
     val paymentMethod: String
 ) {
     fun toModel(): PurchaseModel = PurchaseModel(
-        id = documentId,
+        key = documentId,
         cod = cod,
         name = name,
         cost = cost,

@@ -47,7 +47,7 @@ class AddPurchaseViewModelTest {
     private lateinit var purchaseRepository: FakePurchaseRepository
     private lateinit var viewModel: AddPurchaseViewModel
     private val product = ProductModel(
-        id = "product-1",
+        key = "product-1",
         cod = "A-1",
         name = "Bolsa Feminina",
         cost = BigDecimal("50.00"),
@@ -90,6 +90,8 @@ class AddPurchaseViewModelTest {
         val products = CompletableDeferred<List<ProductModel>>()
         viewModel = createViewModel(
             object : ProductRepository {
+        override suspend fun updateProduct(product: ProductModel): ProductModel = product
+        override suspend fun deleteProduct(key: String) = Unit
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
                 override fun observeProducts(): Flow<List<ProductModel>> = flow {
                     emit(products.await())
@@ -112,6 +114,8 @@ class AddPurchaseViewModelTest {
     fun exposesProductLoadFailureAndStopsLoading() = runTest {
         viewModel = createViewModel(
             object : ProductRepository {
+        override suspend fun updateProduct(product: ProductModel): ProductModel = product
+        override suspend fun deleteProduct(key: String) = Unit
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
                 override fun observeProducts(): Flow<List<ProductModel>> = flow {
                     throw ProductFailure(ProductFailure.Reason.NETWORK)
@@ -133,13 +137,15 @@ class AddPurchaseViewModelTest {
         val products = MutableStateFlow(listOf(product))
         viewModel = createViewModel(
             object : ProductRepository {
+        override suspend fun updateProduct(product: ProductModel): ProductModel = product
+        override suspend fun deleteProduct(key: String) = Unit
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
                 override fun observeProducts(): Flow<List<ProductModel>> = products
             }
         )
         advanceUntilIdle()
 
-        val newProduct = product.copy(id = "product-2", name = "Carteira")
+        val newProduct = product.copy(key = "product-2", name = "Carteira")
         products.value = listOf(product, newProduct)
         advanceUntilIdle()
 
@@ -190,16 +196,20 @@ class AddPurchaseViewModelTest {
     private class FakeProductRepository(
         private val products: Flow<List<ProductModel>>
     ) : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         override suspend fun createProduct(product: ProductModel): ProductModel = product
         override fun observeProducts(): Flow<List<ProductModel>> = products
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         var createdPurchase: PurchaseModel? = null
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
             createdPurchase = purchase
-            return purchase.copy(id = "purchase-1")
+            return purchase.copy(key = "purchase-1")
         }
 
         override fun observeMonthlySummary(start: Date, end: Date) =

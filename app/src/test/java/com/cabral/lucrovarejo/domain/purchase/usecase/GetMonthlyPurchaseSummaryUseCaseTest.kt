@@ -39,6 +39,8 @@ class GetMonthlyPurchaseSummaryUseCaseTest {
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         val summary = MutableStateFlow(MonthlyPurchaseSummary())
         var requestedRange: Pair<Date, Date>? = null
 

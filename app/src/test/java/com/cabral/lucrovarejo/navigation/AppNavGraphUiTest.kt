@@ -112,12 +112,16 @@ class AppNavGraphUiTest {
     }
 
     private class EmptyProductRepository : ProductRepository {
+    override suspend fun updateProduct(product: ProductModel): ProductModel = product
+    override suspend fun deleteProduct(key: String) = Unit
         override suspend fun createProduct(product: ProductModel): ProductModel = product
 
         override fun observeProducts() = flowOf(emptyList<ProductModel>())
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
 
         override fun observeMonthlySummary(

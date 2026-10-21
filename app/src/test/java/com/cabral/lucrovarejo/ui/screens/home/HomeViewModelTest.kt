@@ -127,7 +127,7 @@ class HomeViewModelTest {
     }
 
     private fun purchase(id: String) = PurchaseModel(
-        id = id,
+        key = id,
         cod = "A-1",
         name = "Produto",
         cost = 1000,
@@ -139,6 +139,8 @@ class HomeViewModelTest {
     )
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         val summary = MutableStateFlow(MonthlyPurchaseSummary())
         val latestPurchases = MutableStateFlow<List<PurchaseModel>>(emptyList())
         var failure: PurchaseFailure? = null

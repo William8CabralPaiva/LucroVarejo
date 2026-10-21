@@ -18,6 +18,12 @@ class FirebasePurchaseRemoteDataSource @Inject constructor(
     override suspend fun createPurchase(request: PurchaseRequest): String =
         firestoreClient.savePurchase(requireStoreKey(), request)
 
+    override suspend fun updatePurchase(key: String, request: PurchaseRequest) =
+        firestoreClient.updatePurchase(requireStoreKey(), key, request)
+
+    override suspend fun deletePurchase(key: String) =
+        firestoreClient.deletePurchase(requireStoreKey(), key)
+
     override fun observePurchasesBetween(
         start: Date,
         end: Date

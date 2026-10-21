@@ -31,7 +31,7 @@ class ProductScreenUiTest {
                         isLoading = false,
                         items = listOf(
                             ProductModel(
-                                id = "1",
+                                key = "1",
                                 cod = "7891000123456",
                                 name = "Bolsa Feminina",
                                 cost = BigDecimal("89.90"),

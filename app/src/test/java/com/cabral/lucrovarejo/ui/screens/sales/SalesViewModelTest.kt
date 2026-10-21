@@ -119,7 +119,7 @@ class SalesViewModelTest {
     private fun page(size: Int, hasMore: Boolean) = SalesPage(
         items = (1..size).map {
             PurchaseModel(
-                id = "id$it",
+                key = "id$it",
                 cod = "c",
                 name = "p$it",
                 cost = 100,

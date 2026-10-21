@@ -5,6 +5,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface PurchaseRepository {
     suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel
+    suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel
+    suspend fun deletePurchase(key: String)
     fun observeMonthlySummary(start: Date, end: Date): Flow<MonthlyPurchaseSummary>
     fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>>
 }

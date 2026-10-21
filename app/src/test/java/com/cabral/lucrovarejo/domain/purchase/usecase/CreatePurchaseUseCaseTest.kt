@@ -29,15 +29,17 @@ class CreatePurchaseUseCaseTest {
         val created = CreatePurchaseUseCase(repository)(purchase)
 
         assertEquals(purchase, repository.createdPurchase)
-        assertEquals(purchase.copy(id = "generated-purchase-id"), created)
+        assertEquals(purchase.copy(key = "generated-purchase-id"), created)
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         var createdPurchase: PurchaseModel? = null
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
             createdPurchase = purchase
-            return purchase.copy(id = "generated-purchase-id")
+            return purchase.copy(key = "generated-purchase-id")
         }
 
         override fun observeMonthlySummary(start: Date, end: Date) =

@@ -16,6 +16,13 @@ data class ProductRequest(
         FIELD_CREATED_AT to FieldValue.serverTimestamp()
     )
 
+    fun toFirestoreUpdateFields(): Map<String, Any> = mapOf(
+        FIELD_COD to cod,
+        FIELD_NAME to name,
+        FIELD_COST to cost,
+        FIELD_DESCRIPTION to description
+    )
+
     private companion object {
         const val FIELD_COD = "cod"
         const val FIELD_NAME = "name"

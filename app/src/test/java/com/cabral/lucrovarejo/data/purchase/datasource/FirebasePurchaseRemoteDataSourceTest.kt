@@ -137,6 +137,8 @@ class FirebasePurchaseRemoteDataSourceTest {
     }
 
     private class FakePurchaseFirestoreClient : PurchaseFirestoreClient {
+    override suspend fun updatePurchase(storeKey: String, key: String, request: PurchaseRequest) = Unit
+    override suspend fun deletePurchase(storeKey: String, key: String) = Unit
         var storeKey: String? = null
         var request: PurchaseRequest? = null
         val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())

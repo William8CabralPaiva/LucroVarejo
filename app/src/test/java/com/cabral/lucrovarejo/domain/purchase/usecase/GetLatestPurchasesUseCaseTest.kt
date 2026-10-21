@@ -17,7 +17,7 @@ class GetLatestPurchasesUseCaseTest {
     fun returnsLatestPurchasesInRepositoryOrderUsingRequestedLimit() = runTest {
         val purchases = listOf(
             PurchaseModel(
-                id = "latest",
+                key = "latest",
                 cod = "A-1",
                 name = "Mais atual",
                 cost = 1000,
@@ -28,7 +28,7 @@ class GetLatestPurchasesUseCaseTest {
                 paymentMethod = PaymentMethods.PIX
             ),
             PurchaseModel(
-                id = "older",
+                key = "older",
                 cod = "B-2",
                 name = "Anterior",
                 cost = 800,
@@ -50,6 +50,8 @@ class GetLatestPurchasesUseCaseTest {
     private class FakePurchaseRepository(
         private val latestPurchases: List<PurchaseModel>
     ) : PurchaseRepository {
+    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
+    override suspend fun deletePurchase(key: String) = Unit
         var requestedLimit: Int? = null
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel = purchase
