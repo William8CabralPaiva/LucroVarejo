@@ -137,7 +137,6 @@ fun HomeContent(
                 isLoading = isLatestSalesLoading,
                 hasError = hasLatestSalesError,
                 onShowAll = goToSalesScreen,
-                onSaleClick = goToSalesScreen
             )
         }
     }
@@ -149,7 +148,6 @@ private fun LatestSalesSection(
     isLoading: Boolean,
     hasError: Boolean,
     onShowAll: () -> Unit,
-    onSaleClick: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -189,7 +187,6 @@ private fun LatestSalesSection(
                     productName = purchase.name,
                     priceInCents = purchase.salePrice.toLong(),
                     saleDate = purchase.saleDate,
-                    onClick = onSaleClick
                 )
             }
         }

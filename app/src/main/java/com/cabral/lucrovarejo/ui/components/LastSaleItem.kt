@@ -42,7 +42,7 @@ fun LastSaleItem(
     productName: String,
     priceInCents: Long,
     saleDate: Date,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
     image: Painter? = null
 ) {
