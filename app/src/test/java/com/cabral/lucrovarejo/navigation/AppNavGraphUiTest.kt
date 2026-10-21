@@ -6,6 +6,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
@@ -25,6 +26,7 @@ import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -99,6 +101,34 @@ class AppNavGraphUiTest {
         composeRule.runOnIdle {
             assertTrue(salesNavigationRequested)
         }
+    }
+
+    @Test
+    fun acceptsExplicitNavigationDependenciesAndThemeCallbacks() {
+        composeRule.setContent {
+            val navController = rememberNavController()
+            LucroVarejoTheme {
+                AppNavGraph(
+                    navController = navController,
+                    startDestination = LoggedRoutes.HOME,
+                    isUserAuthenticated = true,
+                    onSignOut = {},
+                    currentThemeMode = ThemeMode.LIGHT,
+                    onThemeModeChanged = {},
+                    salesViewModel = SalesViewModel(
+                        GetSalesPageUseCase(EmptySalesRepository()),
+                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                    ),
+                    productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
+                    homeViewModel = HomeViewModel(
+                        GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
+                        GetLatestPurchasesUseCase(FakePurchaseRepository())
+                    )
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Vendas do mês").assertIsDisplayed()
     }
 
     private class EmptySalesRepository : SalesRepository {

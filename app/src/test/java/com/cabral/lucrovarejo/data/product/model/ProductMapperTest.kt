@@ -23,6 +23,15 @@ class ProductMapperTest {
         assertEquals(1234, request.toFirestoreFields()["cost"])
         assertTrue(request.toFirestoreFields()["cost"] is Int)
         assertTrue(request.toFirestoreFields()["createdAt"] is FieldValue)
+        assertEquals(
+            mapOf(
+                "cod" to "A-1",
+                "name" to "Produto",
+                "cost" to 1234,
+                "description" to "Descricao"
+            ),
+            request.toFirestoreUpdateFields()
+        )
     }
 
     @Test

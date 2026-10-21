@@ -182,9 +182,67 @@ class PurchaseRepositoryImplTest {
         assertTrue(failure is PurchaseFailure)
         assertEquals(PurchaseFailure.Reason.UNKNOWN, (failure as PurchaseFailure).reason)
     }
+
+    @Test
+    fun updatesAndDeletesPurchaseUsingItsExistingKey() = runTest {
+        val dataSource = FakePurchaseRemoteDataSource()
+        val purchase = PurchaseModel(
+            key = "purchase-1",
+            cod = "A-1",
+            name = "Produto",
+            cost = 1200,
+            description = "Descricao",
+            salePrice = 1500,
+            quantity = 3,
+            saleDate = Date(1_735_689_600_000),
+            paymentMethod = PaymentMethods.PIX
+        )
+        val repository = PurchaseRepositoryImpl(dataSource)
+
+        assertEquals(purchase, repository.updatePurchase(purchase))
+        repository.deletePurchase("purchase-1")
+
+        assertEquals("purchase-1", dataSource.updatedKey)
+        assertEquals(PurchaseRequest.from(purchase), dataSource.updatedRequest)
+        assertEquals("purchase-1", dataSource.deletedKey)
+    }
+
+    @Test
+    fun rejectsMissingKeyAndInvalidFlowArguments() = runTest {
+        val repository = PurchaseRepositoryImpl(FakePurchaseRemoteDataSource())
+        val purchaseWithoutKey = PurchaseModel(
+            cod = "A-1",
+            name = "Produto",
+            cost = 1200,
+            description = "Descricao",
+            salePrice = 1500,
+            quantity = 1,
+            saleDate = Date(),
+            paymentMethod = PaymentMethods.CASH
+        )
+
+        assertTrue(runCatching { repository.updatePurchase(purchaseWithoutKey) }.exceptionOrNull()
+            is IllegalArgumentException)
+        assertTrue(runCatching { repository.observeLatestPurchases(0) }.exceptionOrNull()
+            is IllegalArgumentException)
+        assertTrue(runCatching { repository.observeMonthlySummary(Date(2), Date(1)) }
+            .exceptionOrNull() is IllegalArgumentException)
+    }
+
     private class FakePurchaseRemoteDataSource : PurchaseRemoteDataSource {
-    override suspend fun updatePurchase(key: String, request: PurchaseRequest) = Unit
-    override suspend fun deletePurchase(key: String) = Unit
+        var updatedKey: String? = null
+        var updatedRequest: PurchaseRequest? = null
+        var deletedKey: String? = null
+
+        override suspend fun updatePurchase(key: String, request: PurchaseRequest) {
+            updatedKey = key
+            updatedRequest = request
+        }
+
+        override suspend fun deletePurchase(key: String) {
+            deletedKey = key
+        }
+
         var savedRequest: PurchaseRequest? = null
         val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())
         var requestedRange: Pair<Date, Date>? = null

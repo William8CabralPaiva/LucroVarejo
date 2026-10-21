@@ -25,28 +25,62 @@ fun AppNavGraph(
     salesViewModel: SalesViewModel? = null,
     productViewModel: ProductViewModel? = null,
 ) {
+    AppNavGraphContent(
+        navController = navController,
+        startDestination = startDestination,
+        isUserAuthenticated = isUserAuthenticated,
+        onSignOut = onSignOut,
+        splashScreen = { onSplashFinished -> SplashScreen(onSplashFinished) },
+        loginScreen = { goToRegisterScreen, goToLoggedFlow ->
+            LoginScreen(goToRegisterScreen, goToLoggedFlow)
+        },
+        registerScreen = { onBackPress, onRegisterSuccess ->
+            RegisterScreen(onBackPress, onRegisterSuccess)
+        },
+        loggedFlowScreen = { onLogout ->
+            LoggedFlowScreen(
+                currentThemeMode = currentThemeMode,
+                onThemeModeChanged = onThemeModeChanged,
+                homeViewModel = homeViewModel,
+                salesViewModel = salesViewModel,
+                productViewModel = productViewModel,
+                onLogout = onLogout
+            )
+        }
+    )
+}
+
+@Composable
+internal fun AppNavGraphContent(
+    navController: NavHostController,
+    startDestination: String,
+    isUserAuthenticated: Boolean,
+    onSignOut: () -> Unit,
+    splashScreen: @Composable (() -> Unit) -> Unit,
+    loginScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    registerScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    loggedFlowScreen: @Composable (() -> Unit) -> Unit,
+) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         composable(NotLoggedRoutes.SPLASH) {
-            SplashScreen(
-                onSplashFinished = {
-                    navController.navigate(
-                        if (isUserAuthenticated) LoggedRoutes.HOME else NotLoggedRoutes.LOGIN
-                    ) {
-                        popUpTo(NotLoggedRoutes.SPLASH) { inclusive = true }
-                    }
+            splashScreen {
+                navController.navigate(
+                    if (isUserAuthenticated) LoggedRoutes.HOME else NotLoggedRoutes.LOGIN
+                ) {
+                    popUpTo(NotLoggedRoutes.SPLASH) { inclusive = true }
                 }
-            )
+            }
         }
 
         composable(NotLoggedRoutes.LOGIN) {
-            LoginScreen(
-                goToRegisterScreen = {
+            loginScreen(
+                {
                     navController.navigate(NotLoggedRoutes.REGISTER)
                 },
-                goToLoggedFlow = {
+                {
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
@@ -55,9 +89,9 @@ fun AppNavGraph(
         }
 
         composable(NotLoggedRoutes.REGISTER) {
-            RegisterScreen(
-                onBackPress = navController::popBackStack,
-                onRegisterSuccess = {
+            registerScreen(
+                navController::popBackStack,
+                {
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
@@ -66,19 +100,12 @@ fun AppNavGraph(
         }
 
         composable(LoggedRoutes.HOME) {
-            LoggedFlowScreen(
-                currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
-                homeViewModel = homeViewModel,
-                salesViewModel = salesViewModel,
-                productViewModel = productViewModel,
-                onLogout = {
-                    onSignOut()
-                    navController.navigate(NotLoggedRoutes.LOGIN) {
-                        popUpTo(LoggedRoutes.HOME) { inclusive = true }
-                    }
+            loggedFlowScreen {
+                onSignOut()
+                navController.navigate(NotLoggedRoutes.LOGIN) {
+                    popUpTo(LoggedRoutes.HOME) { inclusive = true }
                 }
-            )
+            }
         }
     }
 }

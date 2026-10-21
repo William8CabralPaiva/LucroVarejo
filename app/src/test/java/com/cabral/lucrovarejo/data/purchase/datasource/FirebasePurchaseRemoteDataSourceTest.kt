@@ -136,9 +136,46 @@ class FirebasePurchaseRemoteDataSourceTest {
         assertEquals(null, client.storeKey)
     }
 
+    @Test
+    fun updatesAndDeletesUsingTheAuthenticatedStore() = runTest {
+        val client = FakePurchaseFirestoreClient()
+        val dataSource = FirebasePurchaseRemoteDataSource(FakeAuthRepository("store-uid"), client)
+        val request = PurchaseRequest(
+            cod = "A-1",
+            name = "Produto",
+            cost = 1200,
+            description = "Descricao",
+            salePrice = 1500,
+            quantity = 2,
+            saleDate = Date(1_735_689_600_000),
+            paymentMethod = PaymentMethods.CARD
+        )
+
+        dataSource.updatePurchase("purchase-1", request)
+        dataSource.deletePurchase("purchase-1")
+
+        assertEquals("store-uid", client.storeKey)
+        assertEquals("purchase-1", client.updatedKey)
+        assertEquals(request, client.updatedRequest)
+        assertEquals("purchase-1", client.deletedKey)
+    }
+
     private class FakePurchaseFirestoreClient : PurchaseFirestoreClient {
-    override suspend fun updatePurchase(storeKey: String, key: String, request: PurchaseRequest) = Unit
-    override suspend fun deletePurchase(storeKey: String, key: String) = Unit
+        var updatedKey: String? = null
+        var updatedRequest: PurchaseRequest? = null
+        var deletedKey: String? = null
+
+        override suspend fun updatePurchase(storeKey: String, key: String, request: PurchaseRequest) {
+            this.storeKey = storeKey
+            updatedKey = key
+            updatedRequest = request
+        }
+
+        override suspend fun deletePurchase(storeKey: String, key: String) {
+            this.storeKey = storeKey
+            deletedKey = key
+        }
+
         var storeKey: String? = null
         var request: PurchaseRequest? = null
         val purchases = MutableStateFlow<List<PurchaseSummaryRecord>>(emptyList())
