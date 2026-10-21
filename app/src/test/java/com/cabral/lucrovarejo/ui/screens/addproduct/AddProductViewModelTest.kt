@@ -147,6 +147,68 @@ class AddProductViewModelTest {
         assertNull(repository.deletedKey)
     }
 
+    @Test
+    fun invalidCostAndFieldEditsClearErrors() = runTest {
+        viewModel.onNameChanged("Produto")
+        viewModel.onCostChanged("abc")
+        viewModel.onCodeChanged("X")
+        viewModel.onDescriptionChanged("d")
+
+        viewModel.saveProduct()
+
+        assertEquals(R.string.product_cost_invalid, viewModel.uiState.value.costError)
+        viewModel.onCostChanged("1")
+        assertNull(viewModel.uiState.value.costError)
+    }
+
+    @Test
+    fun mapsEveryFailureReasonForCreate() = runTest {
+        val expected = mapOf(
+            ProductFailure.Reason.PERMISSION_DENIED to R.string.product_create_error_permission,
+            ProductFailure.Reason.UNAUTHENTICATED to R.string.product_create_error_unauthenticated,
+            ProductFailure.Reason.UNKNOWN to R.string.product_create_error_generic
+        )
+        expected.forEach { (reason, message) ->
+            repository.failure = ProductFailure(reason)
+            viewModel.onNameChanged("Produto")
+            viewModel.onCostChanged("10.00")
+            viewModel.saveProduct()
+            advanceUntilIdle()
+            assertEquals(message, viewModel.uiState.value.errorMessage)
+        }
+    }
+
+    @Test
+    fun updateAndDeleteFailuresUseSpecificMessages() = runTest {
+        repository.failure = ProductFailure(ProductFailure.Reason.UNKNOWN)
+        viewModel.loadProduct(existingProduct)
+
+        viewModel.saveProduct()
+        advanceUntilIdle()
+        assertEquals(R.string.product_edit_error_generic, viewModel.uiState.value.errorMessage)
+        assertFalse(viewModel.uiState.value.isLoading)
+
+        viewModel.confirmDelete()
+        advanceUntilIdle()
+        assertEquals(R.string.product_delete_error_generic, viewModel.uiState.value.errorMessage)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun deleteIsIgnoredWithoutKeyAndLoadProductIgnoresSameKey() = runTest {
+        viewModel.onDeleteRequested()
+        viewModel.confirmDelete()
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.value.showDeleteDialog)
+        assertNull(repository.deletedKey)
+
+        viewModel.loadProduct(existingProduct)
+        viewModel.onNameChanged("Editado")
+        viewModel.loadProduct(existingProduct)
+        viewModel.loadProduct(null)
+        assertEquals("Editado", viewModel.uiState.value.name)
+    }
+
     private val existingProduct = ProductModel(
         key = "product-key",
         cod = "A-1",

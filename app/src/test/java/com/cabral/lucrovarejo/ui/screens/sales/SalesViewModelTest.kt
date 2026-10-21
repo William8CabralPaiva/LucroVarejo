@@ -111,6 +111,62 @@ class SalesViewModelTest {
         assertEquals(2, viewModel.uiState.value.items.size)
     }
 
+    @Test
+    fun observeFailureShowsError() = runTest(dispatcher) {
+        val repository = object : SalesRepository {
+            override suspend fun getSalesPage(
+                filter: SalesFilter,
+                cursor: SalesCursor?,
+                pageSize: Int
+            ) = page(1, false)
+
+            override fun observeSalesChanges(filter: SalesFilter): Flow<Unit> =
+                kotlinx.coroutines.flow.flow { throw IllegalStateException("boom") }
+        }
+        val viewModel = createViewModel(repository)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.hasError)
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun loadNextPageIsIgnoredAfterErrorAndRetryReloadsWhenEmpty() = runTest(dispatcher) {
+        val repository = FakeRepository(pages = mutableListOf(page(10, true)), failuresLeft = 1)
+        val viewModel = createViewModel(repository)
+        advanceUntilIdle()
+        val calls = repository.filters.size
+
+        viewModel.loadNextPage()
+        advanceUntilIdle()
+        assertEquals(calls, repository.filters.size)
+
+        viewModel.retry()
+        advanceUntilIdle()
+        assertEquals(10, viewModel.uiState.value.items.size)
+
+        viewModel.onDateSelected(null)
+        advanceUntilIdle()
+        assertEquals(null, repository.filters.last().dateStart)
+    }
+
+    @Test
+    fun retryAfterLoadMoreFailureKeepsItemsAndLoadsNextPage() = runTest(dispatcher) {
+        val repository = FakeRepository(pages = mutableListOf(page(10, true), page(2, false)))
+        val viewModel = createViewModel(repository)
+        advanceUntilIdle()
+        repository.failuresLeft = 1
+
+        viewModel.loadNextPage()
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.value.hasError)
+        assertEquals(10, viewModel.uiState.value.items.size)
+
+        viewModel.retry()
+        advanceUntilIdle()
+        assertEquals(12, viewModel.uiState.value.items.size)
+    }
+
     private fun createViewModel(repository: SalesRepository) = SalesViewModel(
         getSalesPage = GetSalesPageUseCase(repository),
         observeSalesChanges = ObserveSalesChangesUseCase(repository)
@@ -135,7 +191,7 @@ class SalesViewModelTest {
 
     private class FakeRepository(
         private val pages: MutableList<SalesPage>,
-        private var failuresLeft: Int = 0
+        var failuresLeft: Int = 0
     ) : SalesRepository {
         val filters = mutableListOf<SalesFilter>()
         val cursors = mutableListOf<SalesCursor?>()

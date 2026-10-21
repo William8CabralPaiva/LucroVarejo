@@ -61,6 +61,20 @@ class ProductViewModelTest {
         assertEquals("Produto novo", viewModel.uiState.value.items.single().name)
     }
 
+    @Test
+    fun flowFailureStopsLoadingAndShowsError() = runTest(dispatcher) {
+        val failing = object : ProductRepository by repository {
+            override fun observeProducts() = kotlinx.coroutines.flow.flow<List<ProductModel>> {
+                throw IllegalStateException("boom")
+            }
+        }
+        val viewModel = ProductViewModel(GetProductsUseCase(failing))
+        advanceUntilIdle()
+
+        assertEquals(true, viewModel.uiState.value.hasError)
+        assertEquals(false, viewModel.uiState.value.isLoading)
+    }
+
     private fun product(id: String, cod: String, name: String) = ProductModel(
         key = id,
         cod = cod,

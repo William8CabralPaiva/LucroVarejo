@@ -60,6 +60,10 @@ android {
             isIncludeAndroidResources = true
             all {
                 it.jvmArgs("-noverify")
+                it.extensions.configure(JacocoTaskExtension::class.java) {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
             }
         }
     }
