@@ -25,10 +25,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.ui.components.ProdCodPrice
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import java.math.BigDecimal
 
 @Composable
 fun ProductScreen(
@@ -126,5 +130,28 @@ fun ProductContent(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Produtos")
+@Composable
+private fun ProductContentPreview() {
+    LucroVarejoTheme {
+        ProductContent(
+            state = ProductUiState(
+                isLoading = false,
+                items = listOf(
+                    ProductModel(
+                        key = "1",
+                        cod = "7891000123456",
+                        name = "Bolsa Feminina",
+                        cost = BigDecimal("89.90"),
+                        description = ""
+                    )
+                )
+            ),
+            onQueryChange = {},
+            onAddProduct = {}
+        )
     }
 }

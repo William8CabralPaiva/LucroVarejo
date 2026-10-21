@@ -5,9 +5,11 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.math.BigDecimal
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -52,6 +54,56 @@ class ProductScreenUiTest {
 
         composeRule.runOnIdle {
             assertTrue(addProductRequested)
+        }
+    }
+
+    @Test
+    fun displaysEmptyMessageWhenThereAreNoProducts() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false),
+                    onQueryChange = {},
+                    onAddProduct = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Nenhum produto encontrado.").assertIsDisplayed()
+    }
+
+    @Test
+    fun displaysErrorMessageWhenLoadFails() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false, hasError = true),
+                    onQueryChange = {},
+                    onAddProduct = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Não foi possível carregar os produtos.").assertIsDisplayed()
+    }
+
+    @Test
+    fun reportsSearchQueryChanges() {
+        var query = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false),
+                    onQueryChange = { query = it },
+                    onAddProduct = {}
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Buscar produto...").performTextInput("bolsa")
+
+        composeRule.runOnIdle {
+            assertEquals("bolsa", query)
         }
     }
 }

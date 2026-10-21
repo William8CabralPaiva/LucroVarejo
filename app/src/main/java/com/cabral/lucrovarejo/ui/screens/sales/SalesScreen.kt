@@ -63,6 +63,7 @@ private const val LOAD_MORE_THRESHOLD = 3
 @Composable
 fun SalesScreen(
     onAddPurchase: (() -> Unit)? = null,
+    onEditPurchase: (() -> Unit)? = null,
     viewModel: SalesViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -87,6 +88,7 @@ fun SalesContent(
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
     onAddPurchase: (() -> Unit)? = null,
+    onEditPurchase: (() -> Unit)? = null,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
@@ -179,6 +181,7 @@ fun SalesContent(
                 listState = listState,
                 onRetry = onRetry,
                 onAddPurchase = onAddPurchase,
+                onEditPurchase = onEditPurchase,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -217,6 +220,7 @@ private fun SalesList(
     listState: androidx.compose.foundation.lazy.LazyListState,
     onRetry: () -> Unit,
     onAddPurchase: (() -> Unit)?,
+    onEditPurchase: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     when {
@@ -273,7 +277,7 @@ private fun SalesList(
                             salePriceInCents = purchase.salePrice.toLong() * purchase.quantity,
                             costInCents = purchase.cost.toLong() * purchase.quantity,
                             quantity = purchase.quantity,
-                            onClick = {}
+                            onClick = onEditPurchase ?: {},
                         )
                     }
                 }

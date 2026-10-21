@@ -18,6 +18,7 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -51,9 +52,9 @@ class MainActivity : ComponentActivity() {
                         currentThemeMode = themeMode,
                         onThemeModeChanged = { newMode ->
                             themeMode = newMode
-                            themePreferences.edit()
-                                .putString(THEME_MODE_KEY, newMode.name)
-                                .apply()
+                            themePreferences.edit {
+                                putString(THEME_MODE_KEY, newMode.name)
+                            }
                         }
                     )
                 }

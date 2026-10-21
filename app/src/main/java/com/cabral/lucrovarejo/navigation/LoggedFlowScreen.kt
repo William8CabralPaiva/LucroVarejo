@@ -116,6 +116,13 @@ private fun LoggedDestinationNavHost(
             AddPurchaseScreen()
         }
 
+        composable(LoggedRoutes.EDIT_PRODUCT) {
+            ProductScreen(
+                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                viewModel = productViewModel
+            )
+        }
+
         composable(LoggedRoutes.PRODUCTS) {
             ProductScreen(
                 onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
