@@ -103,7 +103,7 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.HOME) {
             HomeScreen(
                 goToProductScreen = {
-                    navigator.navigateTo(LoggedRoutes.ADD_PURCHASE)
+                    navigator.navigateTo(LoggedRoutes.ADD_PRODUCT)
                 },
                 goToSalesScreen = {
                     navigator.navigateToTab(LoggedRoutes.SALES)
@@ -117,15 +117,13 @@ private fun LoggedDestinationNavHost(
         }
 
         composable(LoggedRoutes.EDIT_PRODUCT) {
-            ProductScreen(
-                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
-                viewModel = productViewModel
-            )
+            AddProductScreen()
         }
 
         composable(LoggedRoutes.PRODUCTS) {
             ProductScreen(
                 onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                onEditProduct = { navigator.navigateTo(LoggedRoutes.EDIT_PRODUCT) },
                 viewModel = productViewModel
             )
         }
@@ -141,9 +139,10 @@ private fun LoggedDestinationNavHost(
             )
         }
 
-        composable(LoggedRoutes.SUMMARY) {
-            SummaryScreen()
-        }
+        //Não descomentar
+//        composable(LoggedRoutes.SUMMARY) {
+//            SummaryScreen()
+//        }
 
         composable(LoggedRoutes.CONFIG) {
             ConfigScreen(

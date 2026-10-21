@@ -40,7 +40,8 @@ fun BottomNavBar(
             Icons.AutoMirrored.Filled.ReceiptLong
         ),
         BottomNavItem(LoggedRoutes.PRODUCTS, R.string.bottom_nav_products, Icons.Outlined.Inventory2),
-        BottomNavItem(LoggedRoutes.SUMMARY, R.string.bottom_nav_summary, Icons.Default.BarChart),
+        //Não Descomentar
+        //BottomNavItem(LoggedRoutes.SUMMARY, R.string.bottom_nav_summary, Icons.Default.BarChart),
         BottomNavItem(LoggedRoutes.CONFIG, R.string.bottom_nav_config, Icons.Default.Settings)
     )
 

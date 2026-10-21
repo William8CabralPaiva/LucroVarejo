@@ -58,6 +58,38 @@ class ProductScreenUiTest {
     }
 
     @Test
+    fun invokesEditProductWhenItemClicked() {
+        var editProductRequested = false
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(
+                        isLoading = false,
+                        items = listOf(
+                            ProductModel(
+                                key = "1",
+                                cod = "7891000123456",
+                                name = "Bolsa Feminina",
+                                cost = BigDecimal("89.90"),
+                                description = ""
+                            )
+                        )
+                    ),
+                    onQueryChange = {},
+                    onAddProduct = {},
+                    onEditProduct = { editProductRequested = true }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Bolsa Feminina").performClick()
+
+        composeRule.runOnIdle {
+            assertTrue(editProductRequested)
+        }
+    }
+
+    @Test
     fun displaysEmptyMessageWhenThereAreNoProducts() {
         composeRule.setContent {
             LucroVarejoTheme {

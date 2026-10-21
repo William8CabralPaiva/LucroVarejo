@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.ui.screens.product
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,6 +38,7 @@ import java.math.BigDecimal
 @Composable
 fun ProductScreen(
     onAddProduct: () -> Unit,
+    onEditProduct: () -> Unit = {},
     viewModel: ProductViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -45,6 +47,7 @@ fun ProductScreen(
         state = state,
         onQueryChange = resolvedViewModel::onQueryChange,
         onAddProduct = onAddProduct,
+        onEditProduct = onEditProduct
     )
 }
 
@@ -53,6 +56,7 @@ fun ProductContent(
     state: ProductUiState,
     onQueryChange: (String) -> Unit,
     onAddProduct: () -> Unit,
+    onEditProduct: () -> Unit = {},
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -122,6 +126,7 @@ fun ProductContent(
                 } else {
                     items(state.items, key = { it.key ?: "${it.cod}-${it.name}" }) { product ->
                         ProdCodPrice(
+                            onClick = onEditProduct,
                             name = product.name,
                             code = product.cod,
                             cost = product.cost
@@ -151,7 +156,8 @@ private fun ProductContentPreview() {
                 )
             ),
             onQueryChange = {},
-            onAddProduct = {}
+            onAddProduct = {},
+            onEditProduct = {}
         )
     }
 }
