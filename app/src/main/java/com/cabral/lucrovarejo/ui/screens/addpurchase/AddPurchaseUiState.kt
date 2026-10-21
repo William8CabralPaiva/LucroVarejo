@@ -11,7 +11,12 @@ data class AddPurchaseUiState(
     val isSaving: Boolean = false,
     val errorMessage: Int? = null,
     val formResetCount: Int = 0,
+    val key: String? = null,
+    val showDeleteDialog: Boolean = false,
 ) {
+    val isEditing: Boolean
+        get() = key != null
+
     val canSubmit: Boolean
         get() = form.selectedProduct != null &&
                 parseSalePrice(form.salePrice) != null &&

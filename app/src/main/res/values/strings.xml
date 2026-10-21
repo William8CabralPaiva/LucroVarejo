@@ -107,6 +107,15 @@
     <string name="purchase_profit_title">Lucro desta venda</string>
     <string name="purchase_profit_placeholder">Informe o valor vendido</string>
     <string name="purchase_profit_calculation">(Vendido: %1$s - Custo: %2$s)</string>
+    <string name="edit_purchase_title">Editar Venda</string>
+    <string name="purchase_edit_submit">EDITAR</string>
+    <string name="purchase_edit_loading">EDITANDO...</string>
+    <string name="purchase_edit_error_generic">Não foi possível salvar as alterações da venda. Tente novamente.</string>
+    <string name="purchase_delete_submit">DELETAR</string>
+    <string name="purchase_delete_dialog_title">Deletar venda</string>
+    <string name="purchase_delete_dialog_message">Tem certeza que deseja deletar a venda de %1$s? Essa ação não pode ser desfeita.</string>
+    <string name="purchase_delete_dialog_confirm">Deletar</string>
+    <string name="purchase_delete_error_generic">Não foi possível deletar a venda. Tente novamente.</string>
     <string name="purchase_create_submit">REGISTRAR VENDA</string>
     <string name="purchase_create_success">Venda registrada com sucesso</string>
     <string name="purchase_create_loading">REGISTRANDO...</string>

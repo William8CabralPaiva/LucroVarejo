@@ -10,6 +10,8 @@ import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.DeletePurchaseUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.UpdatePurchaseUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -23,6 +25,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.Date
 import javax.inject.Inject
@@ -31,15 +34,43 @@ import javax.inject.Inject
 class AddPurchaseViewModel @Inject constructor(
     private val getProducts: GetProductsUseCase,
     private val createPurchase: CreatePurchaseUseCase,
+    private val updatePurchase: UpdatePurchaseUseCase,
+    private val deletePurchase: DeletePurchaseUseCase,
 ) : ViewModel() {
     private val effectChannel = Channel<Unit>(Channel.BUFFERED)
     val effects: Flow<Unit> = effectChannel.receiveAsFlow()
+
+    // Emitido apos editar/deletar com sucesso: a tela deve voltar para a lista de vendas.
+    private val completionChannel = Channel<Unit>(Channel.BUFFERED)
+    val completions: Flow<Unit> = completionChannel.receiveAsFlow()
 
     private val _uiState = MutableStateFlow(AddPurchaseUiState())
     val uiState: StateFlow<AddPurchaseUiState> = _uiState.asStateFlow()
 
     init {
         observeProducts()
+    }
+
+    fun loadPurchase(purchase: PurchaseModel?) {
+        if (purchase?.key == null || _uiState.value.key == purchase.key) return
+        _uiState.update {
+            it.copy(
+                key = purchase.key,
+                errorMessage = null,
+                form = PurchaseFormState(
+                    selectedProduct = ProductModel(
+                        cod = purchase.cod,
+                        name = purchase.name,
+                        cost = BigDecimal.valueOf(purchase.cost.toLong(), 2),
+                        description = purchase.description
+                    ),
+                    salePrice = BigDecimal.valueOf(purchase.salePrice.toLong(), 2).toPlainString(),
+                    quantity = purchase.quantity.coerceIn(1, 100),
+                    paymentMethod = purchase.paymentMethod,
+                    saleDateMillis = purchase.saleDate.time
+                )
+            )
+        }
     }
 
     fun onProductSelected(displayName: String) {
@@ -108,6 +139,7 @@ class AddPurchaseViewModel @Inject constructor(
 
         val product = form.selectedProduct
         val purchase = PurchaseModel(
+            key = current.key,
             cod = product.cod,
             name = product.name,
             cost = product.cost
@@ -131,6 +163,12 @@ class AddPurchaseViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
+                if (purchase.key != null) {
+                    updatePurchase(purchase)
+                    _uiState.update { it.copy(isSaving = false) }
+                    completionChannel.send(Unit)
+                    return@launch
+                }
                 createPurchase(purchase)
                 _uiState.update {
                     it.copy(
@@ -142,7 +180,47 @@ class AddPurchaseViewModel @Inject constructor(
                 effectChannel.send(Unit)
             } catch (failure: PurchaseFailure) {
                 _uiState.update {
-                    it.copy(isSaving = false, errorMessage = purchaseErrorMessage(failure.reason))
+                    it.copy(
+                        isSaving = false,
+                        errorMessage = purchaseErrorMessage(
+                            failure.reason,
+                            R.string.purchase_edit_error_generic.takeIf { purchase.key != null }
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun onDeleteRequested() {
+        if (_uiState.value.key == null || _uiState.value.isSaving) return
+        _uiState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun onDeleteDismissed() {
+        _uiState.update { it.copy(showDeleteDialog = false) }
+    }
+
+    fun confirmDelete() {
+        val current = _uiState.value
+        val key = current.key ?: return
+        if (current.isSaving) return
+
+        _uiState.update { it.copy(showDeleteDialog = false, isSaving = true, errorMessage = null) }
+        viewModelScope.launch {
+            try {
+                deletePurchase(key)
+                _uiState.update { it.copy(isSaving = false) }
+                completionChannel.send(Unit)
+            } catch (failure: PurchaseFailure) {
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        errorMessage = purchaseErrorMessage(
+                            failure.reason,
+                            R.string.purchase_delete_error_generic
+                        )
+                    )
                 }
             }
         }
@@ -182,11 +260,14 @@ class AddPurchaseViewModel @Inject constructor(
         ProductFailure.Reason.UNKNOWN -> R.string.purchase_load_products_error_generic
     }
 
-    private fun purchaseErrorMessage(reason: PurchaseFailure.Reason): Int = when (reason) {
+    private fun purchaseErrorMessage(
+        reason: PurchaseFailure.Reason,
+        unknownOverride: Int? = null
+    ): Int = when (reason) {
         PurchaseFailure.Reason.NETWORK -> R.string.purchase_create_error_network
         PurchaseFailure.Reason.PERMISSION_DENIED -> R.string.purchase_create_error_permission
         PurchaseFailure.Reason.UNAUTHENTICATED -> R.string.purchase_create_error_unauthenticated
-        PurchaseFailure.Reason.UNKNOWN -> R.string.purchase_create_error_generic
+        PurchaseFailure.Reason.UNKNOWN -> unknownOverride ?: R.string.purchase_create_error_generic
     }
 }
 

@@ -58,4 +58,25 @@ class AddPurchaseScreenInstrumentedTest {
         composeRule.onNodeWithText("Bolsa Feminina (A-1)").assertIsDisplayed()
         composeRule.onNodeWithText("Valor vendido").assertIsDisplayed()
     }
+
+    @Test
+    fun editModeHidesRegisterButtonAndShowsDeleteConfirmation() {
+        val product = ProductModel(key = "p", cod = "A-1", name = "Bolsa Feminina", cost = BigDecimal("50.00"), description = "Bolsa")
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AddPurchaseScreenContent(
+                    state = AddPurchaseUiState(
+                        key = "purchase-key",
+                        products = listOf(product),
+                        form = PurchaseFormState(selectedProduct = product, salePrice = "89.90"),
+                        isLoadingProducts = false,
+                        showDeleteDialog = true
+                    )
+                )
+            }
+        }
+
+        composeRule.onAllNodesWithText("REGISTRAR VENDA").assertCountEquals(0)
+        composeRule.onNodeWithText("Deletar venda").assertIsDisplayed()
+    }
 }

@@ -29,6 +29,7 @@ fun LoggedRouteTopBar(
         LoggedRoutes.SUMMARY -> R.string.summary_title
         LoggedRoutes.CONFIG -> R.string.config_title
         LoggedRoutes.ADD_PURCHASE -> R.string.add_purchase_title
+        LoggedRoutes.EDIT_SALES -> R.string.edit_purchase_title
         else -> return
     }
     TopAppBar(
@@ -59,5 +60,6 @@ fun LoggedRouteTopBar(
 private fun showBackButton(route: String): Boolean {
     return route == LoggedRoutes.ADD_PRODUCT ||
             route == LoggedRoutes.EDIT_PRODUCT ||
+            route == LoggedRoutes.EDIT_SALES ||
             route == LoggedRoutes.ADD_PURCHASE
 }

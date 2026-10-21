@@ -12,6 +12,7 @@ object LoggedRoutes {
     const val EDIT_PRODUCT = "edit_product"
     const val ADD_PRODUCT = "add_product"
     const val PRODUCT = ADD_PRODUCT
+    const val EDIT_SALES = "edit_sales"
     const val SALES = "sales"
     const val SUMMARY = "summary"
     const val CONFIG = "config"

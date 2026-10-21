@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
@@ -141,7 +142,17 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.SALES) {
             SalesScreen(
                 onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
+                onEditPurchase = navigator::navigateToEditPurchase,
                 viewModel = salesViewModel
+            )
+        }
+
+        composable(LoggedRoutes.EDIT_SALES) {
+            AddPurchaseScreen(
+                purchase = navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<PurchaseModel>(LoggedNavigator.PURCHASE_TO_EDIT_KEY),
+                onFinished = navigator::navigateBack
             )
         }
 
@@ -185,11 +196,17 @@ private class LoggedNavigator(
         navigateTo(LoggedRoutes.EDIT_PRODUCT)
     }
 
+    fun navigateToEditPurchase(purchase: PurchaseModel) {
+        navController.currentBackStackEntry?.savedStateHandle?.set(PURCHASE_TO_EDIT_KEY, purchase)
+        navigateTo(LoggedRoutes.EDIT_SALES)
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }
 
     companion object {
         const val PRODUCT_TO_EDIT_KEY = "product_to_edit"
+        const val PURCHASE_TO_EDIT_KEY = "purchase_to_edit"
     }
 }

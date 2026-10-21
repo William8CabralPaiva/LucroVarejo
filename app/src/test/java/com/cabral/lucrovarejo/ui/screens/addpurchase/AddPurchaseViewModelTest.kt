@@ -10,6 +10,8 @@ import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.DeletePurchaseUseCase
+import com.cabral.lucrovarejo.domain.purchase.usecase.UpdatePurchaseUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import java.math.BigDecimal
 import java.util.Date
@@ -60,7 +62,9 @@ class AddPurchaseViewModelTest {
         purchaseRepository = FakePurchaseRepository()
         viewModel = AddPurchaseViewModel(
             getProducts = GetProductsUseCase(FakeProductRepository(flowOf(listOf(product)))),
-            createPurchase = CreatePurchaseUseCase(purchaseRepository)
+            createPurchase = CreatePurchaseUseCase(purchaseRepository),
+            updatePurchase = UpdatePurchaseUseCase(purchaseRepository),
+            deletePurchase = DeletePurchaseUseCase(purchaseRepository)
         )
     }
 
@@ -187,10 +191,71 @@ class AddPurchaseViewModelTest {
         assertFalse(viewModel.uiState.value.canSubmit)
     }
 
+    @Test
+    fun loadPurchaseFillsFormAndEntersEditMode() = runTest {
+        advanceUntilIdle()
+
+        viewModel.loadPurchase(existingPurchase)
+
+        val state = viewModel.uiState.value
+        assertTrue(state.isEditing)
+        assertEquals("Bolsa Feminina", state.form.selectedProduct?.name)
+        assertEquals("89.90", state.form.salePrice)
+        assertEquals(2, state.form.quantity)
+        assertEquals(PaymentMethods.PIX, state.form.paymentMethod)
+        assertEquals(existingPurchase.saleDate.time, state.form.saleDateMillis)
+    }
+
+    @Test
+    fun savingInEditModeUpdatesPurchaseByKeyAndCompletes() = runTest {
+        advanceUntilIdle()
+        viewModel.loadPurchase(existingPurchase)
+        viewModel.onQuantityChanged(3)
+        val completion = async { viewModel.completions.first() }
+
+        viewModel.savePurchase()
+        advanceUntilIdle()
+
+        assertEquals(existingPurchase.copy(quantity = 3), purchaseRepository.updatedPurchase)
+        assertNull(purchaseRepository.createdPurchase)
+        assertEquals(Unit, completion.await())
+    }
+
+    @Test
+    fun deleteRequiresConfirmationBeforeDeletingByKey() = runTest {
+        advanceUntilIdle()
+        viewModel.loadPurchase(existingPurchase)
+        val completion = async { viewModel.completions.first() }
+
+        viewModel.onDeleteRequested()
+        assertTrue(viewModel.uiState.value.showDeleteDialog)
+        assertNull(purchaseRepository.deletedKey)
+
+        viewModel.confirmDelete()
+        advanceUntilIdle()
+
+        assertEquals("purchase-key", purchaseRepository.deletedKey)
+        assertFalse(viewModel.uiState.value.showDeleteDialog)
+        assertEquals(Unit, completion.await())
+    }
+
+    private val existingPurchase = PurchaseModel(
+        key = "purchase-key",
+        cod = "A-1",
+        name = "Bolsa Feminina",
+        cost = 5000,
+        description = "Bolsa",
+        salePrice = 8990,
+        quantity = 2,
+        saleDate = Date(1_700_000_000_000),
+        paymentMethod = PaymentMethods.PIX
+    )
     private fun createViewModel(productRepository: ProductRepository): AddPurchaseViewModel =
         AddPurchaseViewModel(
             getProducts = GetProductsUseCase(productRepository),
-            createPurchase = CreatePurchaseUseCase(purchaseRepository)
+            createPurchase = CreatePurchaseUseCase(purchaseRepository),
+            updatePurchase = UpdatePurchaseUseCase(purchaseRepository),
+            deletePurchase = DeletePurchaseUseCase(purchaseRepository)
         )
 
     private class FakeProductRepository(
@@ -203,9 +268,18 @@ class AddPurchaseViewModelTest {
     }
 
     private class FakePurchaseRepository : PurchaseRepository {
-    override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel = purchase
-    override suspend fun deletePurchase(key: String) = Unit
         var createdPurchase: PurchaseModel? = null
+        var updatedPurchase: PurchaseModel? = null
+        var deletedKey: String? = null
+
+        override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
+            updatedPurchase = purchase
+            return purchase
+        }
+
+        override suspend fun deletePurchase(key: String) {
+            deletedKey = key
+        }
 
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
             createdPurchase = purchase

@@ -97,4 +97,24 @@ class AddPurchaseScreenUiTest {
             assertEquals(1, saveCount)
         }
     }
+
+    @Test
+    fun editModeHidesRegisterButtonAndShowsDeleteConfirmation() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AddPurchaseScreenContent(
+                    state = AddPurchaseUiState(
+                        key = "purchase-key",
+                        products = listOf(product),
+                        form = PurchaseFormState(selectedProduct = product, salePrice = "89.90"),
+                        isLoadingProducts = false,
+                        showDeleteDialog = true
+                    )
+                )
+            }
+        }
+
+        composeRule.onAllNodesWithText("REGISTRAR VENDA").assertCountEquals(0)
+        composeRule.onNodeWithText("Deletar venda").assertIsDisplayed()
+    }
 }

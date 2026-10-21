@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MonetizationOn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -37,6 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.ui.components.DELETE_PRODUCT_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.DateTextField
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldType
@@ -52,11 +60,19 @@ import java.util.Locale
 
 @Composable
 fun AddPurchaseScreen(
+    purchase: PurchaseModel? = null,
+    onFinished: () -> Unit = {},
     viewModel: AddPurchaseViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.purchase_create_success)
+    LaunchedEffect(viewModel, purchase) {
+        viewModel.loadPurchase(purchase)
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.completions.collect { onFinished() }
+    }
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
             // Sem callback de atualizacao: o Home observa o Firestore e se atualiza sozinho.
@@ -71,7 +87,10 @@ fun AddPurchaseScreen(
         onQuantityChanged = viewModel::onQuantityChanged,
         onPaymentMethodSelected = viewModel::onPaymentMethodSelected,
         onSaleDateChanged = viewModel::onSaleDateChanged,
-        onSave = viewModel::savePurchase
+        onSave = viewModel::savePurchase,
+        onDelete = viewModel::onDeleteRequested,
+        onDeleteConfirm = viewModel::confirmDelete,
+        onDeleteDismiss = viewModel::onDeleteDismissed
     )
 }
 
@@ -84,8 +103,38 @@ fun AddPurchaseScreenContent(
     onQuantityChanged: (Int) -> Unit = {},
     onPaymentMethodSelected: (PaymentMethods) -> Unit = {},
     onSaleDateChanged: (Long) -> Unit = {},
-    onSave: () -> Unit = {}
+    onSave: () -> Unit = {},
+    onDelete: () -> Unit = {},
+    onDeleteConfirm: () -> Unit = {},
+    onDeleteDismiss: () -> Unit = {}
 ) {
+    if (state.showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = onDeleteDismiss,
+            title = { Text(stringResource(R.string.purchase_delete_dialog_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.purchase_delete_dialog_message,
+                        state.form.selectedProduct?.name.orEmpty()
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = onDeleteConfirm) {
+                    Text(
+                        text = stringResource(R.string.purchase_delete_dialog_confirm),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDeleteDismiss) {
+                    Text(stringResource(R.string.date_picker_cancel))
+                }
+            }
+        )
+    }
     val paymentMethods = PaymentMethodsUi.entries
     val paymentLabels = paymentMethods.map { it.displayName }
     val form = state.form
@@ -188,13 +237,36 @@ fun AddPurchaseScreenContent(
                     )
                 }
 
-                SaveProductButtonContent(
-                    label = stringResource(R.string.purchase_create_submit),
-                    loadingLabel = stringResource(R.string.purchase_create_loading),
-                    enabled = state.canSubmit,
-                    isLoading = state.isSaving,
-                    onClick = onSave
-                )
+                if (state.isEditing) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        SaveProductButtonContent(
+                            label = stringResource(R.string.purchase_delete_submit),
+                            enabled = !state.isSaving,
+                            onClick = onDelete,
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Delete,
+                            containerColor = MaterialTheme.colorScheme.error,
+                            testTag = DELETE_PRODUCT_BUTTON_TAG
+                        )
+                        SaveProductButtonContent(
+                            label = stringResource(R.string.purchase_edit_submit),
+                            loadingLabel = stringResource(R.string.purchase_edit_loading),
+                            enabled = state.canSubmit,
+                            isLoading = state.isSaving,
+                            onClick = onSave,
+                            modifier = Modifier.weight(1f),
+                            icon = Icons.Default.Edit
+                        )
+                    }
+                } else {
+                    SaveProductButtonContent(
+                        label = stringResource(R.string.purchase_create_submit),
+                        loadingLabel = stringResource(R.string.purchase_create_loading),
+                        enabled = state.canSubmit,
+                        isLoading = state.isSaving,
+                        onClick = onSave
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
@@ -261,3 +333,35 @@ fun AddPurchaseScreenPreview() {
         AddPurchaseScreenContent(state = AddPurchaseUiState(isLoadingProducts = false))
     }
 }
+
+@Preview(showBackground = true, heightDp = 1000, name = "Editar venda")
+@Composable
+private fun EditPurchaseScreenPreview() {
+    LucroVarejoTheme {
+        AddPurchaseScreenContent(state = editPreviewState())
+    }
+}
+
+@Preview(showBackground = true, heightDp = 1000, name = "Confirmar exclusão da venda")
+@Composable
+private fun DeletePurchaseDialogPreview() {
+    LucroVarejoTheme {
+        AddPurchaseScreenContent(state = editPreviewState().copy(showDeleteDialog = true))
+    }
+}
+
+private fun editPreviewState() = AddPurchaseUiState(
+    isLoadingProducts = false,
+    key = "1",
+    form = PurchaseFormState(
+        selectedProduct = ProductModel(
+            cod = "001",
+            name = "Bolsa Feminina",
+            cost = java.math.BigDecimal("50.00"),
+            description = ""
+        ),
+        salePrice = "89.90",
+        quantity = 2,
+        paymentMethod = PaymentMethods.PIX
+    )
+)

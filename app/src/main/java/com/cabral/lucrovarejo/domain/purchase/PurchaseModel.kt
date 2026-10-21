@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.domain.purchase
 
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import java.io.Serializable
 import java.util.Date
 
 data class PurchaseModel(
@@ -13,4 +14,4 @@ data class PurchaseModel(
     val saleDate: Date,
     val paymentMethod: PaymentMethods,
     val key: String? = null
-)
+) : Serializable
