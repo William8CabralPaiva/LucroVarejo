@@ -34,7 +34,7 @@ class BottomNavBarUiTest {
 
         composeRule.onNodeWithText("Início").assertIsDisplayed()
         composeRule.onNodeWithText("Vendas").assertIsSelected()
-        composeRule.onNodeWithText("Resumo").assertIsDisplayed()
+        composeRule.onNodeWithText("Produtos").assertIsDisplayed()
         composeRule.onNodeWithText("Configurações").assertIsDisplayed()
     }
 
@@ -50,10 +50,10 @@ class BottomNavBarUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Resumo").performClick()
+        composeRule.onNodeWithText("Produtos").performClick()
 
         composeRule.runOnIdle {
-            assertEquals(LoggedRoutes.SUMMARY, selectedRoute)
+            assertEquals(LoggedRoutes.PRODUCTS, selectedRoute)
         }
     }
 
