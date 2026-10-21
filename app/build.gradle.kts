@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    jacoco
 }
 
 android {
@@ -25,6 +26,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
         release {
             optimization {
                 enable = false
@@ -39,8 +43,25 @@ android {
         compose = true
         buildConfig = true
     }
+//    testOptions {
+//        unitTests.isIncludeAndroidResources = true
+//        unitTests.all {
+//            it.extensions.configure(JacocoTaskExtension::class.java) {
+//                // Robolectric's android-all classes are already instrumented; JaCoCo must not touch them
+//                isIncludeNoLocationClasses = false
+//                excludes = listOf("jdk.internal.*", "android.*", "androidx.*", "com.android.*", "org.robolectric.*", "sun.*")
+//            }
+//        }
+//    }
+
+    //RoboEletric
     testOptions {
-        unitTests.isIncludeAndroidResources = true
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.jvmArgs("-noverify")
+            }
+        }
     }
 }
 
