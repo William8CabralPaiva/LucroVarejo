@@ -44,6 +44,7 @@ import com.cabral.lucrovarejo.ui.components.IconButton
 import com.cabral.lucrovarejo.ui.components.AreaTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldType
+import com.cabral.lucrovarejo.ui.theme.DestructiveRed
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
@@ -204,7 +205,7 @@ fun AddProductContent(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.Delete,
                             text = stringResource(R.string.product_delete_submit),
-                            containerColor = MaterialTheme.colorScheme.error,
+                            containerColor = DestructiveRed,
                             testTag = DELETE_PRODUCT_BUTTON_TAG
                         )
                         IconButton(
