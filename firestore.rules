@@ -22,8 +22,27 @@ service cloud.firestore {
         && request.resource.data.email.size() <= 254;
       allow list, delete: if false;
 
-      match /{document=**} {
+      // Coleções da loja sem exigência de imutabilidade.
+      match /products/{productId} {
         allow read, write: if ownsStore();
+      }
+      match /purchases/{purchaseId} {
+        allow read, write: if ownsStore();
+      }
+      match /cardBrands/{brandId} {
+        allow read, create, update: if ownsStore();
+        allow delete: if false;
+      }
+
+      match /paymentTerminals/{terminalId} {
+        allow read, create, update: if ownsStore();
+        allow delete: if false;
+
+        // Tarifas são append-only: nunca sobrescrever/apagar o histórico.
+        match /fees/{feeId} {
+          allow read, create: if ownsStore();
+          allow update, delete: if false;
+        }
       }
     }
   }

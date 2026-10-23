@@ -14,12 +14,13 @@ histórico **nunca é sobrescrito**.
 | Débito | sim | não | por bandeira (%) |
 | Crédito | sim | sim, **cada parcela individual** (1x, 2x, 3x…), sem faixas | uma tarifa (%) por bandeira + parcela |
 
-- Bandeiras: catálogo cadastrado pelo usuário (somente **nome**, sem ícone). Aparecem só nas maquininhas que as habilitarem.
+- Bandeiras: catálogo cadastrado pelo usuário em uma tela separada (`Configurações → Bandeiras`), contendo somente **nome**, sem ícone. Aparecem apenas nas maquininhas que as habilitarem.
+- No cadastro da maquininha, o usuário seleciona as bandeiras previamente cadastradas. Não é possível cadastrar uma nova bandeira diretamente nessa tela.
 - Tarifa digitada em %, armazenada como inteiro em **basis points** (2,49% = 249). Nunca `Float`/`Double`; na UI `BigDecimal`. Validar 0 a 100% e no máximo 2 casas.
 - Cada tarifa tem `effectiveFrom` (data de início). A tarifa válida numa data D é a de maior `effectiveFrom <= D` para a mesma chave (maquininha + tipo + bandeira + nº da parcela).
 - **Histórico imutável**: alterar tarifa = inserir novo registro com nova vigência. Sem update/delete (reforçado nas regras do Firestore). Se o usuário esquecer de registrar na data certa, pode inserir um registro com data retroativa; a consulta por data resolve.
 - Mesma chave + mesma `effectiveFrom` é rejeitada (evita ambiguidade); corrigir = nova data.
-- Vendas futuras devem gravar **snapshot** da tarifa aplicada (bps, bandeira, parcelas, maquininha), conforme o princípio do projeto de não reescrever histórico.
+- Vendas futuras devem gravar **snapshot** da tarifa aplicada (bps, bandeira, parcelas, maquininha), conforme o princípio do projeto de não reescrever histórico. A implementação da venda pertence a outro fluxo e não faz parte deste planejamento.
 - Desativar maquininha/bandeira = `active=false` (arquivar), nunca apagar se houver tarifas ou vendas.
 
 ## Modelo de dados (Firestore, dentro da loja)
@@ -38,35 +39,34 @@ Camadas (seguindo INSTRUCTION.md: models UI separados de request, `strings.xml`,
 No cadastro da maquininha, tudo é vinculado por **chips** (Material 3 `FilterChip`): selecionar um chip revela as opções dependentes abaixo; desselecionar oculta (o histórico de tarifas permanece).
 
 1. **Configurações → Maquininhas** (ver `docs/proposta-tarifas-e-pagamento.svg`): lista + "Adicionar".
-2. **Configurações → Bandeiras**: lista, adicionar/renomear/arquivar (só nome).
+2. **Configurações → Bandeiras**: lista, adicionar/renomear/arquivar (só nome). Essa tela é independente do cadastro de maquininhas.
 3. **Cadastro/edição da maquininha**:
-   - Nome.
-   - Chips de tipo: `Dinheiro` `Pix` `Débito` `Crédito` (multisseleção).
-   - **Dinheiro** selecionado → opção "Cobra tarifa?" (chip/switch); se sim, tarifa % + início da vigência.
-   - **Pix** selecionado → tarifa % + início da vigência.
-   - **Débito** selecionado → chips das bandeiras cadastradas; cada bandeira marcada mostra tarifa % + início.
-   - **Crédito** selecionado → chips das bandeiras; cada bandeira marcada mostra chips de parcelas (`1x` … `12x`); cada parcela marcada mostra sua tarifa % + início.
-4. **Histórico de tarifas** por tipo/bandeira/parcela: ordenado por vigência, atual destacada, botão "Nova tarifa" (% + data de início). Nunca edita registro antigo.
-5. **Nova venda** (incluída no escopo): o usuário escolhe a maquininha e depois o método de pagamento (chips); conforme a escolha, habilita as opções seguintes:
-   - Dinheiro → (tarifa, se configurada).
-   - Pix → tarifa.
-   - Débito → chips das bandeiras habilitadas na maquininha.
-   - Crédito → bandeira, depois parcela (somente as parcelas com tarifa cadastrada).
-   - Tarifa resolvida pela data da venda (`ResolveFee`) e gravada como **snapshot** na venda.
+  - Nome.
+  - Chips de tipo: `Dinheiro` `Pix` `Débito` `Crédito` (multisseleção).
+  - **Dinheiro** selecionado → opção "Cobra tarifa?" (chip/switch); se sim, tarifa % + início da vigência.
+  - **Pix** selecionado → tarifa % + início da vigência.
+  - **Débito** selecionado → chips das bandeiras previamente cadastradas; cada bandeira marcada mostra tarifa % + início.
+  - **Crédito** selecionado → chips das bandeiras previamente cadastradas; cada bandeira marcada permite configurar suas parcelas individualmente. A seleção da parcela deve utilizar um componente **Spinner**, com as parcelas previamente cadastradas para aquela bandeira. Cada combinação de bandeira + parcela possui sua própria tarifa (%) e data de início da vigência. Exemplo: Visa 1x possui uma tarifa, Visa 2x possui outra e Mastercard 1x possui outra. As tarifas nunca são compartilhadas entre parcelas ou bandeiras.
+4. **Histórico de tarifas** por tipo/bandeira/parcela: ordenado por vigência, atual destacada, botão "Nova tarifa" (% + data de início). No crédito, o histórico deve ser independente para cada combinação de bandeira e parcela. Nunca edita registro antigo.
+
 ## Todos (ordem sugerida)
 1. `payment-domain` — modelos de domínio, enum com DEBIT/CREDIT, `ResolveFeeForDate` + testes unitários (vigência, empate, retroativo, bps).
 2. `payment-data` — requests/records/mappers, data sources Firestore, repositório, DI, regras do Firestore (fees append-only).
 3. `card-brands-screen` — CRUD de bandeiras (nome apenas).
 4. `terminal-list-screen` — lista de maquininhas + rota/navegação e entrada em Configurações.
-5. `terminal-form-screen` — formulário com chips (FilterChip) de tipo, bandeira e parcela, tarifas por tipo/bandeira/parcela, data de início.
+5. `terminal-form-screen` — formulário com chips (FilterChip) de tipo e bandeira; tarifas por tipo/bandeira/parcela, seleção de parcelas por Spinner, data de início.
 6. `fee-history-screen` — histórico e nova tarifa com vigência.
 7. `strings-and-validation` — textos em `strings.xml`, validações (%, datas, parcelas entre 1 e 12 sem duplicidade, duplicidade de vigência), estados vazio/erro/loading, confirmação ao arquivar.
-8. `sale-integration` — Nova Venda: escolher maquininha → método (chips) → bandeira → parcela, com snapshot da tarifa.
+8. `sale-integration` — **fora do escopo deste planejamento**. A implementação de Nova Venda pertence a outro fluxo e será desenvolvida separadamente, consumindo as configurações cadastradas aqui.
 
-Dependências: 2→1; 3,4→2; 5→3,4; 6→5; 7 transversal; 8→6.
+Dependências: 2→1; 3,4→2; 5→3,4; 6→5; 7 transversal. A integração com Nova Venda não faz parte destas dependências.
 
 ## Decisões
 - Dinheiro: tarifa opcional, definida pelo usuário.
 - Crédito: tarifa individual por parcela (sem faixa).
-- Integração com a Nova Venda: incluída (item 8 deixa de ser opcional).
+- Bandeiras cadastradas separadamente das maquininhas.
+- Bandeiras exibidas somente pelo nome, sem ícones.
+- Parcelas de crédito selecionadas por Spinner, utilizando as parcelas previamente cadastradas para cada bandeira.
+- Cada combinação de bandeira e parcela possui tarifa e vigência independentes.
+- Integração com a Nova Venda: fora do escopo deste planejamento.
 - Vínculo no cadastro: componentes de chips.

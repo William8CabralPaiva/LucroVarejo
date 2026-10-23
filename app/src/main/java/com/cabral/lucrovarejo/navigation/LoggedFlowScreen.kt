@@ -17,9 +17,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
+import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
+import com.cabral.lucrovarejo.ui.screens.cardbrands.CardBrandsScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
+import com.cabral.lucrovarejo.ui.screens.feehistory.FeeHistoryScreen
+import com.cabral.lucrovarejo.ui.screens.feehistory.FeeSlotKey
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.addproduct.AddProductScreen
@@ -27,6 +31,8 @@ import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
 import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
+import com.cabral.lucrovarejo.ui.screens.terminalform.TerminalFormScreen
+import com.cabral.lucrovarejo.ui.screens.terminals.PaymentTerminalsScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 
@@ -165,8 +171,47 @@ private fun LoggedDestinationNavHost(
             ConfigScreen(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
-                onLogout = onLogout
+                onLogout = onLogout,
+                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.PAYMENT_TERMINALS) },
+                onNavigateToCardBrands = { navigator.navigateTo(LoggedRoutes.CARD_BRANDS) }
             )
+        }
+
+        composable(LoggedRoutes.CARD_BRANDS) {
+            CardBrandsScreen()
+        }
+
+        composable(LoggedRoutes.PAYMENT_TERMINALS) {
+            PaymentTerminalsScreen(
+                onAddTerminal = { navigator.navigateTo(LoggedRoutes.ADD_TERMINAL) },
+                onEditTerminal = navigator::navigateToEditTerminal
+            )
+        }
+
+        composable(LoggedRoutes.ADD_TERMINAL) {
+            TerminalFormScreen(
+                onFinished = navigator::navigateBack,
+                onOpenFeeHistory = navigator::navigateToFeeHistory
+            )
+        }
+
+        composable(LoggedRoutes.EDIT_TERMINAL) {
+            TerminalFormScreen(
+                terminal = navController.previousBackStackEntry
+                    ?.savedStateHandle
+                    ?.get<PaymentTerminalModel>(LoggedNavigator.TERMINAL_TO_EDIT_KEY),
+                onFinished = navigator::navigateBack,
+                onOpenFeeHistory = navigator::navigateToFeeHistory
+            )
+        }
+
+        composable(LoggedRoutes.FEE_HISTORY) {
+            val slot = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<FeeSlotKey>(LoggedNavigator.FEE_SLOT_KEY)
+            if (slot != null) {
+                FeeHistoryScreen(slot = slot)
+            }
         }
     }
 }
@@ -201,6 +246,16 @@ private class LoggedNavigator(
         navigateTo(LoggedRoutes.EDIT_SALES)
     }
 
+    fun navigateToEditTerminal(terminal: PaymentTerminalModel) {
+        navController.currentBackStackEntry?.savedStateHandle?.set(TERMINAL_TO_EDIT_KEY, terminal)
+        navigateTo(LoggedRoutes.EDIT_TERMINAL)
+    }
+
+    fun navigateToFeeHistory(slot: FeeSlotKey) {
+        navController.currentBackStackEntry?.savedStateHandle?.set(FEE_SLOT_KEY, slot)
+        navigateTo(LoggedRoutes.FEE_HISTORY)
+    }
+
     fun navigateBack() {
         navController.popBackStack()
     }
@@ -208,5 +263,7 @@ private class LoggedNavigator(
     companion object {
         const val PRODUCT_TO_EDIT_KEY = "product_to_edit"
         const val PURCHASE_TO_EDIT_KEY = "purchase_to_edit"
+        const val TERMINAL_TO_EDIT_KEY = "terminal_to_edit"
+        const val FEE_SLOT_KEY = "fee_slot_key"
     }
 }

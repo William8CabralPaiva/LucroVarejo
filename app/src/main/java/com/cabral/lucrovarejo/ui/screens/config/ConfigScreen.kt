@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.ModeNight
+import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,7 +36,9 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 fun ConfigScreen(
     currentThemeMode: ThemeMode,
     onThemeModeChanged: (ThemeMode) -> Unit,
-    onLogout: () -> Unit = {}
+    onLogout: () -> Unit = {},
+    onNavigateToTerminals: () -> Unit = {},
+    onNavigateToCardBrands: () -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
 
@@ -59,6 +63,22 @@ fun ConfigScreen(
                 onCheckedChange = { enabled ->
                     onThemeModeChanged(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
                 }
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.PointOfSale,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_terminals),
+                subtitle = stringResource(R.string.settings_terminals_subtitle),
+                onClick = onNavigateToTerminals
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.CreditCard,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_card_brands),
+                subtitle = stringResource(R.string.settings_card_brands_subtitle),
+                onClick = onNavigateToCardBrands
             )
 
             SettingsItem(

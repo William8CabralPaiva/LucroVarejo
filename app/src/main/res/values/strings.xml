@@ -168,4 +168,76 @@
     <string name="sales_retry">Tentar novamente</string>
     <string name="sales_load_error">Não foi possível carregar as vendas.</string>
     <string name="sales_add">Nova venda</string>
+
+    <!-- Configurações: Maquininhas e Bandeiras -->
+    <string name="settings_terminals">Maquininhas</string>
+    <string name="settings_terminals_subtitle">Cadastre maquininhas, métodos aceitos e tarifas.</string>
+    <string name="settings_card_brands">Bandeiras</string>
+    <string name="settings_card_brands_subtitle">Cadastre as bandeiras de cartão aceitas.</string>
+
+    <string name="card_brands_title">Bandeiras</string>
+    <string name="card_brands_add">Adicionar bandeira</string>
+    <string name="card_brands_empty">Nenhuma bandeira cadastrada.</string>
+    <string name="card_brands_load_error">Não foi possível carregar as bandeiras.</string>
+    <string name="card_brands_name_label">Nome da bandeira</string>
+    <string name="card_brands_name_placeholder">Ex.: Visa</string>
+    <string name="card_brands_name_required">Informe o nome da bandeira.</string>
+    <string name="card_brands_dialog_add_title">Nova bandeira</string>
+    <string name="card_brands_dialog_rename_title">Renomear bandeira</string>
+    <string name="card_brands_archive">Arquivar</string>
+    <string name="card_brands_archive_dialog_title">Arquivar bandeira</string>
+    <string name="card_brands_archive_dialog_message">Tem certeza que deseja arquivar a bandeira %1$s? Ela deixará de aparecer nas maquininhas.</string>
+    <string name="card_brands_archived_badge">Arquivada</string>
+    <string name="dialog_save">Salvar</string>
+    <string name="dialog_cancel">Cancelar</string>
+    <string name="dialog_confirm">Confirmar</string>
+
+    <string name="terminals_title">Maquininhas</string>
+    <string name="terminals_add">Adicionar maquininha</string>
+    <string name="terminals_empty">Nenhuma maquininha cadastrada.</string>
+    <string name="terminals_load_error">Não foi possível carregar as maquininhas.</string>
+    <string name="terminals_archived_badge">Arquivada</string>
+    <string name="terminals_archive">Arquivar</string>
+    <string name="terminals_archive_dialog_title">Arquivar maquininha</string>
+    <string name="terminals_archive_dialog_message">Tem certeza que deseja arquivar a maquininha %1$s?</string>
+
+    <string name="terminal_form_add_title">Nova maquininha</string>
+    <string name="terminal_form_edit_title">Editar maquininha</string>
+    <string name="terminal_form_name_label">Nome da maquininha</string>
+    <string name="terminal_form_name_placeholder">Ex.: Maquininha Mercado Pago</string>
+    <string name="terminal_form_name_required">Informe o nome da maquininha.</string>
+    <string name="terminal_form_methods_label">Tipos de pagamento habilitados</string>
+    <string name="terminal_form_method_cash">Dinheiro</string>
+    <string name="terminal_form_method_pix">Pix</string>
+    <string name="terminal_form_method_debit">Débito</string>
+    <string name="terminal_form_method_credit">Crédito</string>
+    <string name="terminal_form_methods_required">Selecione ao menos um tipo de pagamento.</string>
+    <string name="terminal_form_enable_method">Habilitar este tipo de pagamento</string>
+    <string name="terminal_form_cash_charges_fee">Cobrar tarifa?</string>
+    <string name="terminal_form_brands_label">Bandeiras aceitas</string>
+    <string name="terminal_form_brands_empty">Cadastre bandeiras em Configurações → Bandeiras antes de habilitar débito ou crédito.</string>
+    <string name="terminal_form_fee_rate_label">Tarifa (%)</string>
+    <string name="terminal_form_fee_rate_placeholder">0,00</string>
+    <string name="terminal_form_fee_rate_required">Informe a tarifa.</string>
+    <string name="terminal_form_fee_rate_invalid">Informe um valor entre 0 e 100, com até duas casas decimais.</string>
+    <string name="terminal_form_fee_effective_from_label">Início da vigência</string>
+    <string name="terminal_form_installments_label">Parcelas</string>
+    <string name="terminal_form_installments_placeholder">Selecionar parcela</string>
+    <string name="terminal_form_add_installment">Adicionar parcela</string>
+    <string name="terminal_form_installment_x">%1$dx</string>
+    <string name="terminal_form_save">Salvar</string>
+    <string name="terminal_form_saving">Salvando...</string>
+    <string name="terminal_form_save_error">Não foi possível salvar a maquininha. Tente novamente.</string>
+    <string name="terminal_form_fee_duplicate_date">Já existe uma tarifa com essa data de início para essa combinação. Escolha outra data.</string>
+    <string name="terminal_form_fee_save_error">Não foi possível salvar a tarifa. Tente novamente.</string>
+    <string name="terminal_form_current_fee">Tarifa atual: %1$s</string>
+    <string name="terminal_form_no_fee">Sem tarifa cadastrada</string>
+    <string name="terminal_form_history">Ver histórico de tarifas</string>
+
+    <string name="fee_history_title">Histórico de tarifas</string>
+    <string name="fee_history_empty">Nenhuma tarifa cadastrada.</string>
+    <string name="fee_history_load_error">Não foi possível carregar o histórico de tarifas.</string>
+    <string name="fee_history_current_badge">Atual</string>
+    <string name="fee_history_effective_from">Vigência: %1$s</string>
+    <string name="fee_history_add">Nova tarifa</string>
 </resources>
