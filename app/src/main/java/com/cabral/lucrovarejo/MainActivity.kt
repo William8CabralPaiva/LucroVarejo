@@ -1,6 +1,10 @@
 package com.cabral.lucrovarejo
 
 import android.os.Bundle
+import android.os.SystemClock
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.cabral.lucrovarejo.navigation.LoggedRoutes
+import com.cabral.lucrovarejo.navigation.NotLoggedRoutes
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,8 +33,14 @@ class MainActivity : ComponentActivity() {
     lateinit var signOut: SignOutUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val splashStart = SystemClock.elapsedRealtime()
+        splashScreen.setKeepOnScreenCondition {
+            SystemClock.elapsedRealtime() - splashStart < SPLASH_DURATION_MS
+        }
         enableEdgeToEdge()
+        val isUserAuthenticated = hasSession()
         val themePreferences = getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
 
         setContent {
@@ -47,7 +57,12 @@ class MainActivity : ComponentActivity() {
             LucroVarejoTheme(themeMode = themeMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AppNavGraph(
-                        isUserAuthenticated = hasSession(),
+                        startDestination = if (isUserAuthenticated) {
+                            LoggedRoutes.HOME
+                        } else {
+                            NotLoggedRoutes.LOGIN
+                        },
+                        isUserAuthenticated = isUserAuthenticated,
                         onSignOut = { signOut() },
                         currentThemeMode = themeMode,
                         onThemeModeChanged = { newMode ->
@@ -65,5 +80,6 @@ class MainActivity : ComponentActivity() {
     private companion object {
         const val THEME_PREFERENCES = "lucro_varejo_preferences"
         const val THEME_MODE_KEY = "theme_mode"
+        const val SPLASH_DURATION_MS = 1500L
     }
 }

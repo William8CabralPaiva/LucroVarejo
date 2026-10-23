@@ -1,11 +1,12 @@
 package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.cabral.lucrovarejo.ui.screens.SplashScreen
+
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
@@ -30,7 +31,7 @@ fun AppNavGraph(
         startDestination = startDestination,
         isUserAuthenticated = isUserAuthenticated,
         onSignOut = onSignOut,
-        splashScreen = { onSplashFinished -> SplashScreen(onSplashFinished) },
+        splashScreen = { onSplashFinished -> LaunchedEffect(Unit) { onSplashFinished() } },
         loginScreen = { goToRegisterScreen, goToLoggedFlow ->
             LoginScreen(goToRegisterScreen, goToLoggedFlow)
         },
