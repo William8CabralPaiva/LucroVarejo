@@ -24,8 +24,7 @@ histórico **nunca é sobrescrito**.
 - Desativar maquininha = `active=false` (arquivar), nunca apagar se houver tarifas ou vendas.
 
 ## Modelo de dados (Firestore, dentro da loja)
-- `stores/{storeId}/cardBrands/{brandId}`: `name`, `active`, `createdAt`
-- `stores/{storeId}/paymentTerminals/{terminalId}`: `name`, `active`, `enabledMethods` (lista de CASH/PIX/DEBIT/CREDIT), `enabledBrandIds`
+- `stores/{storeId}/paymentTerminals/{terminalId}`: `name`, `active`, `enabledMethods` (lista de CASH/PIX/DEBIT/CREDIT), `brands` (lista de nomes de bandeira, exclusiva desta maquininha — não há `cardBrands` global)
 - `stores/{storeId}/paymentTerminals/{terminalId}/fees/{feeId}` (append-only):
   `method`, `brandId?`, `installments?` (nº exato da parcela), `rateBps`, `effectiveFrom`, `createdAt`
 - `firestore.rules`: fees só `create`/`read` (sem `update`/`delete`); demais com acesso restrito à sessão da loja.
@@ -35,18 +34,18 @@ Camadas (seguindo INSTRUCTION.md: models UI separados de request, `strings.xml`,
 - `data/payment`: `*Request` (bps `Int`, data ISO), `*Record`, mappers, `FirebasePayment*DataSource`, repositório, módulo Hilt.
 - `ui/screens/...`: telas abaixo. Atualizar `PaymentMethodsUi` (nomes via `stringResource`, e corrigir o encoding quebrado atual).
 
-## UX (vínculo no cadastro com chips)
-No cadastro da maquininha, tudo é vinculado por **chips** (Material 3 `FilterChip`): selecionar um chip revela as opções dependentes abaixo; desselecionar oculta (o histórico de tarifas permanece).
+## UX (implementado)
+No cadastro da maquininha, os 4 tipos de pagamento ficam em um **`SecondaryTabRow`/`Tab`** (Material 3) — a aba só navega entre as seções, nunca representa "habilitado/desabilitado" (evita o bug de duas abas parecerem selecionadas ao mesmo tempo). Dentro de cada seção, um **`AppSwitch`** (ver `ui/components/AppSwitch.kt`) liga/desliga o método. O botão **Salvar** fica fixo fora das tabs, na `bottomBar` do `Scaffold` (padrão verde circular do app, `ui/components/IconButton.kt`), sempre visível e habilitado assim que nome + ao menos um método estiverem preenchidos.
 
 1. **Configurações → Maquininhas** (ver `docs/proposta-tarifas-e-pagamento.svg`): lista + "Adicionar".
 2. **Cadastro/edição da maquininha**:
-  - Nome.
-  - Chips de tipo: `Dinheiro` `Pix` `Débito` `Crédito` (multisseleção).
-  - **Dinheiro** selecionado → opção "Cobra tarifa?" (chip/switch); se sim, tarifa % + início da vigência.
-  - **Pix** selecionado → tarifa % + início da vigência.
-  - **Débito** selecionado → campo para cadastrar o nome de uma nova bandeira (própria desta maquininha) + chips das bandeiras já cadastradas nela; cada bandeira marcada mostra tarifa % + início.
-  - **Crédito** selecionado → mesmo cadastro inline de bandeiras (desta maquininha); cada bandeira marcada permite configurar suas parcelas individualmente. A seleção da parcela deve utilizar um componente **Spinner**, com as parcelas previamente cadastradas para aquela bandeira. Cada combinação de bandeira + parcela possui sua própria tarifa (%) e data de início da vigência. Exemplo: Visa 1x possui uma tarifa, Visa 2x possui outra e Mastercard 1x possui outra. As tarifas nunca são compartilhadas entre parcelas ou bandeiras.
-3. **Histórico de tarifas** por tipo/bandeira/parcela: ordenado por vigência, atual destacada, botão "Nova tarifa" (% + data de início). No crédito, o histórico deve ser independente para cada combinação de bandeira e parcela. Nunca edita registro antigo.
+  - Nome (ícone `Icons.Outlined.PointOfSale`).
+  - `Tab`s de tipo: `Dinheiro` `Pix` `Débito` `Crédito` (navegação); `AppSwitch` dentro da seção habilita/desabilita o método.
+  - **Dinheiro** habilitado → opção "Cobra tarifa?" (`AppSwitch`); se sim, tarifa % + início da vigência (pré-preenchida com a data atual).
+  - **Pix** habilitado → tarifa % + início da vigência (pré-preenchida com a data atual).
+  - **Débito** habilitado → campo para cadastrar o nome de uma nova bandeira (própria desta maquininha, campo full-width + botão "Adicionar bandeira" centralizado abaixo) + `FilterChip`s das bandeiras já cadastradas nela; selecionar um chip revela o card de tarifa da bandeira **e rola a tela até ele** (`BringIntoViewRequester` + `LaunchedEffect` disparado após a seleção ser recomposta — nunca lançar `bringIntoView()` direto no clique, pois o card ainda não existe na árvore nesse instante).
+  - **Crédito** habilitado → mesmo cadastro inline de bandeiras (desta maquininha); cada bandeira marcada (com o mesmo scroll-to-card) permite configurar suas parcelas individualmente via **Spinner**, com as parcelas previamente cadastradas para aquela bandeira. Cada combinação de bandeira + parcela possui sua própria tarifa (%) e data de início da vigência (pré-preenchida com a data atual). Exemplo: Visa 1x possui uma tarifa, Visa 2x possui outra e Mastercard 1x possui outra. As tarifas nunca são compartilhadas entre parcelas ou bandeiras.
+3. **Histórico de tarifas** por tipo/bandeira/parcela: ordenado por vigência, atual destacada, botão "Nova tarifa" (% + data de início, também pré-preenchida com a data atual). No crédito, o histórico deve ser independente para cada combinação de bandeira e parcela. Nunca edita registro antigo.
 
 ## Todos (ordem sugerida)
 1. `payment-domain` — modelos de domínio, enum com DEBIT/CREDIT, `ResolveFeeForDate` + testes unitários (vigência, empate, retroativo, bps).
@@ -67,4 +66,7 @@ Dependências: 2→1; 3,4→2; 5→3; 6→5; 7 transversal. A integração com N
 - Parcelas de crédito selecionadas por Spinner, utilizando as parcelas previamente cadastradas para cada bandeira.
 - Cada combinação de bandeira e parcela possui tarifa e vigência independentes.
 - Integração com a Nova Venda: fora do escopo deste planejamento.
-- Vínculo no cadastro: componentes de chips.
+- Navegação entre tipos de pagamento: `Tab`/`SecondaryTabRow` (não chips); habilitar/desabilitar o método é feito por um `AppSwitch` dentro da seção, para a aba nunca ficar ambígua sobre estar "selecionada" vs. "habilitada".
+- Botão Salvar fixo fora das tabs (bottomBar do Scaffold), sempre no padrão verde circular (`ui/components/IconButton.kt`) usado no resto do app.
+- Chip de bandeira (`FilterChip`) ao ser marcado rola a tela até o card de tarifa correspondente (scroll-to-select, nunca ao desmarcar).
+- Datas de vigência (nova maquininha e histórico de tarifas) vêm pré-preenchidas com a data atual; o usuário pode alterar livremente.
