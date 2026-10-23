@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.terminals
+package com.cabral.lucrovarejo.ui.screens.machinelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,19 +14,19 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class PaymentTerminalsViewModel @Inject constructor(
+class MachineListViewModel @Inject constructor(
     getTerminals: GetTerminalsUseCase,
     private val archiveTerminal: ArchiveTerminalUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(PaymentTerminalsUiState())
-    val uiState: StateFlow<PaymentTerminalsUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(MachineListUiState())
+    val uiState: StateFlow<MachineListUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             getTerminals()
                 .catch { _uiState.update { state -> state.copy(isLoading = false, hasError = true) } }
                 .collect { terminals ->
-                    _uiState.value = PaymentTerminalsUiState(items = terminals, isLoading = false)
+                    _uiState.value = MachineListUiState(items = terminals, isLoading = false)
                 }
         }
     }

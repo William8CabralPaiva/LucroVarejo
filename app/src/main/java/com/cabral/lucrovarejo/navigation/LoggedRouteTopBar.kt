@@ -30,10 +30,10 @@ fun LoggedRouteTopBar(
         LoggedRoutes.CONFIG -> R.string.config_title
         LoggedRoutes.ADD_PURCHASE -> R.string.add_purchase_title
         LoggedRoutes.EDIT_SALES -> R.string.edit_purchase_title
-        LoggedRoutes.PAYMENT_TERMINALS -> R.string.terminals_title
-        LoggedRoutes.ADD_TERMINAL -> R.string.terminal_form_add_title
-        LoggedRoutes.EDIT_TERMINAL -> R.string.terminal_form_edit_title
-        LoggedRoutes.FEE_HISTORY -> R.string.fee_history_title
+        LoggedRoutes.MACHINE_LIST -> R.string.terminals_title
+        LoggedRoutes.ADD_MACHINE -> R.string.terminal_form_add_title
+        LoggedRoutes.EDIT_MACHINE -> R.string.terminal_form_edit_title
+        LoggedRoutes.MACHINE_HISTORY -> R.string.machine_history_title
         else -> return
     }
     TopAppBar(
@@ -66,8 +66,8 @@ private fun showBackButton(route: String): Boolean {
             route == LoggedRoutes.EDIT_PRODUCT ||
             route == LoggedRoutes.EDIT_SALES ||
             route == LoggedRoutes.ADD_PURCHASE ||
-            route == LoggedRoutes.PAYMENT_TERMINALS ||
-            route == LoggedRoutes.ADD_TERMINAL ||
-            route == LoggedRoutes.EDIT_TERMINAL ||
-            route == LoggedRoutes.FEE_HISTORY
+            route == LoggedRoutes.MACHINE_LIST ||
+            route == LoggedRoutes.ADD_MACHINE ||
+            route == LoggedRoutes.EDIT_MACHINE ||
+            route == LoggedRoutes.MACHINE_HISTORY
 }

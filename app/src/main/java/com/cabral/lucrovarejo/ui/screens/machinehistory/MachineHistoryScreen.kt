@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.feehistory
+package com.cabral.lucrovarejo.ui.screens.machinehistory
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,9 +49,9 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
 
 @Composable
-fun FeeHistoryScreen(
+fun MachineHistoryScreen(
     slot: FeeSlotKey,
-    viewModel: FeeHistoryViewModel? = null,
+    viewModel: MachineHistoryViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
@@ -60,7 +60,7 @@ fun FeeHistoryScreen(
         resolvedViewModel.loadSlot(slot)
     }
 
-    FeeHistoryContent(
+    MachineHistoryContent(
         state = state,
         onShowAddDialog = resolvedViewModel::onShowAddDialog,
         onDismissAddDialog = resolvedViewModel::onDismissAddDialog,
@@ -71,8 +71,8 @@ fun FeeHistoryScreen(
 }
 
 @Composable
-fun FeeHistoryContent(
-    state: FeeHistoryUiState,
+fun MachineHistoryContent(
+    state: MachineHistoryUiState,
     onShowAddDialog: () -> Unit,
     onDismissAddDialog: () -> Unit,
     onRateChange: (String) -> Unit,
@@ -85,7 +85,7 @@ fun FeeHistoryContent(
             ExtendedFloatingActionButton(onClick = onShowAddDialog) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.fee_history_add))
+                Text(stringResource(R.string.machine_history_add))
             }
         }
     ) { innerPadding ->
@@ -108,7 +108,7 @@ fun FeeHistoryContent(
                 Column(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     horizontalAlignment = Alignment.CenterHorizontally
-                ) { Text(text = stringResource(R.string.fee_history_empty)) }
+                ) { Text(text = stringResource(R.string.machine_history_empty)) }
             }
 
             else -> {
@@ -120,7 +120,7 @@ fun FeeHistoryContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(state.fees, key = { it.historyKey() }) { fee ->
-                        FeeHistoryItem(fee = fee, isCurrent = fee.historyKey() == state.currentFeeKey)
+                        MachineHistoryItem(fee = fee, isCurrent = fee.historyKey() == state.currentFeeKey)
                     }
                 }
             }
@@ -139,7 +139,7 @@ fun FeeHistoryContent(
 }
 
 @Composable
-private fun FeeHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
+private fun MachineHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -153,13 +153,13 @@ private fun FeeHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
             ) {
                 Text(text = "${fee.rateBps.bpsToRate()}%", style = MaterialTheme.typography.titleMedium)
                 if (isCurrent) {
-                    AssistChip(onClick = {}, label = { Text(stringResource(R.string.fee_history_current_badge)) })
+                    AssistChip(onClick = {}, label = { Text(stringResource(R.string.machine_history_current_badge)) })
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(
-                    R.string.fee_history_effective_from,
+                    R.string.machine_history_effective_from,
                     formatSaleDatePtBr(fee.effectiveFrom.time)
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -171,7 +171,7 @@ private fun FeeHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
 
 @Composable
 private fun AddFeeDialog(
-    state: FeeHistoryUiState,
+    state: MachineHistoryUiState,
     onDismiss: () -> Unit,
     onRateChange: (String) -> Unit,
     onDateChange: (Long) -> Unit,
@@ -179,7 +179,7 @@ private fun AddFeeDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.fee_history_add)) },
+        title = { Text(stringResource(R.string.machine_history_add)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 IconTextFieldContent(
@@ -218,12 +218,12 @@ private fun AddFeeDialog(
     )
 }
 
-@Preview(showBackground = true, name = "Histórico de tarifas")
+@Preview(showBackground = true, name = "HistÃƒÂ³rico de tarifas")
 @Composable
-private fun FeeHistoryContentPreview() {
+private fun MachineHistoryContentPreview() {
     LucroVarejoTheme {
-        FeeHistoryContent(
-            state = FeeHistoryUiState(
+        MachineHistoryContent(
+            state = MachineHistoryUiState(
                 method = TerminalPaymentType.CREDIT,
                 brandName = "Visa",
                 installments = 1,

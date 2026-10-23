@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.terminals
+package com.cabral.lucrovarejo.ui.screens.machinelist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,14 +41,14 @@ import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
-fun PaymentTerminalsScreen(
+fun MachineListScreen(
     onAddTerminal: () -> Unit,
     onEditTerminal: (PaymentTerminalModel) -> Unit = {},
-    viewModel: PaymentTerminalsViewModel? = null,
+    viewModel: MachineListViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
-    PaymentTerminalsContent(
+    MachineListContent(
         state = state,
         onAddTerminal = onAddTerminal,
         onEditTerminal = onEditTerminal,
@@ -57,8 +57,8 @@ fun PaymentTerminalsScreen(
 }
 
 @Composable
-fun PaymentTerminalsContent(
-    state: PaymentTerminalsUiState,
+fun MachineListContent(
+    state: MachineListUiState,
     onAddTerminal: () -> Unit,
     onEditTerminal: (PaymentTerminalModel) -> Unit = {},
     onArchive: (String) -> Unit,
@@ -176,10 +176,10 @@ private fun PaymentTerminalItem(
 
 @Preview(showBackground = true, name = "Maquininhas")
 @Composable
-private fun PaymentTerminalsContentPreview() {
+private fun MachineListContentPreview() {
     LucroVarejoTheme {
-        PaymentTerminalsContent(
-            state = PaymentTerminalsUiState(
+        MachineListContent(
+            state = MachineListUiState(
                 isLoading = false,
                 items = listOf(
                     PaymentTerminalModel(key = "1", name = "Maquininha Mercado Pago"),
@@ -195,10 +195,10 @@ private fun PaymentTerminalsContentPreview() {
 
 @Preview(showBackground = true, name = "Maquininhas vazio")
 @Composable
-private fun PaymentTerminalsContentEmptyPreview() {
+private fun MachineListContentEmptyPreview() {
     LucroVarejoTheme {
-        PaymentTerminalsContent(
-            state = PaymentTerminalsUiState(isLoading = false),
+        MachineListContent(
+            state = MachineListUiState(isLoading = false),
             onAddTerminal = {},
             onArchive = {}
         )

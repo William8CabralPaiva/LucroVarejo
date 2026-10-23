@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.terminalform
+package com.cabral.lucrovarejo.ui.screens.machinesale
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,7 +44,7 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
-import com.cabral.lucrovarejo.ui.screens.feehistory.FeeSlotKey
+import com.cabral.lucrovarejo.ui.screens.machinehistory.FeeSlotKey
 import com.cabral.lucrovarejo.ui.components.AppSwitch
 import com.cabral.lucrovarejo.ui.components.DateTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconButton
@@ -61,11 +61,11 @@ import androidx.compose.material.icons.outlined.PointOfSale
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TerminalFormScreen(
+fun MachineSaleScreen(
     terminal: PaymentTerminalModel? = null,
     onFinished: () -> Unit = {},
-    onOpenFeeHistory: (FeeSlotKey) -> Unit = {},
-    viewModel: TerminalFormViewModel? = null,
+    onOpenMachineHistory: (FeeSlotKey) -> Unit = {},
+    viewModel: MachineSaleViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
@@ -74,7 +74,7 @@ fun TerminalFormScreen(
         resolvedViewModel.loadTerminal(terminal)
     }
 
-    TerminalFormContent(
+    MachineSaleContent(
         state = state,
         onNameChange = resolvedViewModel::onNameChange,
         onToggleMethod = resolvedViewModel::onToggleMethod,
@@ -85,9 +85,9 @@ fun TerminalFormScreen(
         onAddCreditInstallment = resolvedViewModel::onAddCreditInstallment,
         onFeeRateChange = resolvedViewModel::onFeeRateChange,
         onFeeDateChange = resolvedViewModel::onFeeDateChange,
-        onOpenFeeHistory = { entry ->
-            val terminalId = state.terminalId ?: return@TerminalFormContent
-            onOpenFeeHistory(
+        onOpenMachineHistory = { entry ->
+            val terminalId = state.terminalId ?: return@MachineSaleContent
+            onOpenMachineHistory(
                 FeeSlotKey(
                     terminalId = terminalId,
                     method = entry.method,
@@ -106,8 +106,8 @@ fun TerminalFormScreen(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TerminalFormContent(
-    state: TerminalFormUiState,
+fun MachineSaleContent(
+    state: MachineSaleUiState,
     onNameChange: (String) -> Unit,
     onToggleMethod: (TerminalPaymentType) -> Unit,
     onCashChargesFeeToggle: (Boolean) -> Unit,
@@ -117,7 +117,7 @@ fun TerminalFormContent(
     onAddCreditInstallment: (String, Int) -> Unit,
     onFeeRateChange: (String, String) -> Unit,
     onFeeDateChange: (String, Long) -> Unit,
-    onOpenFeeHistory: (FeeEntryUi) -> Unit = {},
+    onOpenMachineHistory: (FeeEntryUi) -> Unit = {},
     onSave: () -> Unit,
 ) {
     Scaffold(
@@ -165,8 +165,8 @@ fun TerminalFormContent(
                 TerminalPaymentType.CREDIT to R.string.terminal_form_method_credit,
             )
         }
-        // Aba apenas navega entre as seções; habilitar/desabilitar o método é feito pelo Switch
-        // dentro da própria seção, evitando que mais de uma aba pareça "selecionada" ao mesmo tempo.
+        // Aba apenas navega entre as seÃ§Ãµes; habilitar/desabilitar o mÃ©todo Ã© feito pelo Switch
+        // dentro da prÃ³pria seÃ§Ã£o, evitando que mais de uma aba pareÃ§a "selecionada" ao mesmo tempo.
         var selectedTabIndex by remember { mutableStateOf(0) }
         val (currentMethod, currentLabelResId) = methods[selectedTabIndex]
         val methodEnabled = state.selectedMethods.contains(currentMethod)
@@ -251,7 +251,7 @@ fun TerminalFormContent(
                                         entry = cashEntry,
                                         onRateChange = { onFeeRateChange(cashEntry.id, it) },
                                         onDateChange = { onFeeDateChange(cashEntry.id, it) },
-                                        onOpenHistory = { onOpenFeeHistory(cashEntry) }
+                                        onOpenHistory = { onOpenMachineHistory(cashEntry) }
                                     )
                                 }
                             }
@@ -262,7 +262,7 @@ fun TerminalFormContent(
                                         entry = entry,
                                         onRateChange = { onFeeRateChange(entry.id, it) },
                                         onDateChange = { onFeeDateChange(entry.id, it) },
-                                        onOpenHistory = { onOpenFeeHistory(entry) }
+                                        onOpenHistory = { onOpenMachineHistory(entry) }
                                     )
                                 }
                             }
@@ -283,7 +283,7 @@ fun TerminalFormContent(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 } else {
-                                    // Ao selecionar uma bandeira, rola a tela até o card dela.
+                                    // Ao selecionar uma bandeira, rola a tela atÃ© o card dela.
                                     val debitBringIntoView = remember(state.availableBrands) {
                                         state.availableBrands.associateWith { BringIntoViewRequester() }
                                     }
@@ -325,7 +325,7 @@ fun TerminalFormContent(
                                                     entry = entry,
                                                     onRateChange = { onFeeRateChange(entry.id, it) },
                                                     onDateChange = { onFeeDateChange(entry.id, it) },
-                                                    onOpenHistory = { onOpenFeeHistory(entry) }
+                                                    onOpenHistory = { onOpenMachineHistory(entry) }
                                                 )
                                             }
                                         }
@@ -349,7 +349,7 @@ fun TerminalFormContent(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 } else {
-                                    // Ao selecionar uma bandeira, rola a tela até o card dela.
+                                    // Ao selecionar uma bandeira, rola a tela atÃ© o card dela.
                                     val creditBringIntoView = remember(state.availableBrands) {
                                         state.availableBrands.associateWith { BringIntoViewRequester() }
                                     }
@@ -404,7 +404,7 @@ fun TerminalFormContent(
                                                         entry = entry,
                                                         onRateChange = { onFeeRateChange(entry.id, it) },
                                                         onDateChange = { onFeeDateChange(entry.id, it) },
-                                                        onOpenHistory = { onOpenFeeHistory(entry) }
+                                                        onOpenHistory = { onOpenMachineHistory(entry) }
                                                     )
                                                 }
                                             }
@@ -545,7 +545,7 @@ private fun CreditInstallmentPicker(
     }
 }
 
-/** Campos de tarifa (%) + vigência de um slot, sem Card próprio (usado aninhado dentro das seções). */
+/** Campos de tarifa (%) + vigÃªncia de um slot, sem Card prÃ³prio (usado aninhado dentro das seÃ§Ãµes). */
 @Composable
 private fun FeeEntryFields(
     entry: FeeEntryUi,
@@ -590,10 +590,10 @@ private fun FeeEntryFields(
 
 @Preview(showBackground = true, name = "Form maquininha")
 @Composable
-private fun TerminalFormContentPreview() {
+private fun MachineSaleContentPreview() {
     LucroVarejoTheme {
-        TerminalFormContent(
-            state = TerminalFormUiState(
+        MachineSaleContent(
+            state = MachineSaleUiState(
                 name = "Maquininha Mercado Pago",
                 selectedMethods = setOf(TerminalPaymentType.PIX, TerminalPaymentType.CREDIT),
                 availableBrands = listOf("Visa"),

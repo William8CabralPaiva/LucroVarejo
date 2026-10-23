@@ -222,10 +222,10 @@
     <string name="terminal_form_no_fee">Sem tarifa cadastrada</string>
     <string name="terminal_form_history">Ver histórico de tarifas</string>
 
-    <string name="fee_history_title">Histórico de tarifas</string>
-    <string name="fee_history_empty">Nenhuma tarifa cadastrada.</string>
-    <string name="fee_history_load_error">Não foi possível carregar o histórico de tarifas.</string>
-    <string name="fee_history_current_badge">Atual</string>
-    <string name="fee_history_effective_from">Vigência: %1$s</string>
-    <string name="fee_history_add">Nova tarifa</string>
+    <string name="machine_history_title">Histórico de tarifas</string>
+    <string name="machine_history_empty">Nenhuma tarifa cadastrada.</string>
+    <string name="machine_history_load_error">Não foi possível carregar o histórico de tarifas.</string>
+    <string name="machine_history_current_badge">Atual</string>
+    <string name="machine_history_effective_from">Vigência: %1$s</string>
+    <string name="machine_history_add">Nova tarifa</string>
 </resources>

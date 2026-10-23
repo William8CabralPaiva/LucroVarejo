@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.terminalform
+package com.cabral.lucrovarejo.ui.screens.machinesale
 
 import androidx.annotation.StringRes
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
@@ -20,7 +20,7 @@ data class FeeEntryUi(
             .joinToString("|")
 }
 
-data class TerminalFormUiState(
+data class MachineSaleUiState(
     val terminalId: String? = null,
     val name: String = "",
     @StringRes val nameError: Int? = null,

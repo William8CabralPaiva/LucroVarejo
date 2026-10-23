@@ -1,10 +1,10 @@
-package com.cabral.lucrovarejo.ui.screens.feehistory
+package com.cabral.lucrovarejo.ui.screens.machinehistory
 
 import androidx.annotation.StringRes
 import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 
-data class FeeHistoryUiState(
+data class MachineHistoryUiState(
     val terminalId: String = "",
     val method: TerminalPaymentType = TerminalPaymentType.CASH,
     val brandId: String? = null,
@@ -23,5 +23,5 @@ data class FeeHistoryUiState(
     @StringRes val saveError: Int? = null,
 )
 
-/** Chave estável de uma tarifa na lista (usada para marcar a tarifa "Atual"). */
+/** Chave estÃ¡vel de uma tarifa na lista (usada para marcar a tarifa "Atual"). */
 fun TerminalFeeModel.historyKey(): String = "${effectiveFrom.time}|$rateBps"

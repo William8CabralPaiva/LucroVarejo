@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.feehistory
+package com.cabral.lucrovarejo.ui.screens.machinehistory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,13 +23,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class FeeHistoryViewModel @Inject constructor(
+class MachineHistoryViewModel @Inject constructor(
     private val getTerminalFees: GetTerminalFeesUseCase,
     private val addTerminalFee: AddTerminalFeeUseCase,
     private val resolveFeeForDate: ResolveFeeForDateUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(FeeHistoryUiState(isLoading = true))
-    val uiState: StateFlow<FeeHistoryUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(MachineHistoryUiState(isLoading = true))
+    val uiState: StateFlow<MachineHistoryUiState> = _uiState.asStateFlow()
 
     private var loadedSlot: FeeSlotKey? = null
 
@@ -38,7 +38,7 @@ class FeeHistoryViewModel @Inject constructor(
         if (loadedSlot == slot) return
         loadedSlot = slot
         _uiState.update {
-            FeeHistoryUiState(
+            MachineHistoryUiState(
                 terminalId = slot.terminalId,
                 method = slot.method,
                 brandId = slot.brandId,
@@ -47,13 +47,13 @@ class FeeHistoryViewModel @Inject constructor(
             )
         }
 
-        // A bandeira agora é cadastrada diretamente na maquininha; o próprio nome é o brandId.
+        // A bandeira agora Ã© cadastrada diretamente na maquininha; o prÃ³prio nome Ã© o brandId.
         _uiState.update { it.copy(brandName = slot.brandId) }
 
         viewModelScope.launch {
             getTerminalFees(slot.terminalId)
                 .onStart { _uiState.update { it.copy(isLoading = true, loadError = null) } }
-                .catch { _uiState.update { state -> state.copy(isLoading = false, loadError = R.string.fee_history_load_error) } }
+                .catch { _uiState.update { state -> state.copy(isLoading = false, loadError = R.string.machine_history_load_error) } }
                 .collect { allFees ->
                     val feesForSlot = allFees.filter {
                         it.method == slot.method && it.brandId == slot.brandId && it.installments == slot.installments

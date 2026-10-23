@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.screens.terminalform
+package com.cabral.lucrovarejo.ui.screens.machinesale
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,15 +25,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
-class TerminalFormViewModel @Inject constructor(
+class MachineSaleViewModel @Inject constructor(
     private val getTerminalFees: GetTerminalFeesUseCase,
     private val createTerminal: CreateTerminalUseCase,
     private val updateTerminal: UpdateTerminalUseCase,
     private val addTerminalFee: AddTerminalFeeUseCase,
     private val resolveFeeForDate: ResolveFeeForDateUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(TerminalFormUiState(isLoading = false))
-    val uiState: StateFlow<TerminalFormUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(MachineSaleUiState(isLoading = false))
+    val uiState: StateFlow<MachineSaleUiState> = _uiState.asStateFlow()
 
     private var existingFees: List<TerminalFeeModel> = emptyList()
 

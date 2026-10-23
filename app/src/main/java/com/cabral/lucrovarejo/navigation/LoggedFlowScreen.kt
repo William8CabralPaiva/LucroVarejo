@@ -21,8 +21,8 @@ import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
-import com.cabral.lucrovarejo.ui.screens.feehistory.FeeHistoryScreen
-import com.cabral.lucrovarejo.ui.screens.feehistory.FeeSlotKey
+import com.cabral.lucrovarejo.ui.screens.machinehistory.MachineHistoryScreen
+import com.cabral.lucrovarejo.ui.screens.machinehistory.FeeSlotKey
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.addproduct.AddProductScreen
@@ -30,8 +30,8 @@ import com.cabral.lucrovarejo.ui.screens.product.ProductScreen
 import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
-import com.cabral.lucrovarejo.ui.screens.terminalform.TerminalFormScreen
-import com.cabral.lucrovarejo.ui.screens.terminals.PaymentTerminalsScreen
+import com.cabral.lucrovarejo.ui.screens.machinesale.MachineSaleScreen
+import com.cabral.lucrovarejo.ui.screens.machinelist.MachineListScreen
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 
@@ -161,7 +161,7 @@ private fun LoggedDestinationNavHost(
             )
         }
 
-        //Não descomentar
+        //NÃ£o descomentar
 //        composable(LoggedRoutes.SUMMARY) {
 //            SummaryScreen()
 //        }
@@ -171,40 +171,40 @@ private fun LoggedDestinationNavHost(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
-                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.PAYMENT_TERMINALS) }
+                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) }
             )
         }
 
-        composable(LoggedRoutes.PAYMENT_TERMINALS) {
-            PaymentTerminalsScreen(
-                onAddTerminal = { navigator.navigateTo(LoggedRoutes.ADD_TERMINAL) },
+        composable(LoggedRoutes.MACHINE_LIST) {
+            MachineListScreen(
+                onAddTerminal = { navigator.navigateTo(LoggedRoutes.ADD_MACHINE) },
                 onEditTerminal = navigator::navigateToEditTerminal
             )
         }
 
-        composable(LoggedRoutes.ADD_TERMINAL) {
-            TerminalFormScreen(
+        composable(LoggedRoutes.ADD_MACHINE) {
+            MachineSaleScreen(
                 onFinished = navigator::navigateBack,
-                onOpenFeeHistory = navigator::navigateToFeeHistory
+                onOpenMachineHistory = navigator::navigateToMachineHistory
             )
         }
 
-        composable(LoggedRoutes.EDIT_TERMINAL) {
-            TerminalFormScreen(
+        composable(LoggedRoutes.EDIT_MACHINE) {
+            MachineSaleScreen(
                 terminal = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<PaymentTerminalModel>(LoggedNavigator.TERMINAL_TO_EDIT_KEY),
                 onFinished = navigator::navigateBack,
-                onOpenFeeHistory = navigator::navigateToFeeHistory
+                onOpenMachineHistory = navigator::navigateToMachineHistory
             )
         }
 
-        composable(LoggedRoutes.FEE_HISTORY) {
+        composable(LoggedRoutes.MACHINE_HISTORY) {
             val slot = navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.get<FeeSlotKey>(LoggedNavigator.FEE_SLOT_KEY)
             if (slot != null) {
-                FeeHistoryScreen(slot = slot)
+                MachineHistoryScreen(slot = slot)
             }
         }
     }
@@ -242,12 +242,12 @@ private class LoggedNavigator(
 
     fun navigateToEditTerminal(terminal: PaymentTerminalModel) {
         navController.currentBackStackEntry?.savedStateHandle?.set(TERMINAL_TO_EDIT_KEY, terminal)
-        navigateTo(LoggedRoutes.EDIT_TERMINAL)
+        navigateTo(LoggedRoutes.EDIT_MACHINE)
     }
 
-    fun navigateToFeeHistory(slot: FeeSlotKey) {
+    fun navigateToMachineHistory(slot: FeeSlotKey) {
         navController.currentBackStackEntry?.savedStateHandle?.set(FEE_SLOT_KEY, slot)
-        navigateTo(LoggedRoutes.FEE_HISTORY)
+        navigateTo(LoggedRoutes.MACHINE_HISTORY)
     }
 
     fun navigateBack() {

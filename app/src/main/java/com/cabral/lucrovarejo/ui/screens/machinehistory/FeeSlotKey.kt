@@ -1,12 +1,12 @@
-package com.cabral.lucrovarejo.ui.screens.feehistory
+package com.cabral.lucrovarejo.ui.screens.machinehistory
 
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import java.io.Serializable
 
 /**
  * Identifica um "slot" de tarifa (maquininha + tipo + bandeira opcional + parcela opcional)
- * para abrir a tela de histórico. Passado via `SavedStateHandle` do back stack, como
- * já é feito com `ProductModel`/`PurchaseModel`.
+ * para abrir a tela de histÃ³rico. Passado via `SavedStateHandle` do back stack, como
+ * jÃ¡ Ã© feito com `ProductModel`/`PurchaseModel`.
  */
 data class FeeSlotKey(
     val terminalId: String,
