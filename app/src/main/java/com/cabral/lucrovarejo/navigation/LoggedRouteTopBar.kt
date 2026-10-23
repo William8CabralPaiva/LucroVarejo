@@ -13,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
+import com.cabral.lucrovarejo.ui.theme.LightMintContainer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,6 +22,7 @@ fun LoggedRouteTopBar(
     route: String,
     onBackPress: () -> Unit,
 ) {
+
     val titleId = when (route) {
         LoggedRoutes.HOME -> R.string.home_header_title
         LoggedRoutes.PRODUCTS -> R.string.products_title
@@ -40,12 +43,12 @@ fun LoggedRouteTopBar(
         title = {
             Text(
                 text = stringResource(titleId),
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = LightMintContainer,
                 fontWeight = FontWeight.Bold
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
+            containerColor = ForestGreenHeader
         ),
         navigationIcon = {
             if (showBackButton(route)) {

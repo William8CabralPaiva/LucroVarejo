@@ -32,6 +32,8 @@ import com.cabral.lucrovarejo.ui.screens.sales.SalesScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.screens.machinesale.MachineSaleScreen
 import com.cabral.lucrovarejo.ui.screens.machinelist.MachineListScreen
+import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 
@@ -52,8 +54,11 @@ internal fun LoggedFlowScreen(
         ?.route
         ?: LoggedRoutes.HOME
 
+    val isDark = LocalIsDarkTheme.current
+    val scaffoldContainerColor = if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
+
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = scaffoldContainerColor,
         topBar = {
             LoggedRouteTopBar(
                 route = currentRoute,
