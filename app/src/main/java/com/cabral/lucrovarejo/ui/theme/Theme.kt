@@ -106,8 +106,7 @@ fun LucroVarejoTheme(
             val window = (view.context as? Activity)?.window
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, view)
-                // true = dark icons (for light backgrounds), false = light icons (for dark backgrounds)
-                insetsController.isAppearanceLightStatusBars = !useDarkTheme
+                insetsController.isAppearanceLightStatusBars = false
                 insetsController.isAppearanceLightNavigationBars = !useDarkTheme
             }
         }
