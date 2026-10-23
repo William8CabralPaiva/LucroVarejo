@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Card
@@ -21,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,11 +41,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.CardBrandModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.ui.screens.feehistory.FeeSlotKey
+import com.cabral.lucrovarejo.ui.components.AppSwitch
 import com.cabral.lucrovarejo.ui.components.DateTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconButton
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
@@ -54,6 +55,7 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Percent
 import androidx.compose.material.icons.outlined.PointOfSale
 
@@ -77,6 +79,7 @@ fun TerminalFormScreen(
         onNameChange = resolvedViewModel::onNameChange,
         onToggleMethod = resolvedViewModel::onToggleMethod,
         onCashChargesFeeToggle = resolvedViewModel::onCashChargesFeeToggle,
+        onAddBrand = resolvedViewModel::onAddBrand,
         onToggleDebitBrand = resolvedViewModel::onToggleDebitBrand,
         onToggleCreditBrand = resolvedViewModel::onToggleCreditBrand,
         onAddCreditInstallment = resolvedViewModel::onAddCreditInstallment,
@@ -108,6 +111,7 @@ fun TerminalFormContent(
     onNameChange: (String) -> Unit,
     onToggleMethod: (TerminalPaymentType) -> Unit,
     onCashChargesFeeToggle: (Boolean) -> Unit,
+    onAddBrand: (String) -> Unit,
     onToggleDebitBrand: (String) -> Unit,
     onToggleCreditBrand: (String) -> Unit,
     onAddCreditInstallment: (String, Int) -> Unit,
@@ -227,7 +231,7 @@ fun TerminalFormContent(
                             text = stringResource(R.string.terminal_form_enable_method),
                             modifier = Modifier.weight(1f)
                         )
-                        Switch(checked = methodEnabled, onCheckedChange = { onToggleMethod(currentMethod) })
+                        AppSwitch(checked = methodEnabled, onCheckedChange = { onToggleMethod(currentMethod) })
                     }
 
                     if (methodEnabled) {
@@ -239,7 +243,7 @@ fun TerminalFormContent(
                                         text = stringResource(R.string.terminal_form_cash_charges_fee),
                                         modifier = Modifier.weight(1f)
                                     )
-                                    Switch(checked = state.cashChargesFee, onCheckedChange = onCashChargesFeeToggle)
+                                    AppSwitch(checked = state.cashChargesFee, onCheckedChange = onCashChargesFeeToggle)
                                 }
                                 if (state.cashChargesFee && cashEntry != null) {
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -270,31 +274,53 @@ fun TerminalFormContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
+                                BrandAddRow(onAddBrand = onAddBrand)
                                 if (state.availableBrands.isEmpty()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = stringResource(R.string.terminal_form_brands_empty),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 } else {
+                                    // Ao selecionar uma bandeira, rola a tela até o card dela.
+                                    val debitBringIntoView = remember(state.availableBrands) {
+                                        state.availableBrands.associateWith { BringIntoViewRequester() }
+                                    }
+                                    var debitPendingScroll by remember { mutableStateOf<String?>(null) }
+                                    LaunchedEffect(state.selectedDebitBrandIds) {
+                                        val target = debitPendingScroll
+                                        if (target != null && target in state.selectedDebitBrandIds) {
+                                            debitBringIntoView[target]?.bringIntoView()
+                                            debitPendingScroll = null
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         state.availableBrands.forEach { brand ->
                                             BrandChip(
-                                                brand = brand,
-                                                selected = brand.key in state.selectedDebitBrandIds,
-                                                onToggle = { brand.key?.let(onToggleDebitBrand) }
+                                                name = brand,
+                                                selected = brand in state.selectedDebitBrandIds,
+                                                onToggle = {
+                                                    val willSelect = brand !in state.selectedDebitBrandIds
+                                                    if (willSelect) debitPendingScroll = brand
+                                                    onToggleDebitBrand(brand)
+                                                }
                                             )
                                         }
                                     }
                                     state.selectedDebitBrandIds.forEach { brandId ->
-                                        val brandName =
-                                            state.availableBrands.firstOrNull { it.key == brandId }?.name.orEmpty()
                                         val entry = state.feeEntries.firstOrNull {
                                             it.method == TerminalPaymentType.DEBIT && it.brandId == brandId
                                         }
                                         if (entry != null) {
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            NestedBrandBlock(title = brandName) {
+                                            NestedBrandBlock(
+                                                title = brandId,
+                                                modifier = debitBringIntoView[brandId]?.let {
+                                                    Modifier.bringIntoViewRequester(it)
+                                                } ?: Modifier
+                                            ) {
                                                 FeeEntryFields(
                                                     entry = entry,
                                                     onRateChange = { onFeeRateChange(entry.id, it) },
@@ -314,27 +340,49 @@ fun TerminalFormContent(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
+                                BrandAddRow(onAddBrand = onAddBrand)
                                 if (state.availableBrands.isEmpty()) {
+                                    Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = stringResource(R.string.terminal_form_brands_empty),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 } else {
+                                    // Ao selecionar uma bandeira, rola a tela até o card dela.
+                                    val creditBringIntoView = remember(state.availableBrands) {
+                                        state.availableBrands.associateWith { BringIntoViewRequester() }
+                                    }
+                                    var creditPendingScroll by remember { mutableStateOf<String?>(null) }
+                                    LaunchedEffect(state.selectedCreditBrandIds) {
+                                        val target = creditPendingScroll
+                                        if (target != null && target in state.selectedCreditBrandIds) {
+                                            creditBringIntoView[target]?.bringIntoView()
+                                            creditPendingScroll = null
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
                                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                         state.availableBrands.forEach { brand ->
                                             BrandChip(
-                                                brand = brand,
-                                                selected = brand.key in state.selectedCreditBrandIds,
-                                                onToggle = { brand.key?.let(onToggleCreditBrand) }
+                                                name = brand,
+                                                selected = brand in state.selectedCreditBrandIds,
+                                                onToggle = {
+                                                    val willSelect = brand !in state.selectedCreditBrandIds
+                                                    if (willSelect) creditPendingScroll = brand
+                                                    onToggleCreditBrand(brand)
+                                                }
                                             )
                                         }
                                     }
                                     state.selectedCreditBrandIds.forEach { brandId ->
-                                        val brandName =
-                                            state.availableBrands.firstOrNull { it.key == brandId }?.name.orEmpty()
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        NestedBrandBlock(title = brandName) {
+                                        NestedBrandBlock(
+                                            title = brandId,
+                                            modifier = creditBringIntoView[brandId]?.let {
+                                                Modifier.bringIntoViewRequester(it)
+                                            } ?: Modifier
+                                        ) {
                                             CreditInstallmentPicker(
                                                 brandId = brandId,
                                                 configured = state.creditInstallmentsByBrand[brandId].orEmpty(),
@@ -399,9 +447,13 @@ private fun SectionCard(
 }
 
 @Composable
-private fun NestedBrandBlock(title: String, content: @Composable () -> Unit) {
+private fun NestedBrandBlock(
+    title: String,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -413,15 +465,43 @@ private fun NestedBrandBlock(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
+private fun BrandAddRow(onAddBrand: (String) -> Unit) {
+    var newBrandName by remember { mutableStateOf("") }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        IconTextFieldContent(
+            value = newBrandName,
+            onValueChange = { newBrandName = it },
+            labelResId = R.string.terminal_form_brand_name_label,
+            placeholderResId = R.string.terminal_form_brand_name_placeholder,
+            icon = Icons.Outlined.CreditCard,
+            type = IconTextFieldType.TEXT,
+            required = false
+        )
+        TextButton(
+            onClick = {
+                onAddBrand(newBrandName)
+                newBrandName = ""
+            },
+            enabled = newBrandName.isNotBlank(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(stringResource(R.string.terminal_form_add_brand))
+        }
+    }
+}
+
+@Composable
 private fun BrandChip(
-    brand: CardBrandModel,
+    name: String,
     selected: Boolean,
     onToggle: () -> Unit,
 ) {
     FilterChip(
         selected = selected,
         onClick = onToggle,
-        label = { Text(brand.name) },
+        label = { Text(name) },
         leadingIcon = if (selected) {
             { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.height(18.dp)) }
         } else null
@@ -516,17 +596,18 @@ private fun TerminalFormContentPreview() {
             state = TerminalFormUiState(
                 name = "Maquininha Mercado Pago",
                 selectedMethods = setOf(TerminalPaymentType.PIX, TerminalPaymentType.CREDIT),
-                availableBrands = listOf(CardBrandModel(key = "1", name = "Visa")),
-                selectedCreditBrandIds = setOf("1"),
-                creditInstallmentsByBrand = mapOf("1" to listOf(1, 2)),
+                availableBrands = listOf("Visa"),
+                selectedCreditBrandIds = setOf("Visa"),
+                creditInstallmentsByBrand = mapOf("Visa" to listOf(1, 2)),
                 feeEntries = listOf(
                     FeeEntryUi(method = TerminalPaymentType.PIX),
-                    FeeEntryUi(method = TerminalPaymentType.CREDIT, brandId = "1", brandName = "Visa", installments = 1)
+                    FeeEntryUi(method = TerminalPaymentType.CREDIT, brandId = "Visa", brandName = "Visa", installments = 1)
                 )
             ),
             onNameChange = {},
             onToggleMethod = {},
             onCashChargesFeeToggle = {},
+            onAddBrand = {},
             onToggleDebitBrand = {},
             onToggleCreditBrand = {},
             onAddCreditInstallment = { _, _ -> },

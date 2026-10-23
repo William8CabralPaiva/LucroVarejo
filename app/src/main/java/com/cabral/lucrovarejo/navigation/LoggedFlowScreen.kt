@@ -20,7 +20,6 @@ import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
-import com.cabral.lucrovarejo.ui.screens.cardbrands.CardBrandsScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.feehistory.FeeHistoryScreen
 import com.cabral.lucrovarejo.ui.screens.feehistory.FeeSlotKey
@@ -172,13 +171,8 @@ private fun LoggedDestinationNavHost(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
-                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.PAYMENT_TERMINALS) },
-                onNavigateToCardBrands = { navigator.navigateTo(LoggedRoutes.CARD_BRANDS) }
+                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.PAYMENT_TERMINALS) }
             )
-        }
-
-        composable(LoggedRoutes.CARD_BRANDS) {
-            CardBrandsScreen()
         }
 
         composable(LoggedRoutes.PAYMENT_TERMINALS) {

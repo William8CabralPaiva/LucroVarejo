@@ -1,7 +1,6 @@
 package com.cabral.lucrovarejo.ui.screens.terminalform
 
 import androidx.annotation.StringRes
-import com.cabral.lucrovarejo.domain.payment.CardBrandModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 
 /** Um "slot" de tarifa a preencher no formulário: tipo + bandeira (opcional) + parcela (opcional). */
@@ -28,7 +27,8 @@ data class TerminalFormUiState(
     val selectedMethods: Set<TerminalPaymentType> = emptySet(),
     @StringRes val methodsError: Int? = null,
     val cashChargesFee: Boolean = false,
-    val availableBrands: List<CardBrandModel> = emptyList(),
+    // Bandeiras cadastradas diretamente nesta maquininha (não é um catálogo global).
+    val availableBrands: List<String> = emptyList(),
     val selectedDebitBrandIds: Set<String> = emptySet(),
     val selectedCreditBrandIds: Set<String> = emptySet(),
     val creditInstallmentsByBrand: Map<String, List<Int>> = emptyMap(),

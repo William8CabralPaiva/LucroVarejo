@@ -6,6 +6,8 @@ data class PaymentTerminalModel(
     val name: String,
     val active: Boolean = true,
     val enabledMethods: Set<TerminalPaymentType> = emptySet(),
-    val enabledBrandIds: Set<String> = emptySet(),
+    // Bandeiras cadastradas diretamente nesta maquininha (não é um catálogo global: cada
+    // maquininha pode aceitar um conjunto diferente de bandeiras).
+    val brands: List<String> = emptyList(),
     val key: String? = null
 ) : Serializable

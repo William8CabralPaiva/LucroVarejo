@@ -10,7 +10,6 @@ import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.toRateBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddTerminalFeeUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.CreateTerminalUseCase
-import com.cabral.lucrovarejo.domain.payment.usecase.GetCardBrandsUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalFeesUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.ResolveFeeForDateUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.UpdateTerminalUseCase
@@ -27,26 +26,16 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class TerminalFormViewModel @Inject constructor(
-    private val getCardBrands: GetCardBrandsUseCase,
     private val getTerminalFees: GetTerminalFeesUseCase,
     private val createTerminal: CreateTerminalUseCase,
     private val updateTerminal: UpdateTerminalUseCase,
     private val addTerminalFee: AddTerminalFeeUseCase,
     private val resolveFeeForDate: ResolveFeeForDateUseCase,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(TerminalFormUiState(isLoading = true))
+    private val _uiState = MutableStateFlow(TerminalFormUiState(isLoading = false))
     val uiState: StateFlow<TerminalFormUiState> = _uiState.asStateFlow()
 
     private var existingFees: List<TerminalFeeModel> = emptyList()
-
-    init {
-        viewModelScope.launch {
-            val brands = runCatching { getCardBrands().first() }
-                .getOrDefault(emptyList())
-                .filter { it.active }
-            _uiState.update { it.copy(availableBrands = brands, isLoading = false) }
-        }
-    }
 
     // Chamado a partir da tela (LaunchedEffect) com a maquininha vinda do back stack, se houver.
     fun loadTerminal(terminal: PaymentTerminalModel?) {
@@ -60,12 +49,15 @@ class TerminalFormViewModel @Inject constructor(
                     name = terminal.name,
                     selectedMethods = terminal.enabledMethods,
                     cashChargesFee = existingFees.any { it.method == TerminalPaymentType.CASH },
-                    selectedDebitBrandIds = terminal.enabledBrandIds.filter { brandId ->
-                        existingFees.any { it.method == TerminalPaymentType.DEBIT && it.brandId == brandId }
-                    }.toSet(),
-                    selectedCreditBrandIds = terminal.enabledBrandIds.filter { brandId ->
-                        existingFees.any { it.method == TerminalPaymentType.CREDIT && it.brandId == brandId }
-                    }.toSet(),
+                    availableBrands = terminal.brands,
+                    selectedDebitBrandIds = existingFees
+                        .filter { it.method == TerminalPaymentType.DEBIT }
+                        .mapNotNull { it.brandId }
+                        .toSet(),
+                    selectedCreditBrandIds = existingFees
+                        .filter { it.method == TerminalPaymentType.CREDIT }
+                        .mapNotNull { it.brandId }
+                        .toSet(),
                     creditInstallmentsByBrand = existingFees
                         .filter { it.method == TerminalPaymentType.CREDIT }
                         .groupBy { it.brandId.orEmpty() }
@@ -94,6 +86,16 @@ class TerminalFormViewModel @Inject constructor(
     fun onCashChargesFeeToggle(enabled: Boolean) {
         _uiState.update { it.copy(cashChargesFee = enabled) }
         recomputeFeeEntries()
+    }
+
+    // Bandeira é cadastrada diretamente na maquininha; o próprio nome (normalizado) é usado como id.
+    fun onAddBrand(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isBlank()) return
+        _uiState.update { state ->
+            if (state.availableBrands.any { it.equals(trimmed, ignoreCase = true) }) return@update state
+            state.copy(availableBrands = state.availableBrands + trimmed)
+        }
     }
 
     fun onToggleDebitBrand(brandId: String) {
@@ -170,13 +172,12 @@ class TerminalFormViewModel @Inject constructor(
         _uiState.update { it.copy(isSaving = true, saveError = null) }
         viewModelScope.launch {
             runCatching {
-                val enabledBrandIds = state.selectedDebitBrandIds + state.selectedCreditBrandIds
                 val terminal = PaymentTerminalModel(
                     key = state.terminalId,
                     name = state.name.trim(),
                     active = true,
                     enabledMethods = state.selectedMethods,
-                    enabledBrandIds = enabledBrandIds
+                    brands = state.availableBrands
                 )
                 val saved = if (state.terminalId == null) createTerminal(terminal) else updateTerminal(terminal)
                 val terminalId = requireNotNull(saved.key)
@@ -222,15 +223,13 @@ class TerminalFormViewModel @Inject constructor(
             }
             if (state.selectedMethods.contains(TerminalPaymentType.DEBIT)) {
                 state.selectedDebitBrandIds.forEach { brandId ->
-                    val brandName = state.availableBrands.firstOrNull { it.key == brandId }?.name
-                    entries += buildEntry(TerminalPaymentType.DEBIT, brandId, brandName, null, now)
+                    entries += buildEntry(TerminalPaymentType.DEBIT, brandId, brandId, null, now)
                 }
             }
             if (state.selectedMethods.contains(TerminalPaymentType.CREDIT)) {
                 state.selectedCreditBrandIds.forEach { brandId ->
-                    val brandName = state.availableBrands.firstOrNull { it.key == brandId }?.name
                     state.creditInstallmentsByBrand[brandId].orEmpty().forEach { installment ->
-                        entries += buildEntry(TerminalPaymentType.CREDIT, brandId, brandName, installment, now)
+                        entries += buildEntry(TerminalPaymentType.CREDIT, brandId, brandId, installment, now)
                     }
                 }
             }
@@ -260,6 +259,7 @@ class TerminalFormViewModel @Inject constructor(
             brandId = brandId,
             brandName = brandName,
             installments = installments,
+            effectiveFromMillis = date.time,
             currentRateBps = currentFee?.rateBps
         )
     }

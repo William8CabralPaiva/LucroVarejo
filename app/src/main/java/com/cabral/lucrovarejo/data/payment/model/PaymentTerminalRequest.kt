@@ -6,7 +6,7 @@ data class PaymentTerminalRequest(
     val name: String,
     val active: Boolean,
     val enabledMethods: List<String>,
-    val enabledBrandIds: List<String>
+    val brands: List<String>
 ) {
     fun toFirestoreFields(): Map<String, Any> = toFirestoreUpdateFields() +
         (FIELD_CREATED_AT to FieldValue.serverTimestamp())
@@ -15,14 +15,14 @@ data class PaymentTerminalRequest(
         FIELD_NAME to name,
         FIELD_ACTIVE to active,
         FIELD_ENABLED_METHODS to enabledMethods,
-        FIELD_ENABLED_BRAND_IDS to enabledBrandIds
+        FIELD_BRANDS to brands
     )
 
     companion object {
         const val FIELD_NAME = "name"
         const val FIELD_ACTIVE = "active"
         const val FIELD_ENABLED_METHODS = "enabledMethods"
-        const val FIELD_ENABLED_BRAND_IDS = "enabledBrandIds"
+        const val FIELD_BRANDS = "brands"
         const val FIELD_CREATED_AT = "createdAt"
     }
 }

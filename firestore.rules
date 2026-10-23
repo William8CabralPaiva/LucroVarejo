@@ -29,11 +29,6 @@ service cloud.firestore {
       match /purchases/{purchaseId} {
         allow read, write: if ownsStore();
       }
-      match /cardBrands/{brandId} {
-        allow read, create, update: if ownsStore();
-        allow delete: if false;
-      }
-
       match /paymentTerminals/{terminalId} {
         allow read, create, update: if ownsStore();
         allow delete: if false;

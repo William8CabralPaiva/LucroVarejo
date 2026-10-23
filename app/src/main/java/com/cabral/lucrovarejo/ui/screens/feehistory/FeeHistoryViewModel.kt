@@ -7,7 +7,6 @@ import com.cabral.lucrovarejo.domain.payment.PaymentFailure
 import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
 import com.cabral.lucrovarejo.domain.payment.toRateBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddTerminalFeeUseCase
-import com.cabral.lucrovarejo.domain.payment.usecase.GetCardBrandsUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalFeesUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.ResolveFeeForDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +25,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class FeeHistoryViewModel @Inject constructor(
     private val getTerminalFees: GetTerminalFeesUseCase,
-    private val getCardBrands: GetCardBrandsUseCase,
     private val addTerminalFee: AddTerminalFeeUseCase,
     private val resolveFeeForDate: ResolveFeeForDateUseCase,
 ) : ViewModel() {
@@ -49,15 +47,8 @@ class FeeHistoryViewModel @Inject constructor(
             )
         }
 
-        viewModelScope.launch {
-            val brandName = if (slot.brandId != null) {
-                runCatching { getCardBrands().first() }.getOrDefault(emptyList())
-                    .firstOrNull { it.key == slot.brandId }?.name
-            } else {
-                null
-            }
-            _uiState.update { it.copy(brandName = brandName) }
-        }
+        // A bandeira agora é cadastrada diretamente na maquininha; o próprio nome é o brandId.
+        _uiState.update { it.copy(brandName = slot.brandId) }
 
         viewModelScope.launch {
             getTerminalFees(slot.terminalId)
@@ -81,7 +72,7 @@ class FeeHistoryViewModel @Inject constructor(
 
     fun onShowAddDialog() {
         _uiState.update {
-            it.copy(showAddDialog = true, rateText = "", effectiveFromMillis = null, rateError = null, dateError = null, saveError = null)
+            it.copy(showAddDialog = true, rateText = "", effectiveFromMillis = Date().time, rateError = null, dateError = null, saveError = null)
         }
     }
 

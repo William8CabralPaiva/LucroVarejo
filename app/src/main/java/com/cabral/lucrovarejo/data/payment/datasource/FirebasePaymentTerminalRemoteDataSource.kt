@@ -90,7 +90,7 @@ class FirebasePaymentTerminalRemoteDataSource @Inject constructor(
             active = getBoolean(PaymentTerminalRequest.FIELD_ACTIVE) ?: true,
             enabledMethods = (get(PaymentTerminalRequest.FIELD_ENABLED_METHODS) as? List<*>)
                 ?.filterIsInstance<String>().orEmpty(),
-            enabledBrandIds = (get(PaymentTerminalRequest.FIELD_ENABLED_BRAND_IDS) as? List<*>)
+            brands = (get(PaymentTerminalRequest.FIELD_BRANDS) as? List<*>)
                 ?.filterIsInstance<String>().orEmpty()
         )
         return PaymentTerminalRecord(

@@ -17,7 +17,6 @@ object LoggedRoutes {
     const val SUMMARY = "summary"
     const val CONFIG = "config"
     const val ADD_PURCHASE = "add_purchase"
-    const val CARD_BRANDS = "card_brands"
     const val PAYMENT_TERMINALS = "payment_terminals"
     const val ADD_TERMINAL = "add_terminal"
     const val EDIT_TERMINAL = "edit_terminal"

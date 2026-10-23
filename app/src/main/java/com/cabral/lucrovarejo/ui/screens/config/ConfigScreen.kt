@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.ModeNight
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material3.AlertDialog
@@ -38,7 +39,6 @@ fun ConfigScreen(
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit = {},
     onNavigateToTerminals: () -> Unit = {},
-    onNavigateToCardBrands: () -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
 
@@ -51,6 +51,7 @@ fun ConfigScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -71,14 +72,6 @@ fun ConfigScreen(
                 title = stringResource(R.string.settings_terminals),
                 subtitle = stringResource(R.string.settings_terminals_subtitle),
                 onClick = onNavigateToTerminals
-            )
-
-            SettingsItem(
-                icon = Icons.Outlined.CreditCard,
-                iconTint = MaterialTheme.colorScheme.primary,
-                title = stringResource(R.string.settings_card_brands),
-                subtitle = stringResource(R.string.settings_card_brands_subtitle),
-                onClick = onNavigateToCardBrands
             )
 
             SettingsItem(

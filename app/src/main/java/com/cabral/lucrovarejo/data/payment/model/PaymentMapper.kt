@@ -1,26 +1,14 @@
 package com.cabral.lucrovarejo.data.payment.model
 
-import com.cabral.lucrovarejo.domain.payment.CardBrandModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
-
-fun CardBrandModel.toRequest(): CardBrandRequest = CardBrandRequest(
-    name = name,
-    active = active
-)
-
-fun CardBrandRecord.toModel(): CardBrandModel = CardBrandModel(
-    key = documentId,
-    name = request.name,
-    active = request.active
-)
 
 fun PaymentTerminalModel.toRequest(): PaymentTerminalRequest = PaymentTerminalRequest(
     name = name,
     active = active,
     enabledMethods = enabledMethods.map { it.name },
-    enabledBrandIds = enabledBrandIds.toList()
+    brands = brands
 )
 
 fun PaymentTerminalRecord.toModel(): PaymentTerminalModel = PaymentTerminalModel(
@@ -30,7 +18,7 @@ fun PaymentTerminalRecord.toModel(): PaymentTerminalModel = PaymentTerminalModel
     enabledMethods = request.enabledMethods.mapNotNull { methodName ->
         runCatching { TerminalPaymentType.valueOf(methodName) }.getOrNull()
     }.toSet(),
-    enabledBrandIds = request.enabledBrandIds.toSet()
+    brands = request.brands
 )
 
 fun TerminalFeeModel.toRequest(): TerminalFeeRequest = TerminalFeeRequest(
