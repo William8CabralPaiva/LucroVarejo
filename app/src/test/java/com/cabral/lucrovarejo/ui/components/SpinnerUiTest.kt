@@ -17,6 +17,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -39,8 +40,8 @@ class SpinnerUiTest {
                 var currentItem by remember { mutableStateOf<String?>(null) }
                 SpinnerContent(
                     selectedItem = currentItem,
-                    items = listOf("Bolsa", "Mochila"),
-                    onItemSelected = {
+                    items = persistentListOf("Bolsa", "Mochila"),
+                    onItemSelect = {
                         currentItem = it
                         selectedItem = it
                     },

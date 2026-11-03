@@ -31,6 +31,7 @@ private data class BottomNavItem(
 fun BottomNavBar(
     currentRoute: String,
     onNavigate: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val items = listOf(
         BottomNavItem(LoggedRoutes.HOME, R.string.bottom_nav_home, Icons.Default.Home),
@@ -50,7 +51,7 @@ fun BottomNavBar(
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            modifier = Modifier.drawBehind {
+            modifier = modifier.drawBehind {
                 drawLine(
                     color = dividerColor,
                     start = Offset(0f, 0f),

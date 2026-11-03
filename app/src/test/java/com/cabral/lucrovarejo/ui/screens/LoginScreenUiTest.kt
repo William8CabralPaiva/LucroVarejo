@@ -27,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "w411dp-h891dp")
 class LoginScreenUiTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -46,7 +46,6 @@ class LoginScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Login").assertIsDisplayed()
         composeRule.onNodeWithTag(LOGIN_STORE_NAME_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()

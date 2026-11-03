@@ -120,7 +120,7 @@ fun ProdCodPriceContent(
 
 @Preview(showBackground = true)
 @Composable
-fun ProdCodPricePreview() {
+private fun ProdCodPricePreview() {
     LucroVarejoTheme {
         ProdCodPrice(
             name = "Bolsa Feminina",

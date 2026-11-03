@@ -44,8 +44,8 @@ fun LastSaleItem(
     productName: String,
     priceInCents: Long,
     saleDate: Date,
-    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     image: Painter? = null
 ) {
     val todayLabel = stringResource(R.string.last_sale_today)
@@ -53,7 +53,7 @@ fun LastSaleItem(
     val formattedDate = formatLastSaleTimestamp(saleDate, todayLabel, yesterdayLabel)
     LastSaleItemContent(
         productName = productName,
-        formattedPrice = formatAlertPrice(priceInCents / 100.0),
+        formattedPrice = formatAlertPrice(priceInCents / CENTS_PER_UNIT),
         formattedDate = formattedDate,
 
         onClick = onClick,
@@ -178,7 +178,7 @@ private fun isPreviousDay(saleDay: Calendar, currentDay: Calendar): Boolean {
 
 @Composable
 @Preview(showBackground = true, name = "Última venda")
-fun LastSaleItemPreview() {
+private fun LastSaleItemPreview() {
     LucroVarejoTheme {
         LastSaleItem(
             productName = "Bolsa Feminina",

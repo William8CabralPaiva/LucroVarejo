@@ -21,7 +21,7 @@ fun AppNavGraph(
     isUserAuthenticated: Boolean = false,
     onSignOut: () -> Unit = {},
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
-    onThemeModeChanged: (ThemeMode) -> Unit = {},
+    onThemeModeChange: (ThemeMode) -> Unit = {},
     homeViewModel: HomeViewModel? = null,
     salesViewModel: SalesViewModel? = null,
     productViewModel: ProductViewModel? = null,
@@ -41,7 +41,7 @@ fun AppNavGraph(
         loggedFlowScreen = { onLogout ->
             LoggedFlowScreen(
                 currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
+                onThemeModeChange = onThemeModeChange,
                 homeViewModel = homeViewModel,
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,

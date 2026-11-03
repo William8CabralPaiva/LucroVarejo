@@ -23,7 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +41,8 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import java.text.DateFormatSymbols
 import java.util.Locale
 
+private const val MONTHS_IN_YEAR = 12
+
 @Composable
 fun MonthYearSelector(
     year: Int,
@@ -51,7 +53,7 @@ fun MonthYearSelector(
     val invalidYearMessage = stringResource(R.string.month_year_invalid_year)
     val invalidMonthMessage = stringResource(R.string.month_year_invalid_month)
     require(year > 0) { invalidYearMessage }
-    require(month in 1..12) { invalidMonthMessage }
+    require(month in 1..MONTHS_IN_YEAR) { invalidMonthMessage }
     val locale = Locale.Builder().setLanguage("pt").setRegion("BR").build()
     val monthName = DateFormatSymbols.getInstance(locale).months[month - 1].replaceFirstChar {
         it.titlecase(locale)
@@ -99,7 +101,7 @@ fun MonthYearSelector(
             IconButton(
                 onClick = {
                     if (month == 1) {
-                        onMonthYearChange(year - 1, 12)
+                        onMonthYearChange(year - 1, MONTHS_IN_YEAR)
                     } else {
                         onMonthYearChange(year, month - 1)
                     }
@@ -134,8 +136,8 @@ fun MonthYearSelector(
 @Composable
 private fun MonthYearSelectorLightPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.LIGHT) {
-        var year by remember { mutableStateOf(2026) }
-        var month by remember { mutableStateOf(10) }
+        var year by remember { mutableIntStateOf(2026) }
+        var month by remember { mutableIntStateOf(10) }
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -157,8 +159,8 @@ private fun MonthYearSelectorLightPreview() {
 @Composable
 private fun MonthYearSelectorDarkPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.DARK) {
-        var year by remember { mutableStateOf(2026) }
-        var month by remember { mutableStateOf(10) }
+        var year by remember { mutableIntStateOf(2026) }
+        var month by remember { mutableIntStateOf(10) }
         Surface(
             modifier = Modifier
                 .fillMaxSize()

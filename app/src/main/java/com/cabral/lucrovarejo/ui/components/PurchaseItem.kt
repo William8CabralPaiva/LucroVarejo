@@ -54,10 +54,10 @@ fun PurchaseItem(
     val profitInCents = salePriceInCents - costInCents - tariffInCents
     PurchaseItemContent(
         productName = productName,
-        formattedPrice = formatAlertPrice(salePriceInCents / 100.0),
-        formattedCost = formatAlertPrice(costInCents / 100.0),
-        formattedTariff = formatAlertPrice(tariffInCents / 100.0),
-        formattedProfit = formatAlertPrice(profitInCents / 100.0),
+        formattedPrice = formatAlertPrice(salePriceInCents / CENTS_PER_UNIT),
+        formattedCost = formatAlertPrice(costInCents / CENTS_PER_UNIT),
+        formattedTariff = formatAlertPrice(tariffInCents / CENTS_PER_UNIT),
+        formattedProfit = formatAlertPrice(profitInCents / CENTS_PER_UNIT),
         quantity = quantity,
         onClick = onClick,
         modifier = modifier,
@@ -157,7 +157,7 @@ fun PurchaseItemContent(
 
 @Composable
 @Preview(showBackground = true, name = "Venda")
-fun PurchaseItemPreview() {
+private fun PurchaseItemPreview() {
     LucroVarejoTheme {
         PurchaseItem(
             productName = "Bolsa Feminina",

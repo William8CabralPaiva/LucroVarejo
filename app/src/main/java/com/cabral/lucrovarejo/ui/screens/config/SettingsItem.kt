@@ -31,12 +31,12 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 @Composable
 fun SettingsItem(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     iconTint: Color,
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -57,13 +57,13 @@ fun SettingsItem(
 
 @Composable
 fun SettingsItem(
-    modifier: Modifier = Modifier,
     icon: ImageVector,
     iconTint: Color,
     title: String,
     subtitle: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),

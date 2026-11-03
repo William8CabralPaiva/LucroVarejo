@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.detekt)
     jacoco
 }
 
@@ -76,6 +77,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
@@ -106,4 +108,12 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    baseline = file("detekt-baseline.xml")
+    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
 }
