@@ -1,6 +1,10 @@
 package com.cabral.lucrovarejo
 
 import android.os.Bundle
+import android.os.SystemClock
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.cabral.lucrovarejo.navigation.LoggedRoutes
+import com.cabral.lucrovarejo.navigation.NotLoggedRoutes
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,6 +22,7 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -28,24 +33,53 @@ class MainActivity : ComponentActivity() {
     lateinit var signOut: SignOutUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        val splashStart = SystemClock.elapsedRealtime()
+        splashScreen.setKeepOnScreenCondition {
+            SystemClock.elapsedRealtime() - splashStart < SPLASH_DURATION_MS
+        }
         enableEdgeToEdge()
+        val isUserAuthenticated = hasSession()
+        val themePreferences = getSharedPreferences(THEME_PREFERENCES, MODE_PRIVATE)
 
         setContent {
-            var themeMode by rememberSaveable { mutableStateOf(ThemeMode.SYSTEM) }
+            var themeMode by rememberSaveable {
+                mutableStateOf(
+                    when (themePreferences.getString(THEME_MODE_KEY, ThemeMode.SYSTEM.name)) {
+                        ThemeMode.LIGHT.name -> ThemeMode.LIGHT
+                        ThemeMode.DARK.name -> ThemeMode.DARK
+                        else -> ThemeMode.SYSTEM
+                    }
+                )
+            }
 
             LucroVarejoTheme(themeMode = themeMode) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     AppNavGraph(
-                        isUserAuthenticated = hasSession(),
+                        startDestination = if (isUserAuthenticated) {
+                            LoggedRoutes.HOME
+                        } else {
+                            NotLoggedRoutes.LOGIN
+                        },
+                        isUserAuthenticated = isUserAuthenticated,
                         onSignOut = { signOut() },
                         currentThemeMode = themeMode,
                         onThemeModeChanged = { newMode ->
                             themeMode = newMode
+                            themePreferences.edit {
+                                putString(THEME_MODE_KEY, newMode.name)
+                            }
                         }
                     )
                 }
             }
         }
+    }
+
+    private companion object {
+        const val THEME_PREFERENCES = "lucro_varejo_preferences"
+        const val THEME_MODE_KEY = "theme_mode"
+        const val SPLASH_DURATION_MS = 1500L
     }
 }

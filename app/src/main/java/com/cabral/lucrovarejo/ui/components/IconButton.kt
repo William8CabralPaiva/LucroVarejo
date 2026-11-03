@@ -1,0 +1,185 @@
+package com.cabral.lucrovarejo.ui.components
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.DarkSurfaceVariant
+import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.TextSecondaryDark
+import com.cabral.lucrovarejo.ui.theme.TextSecondaryLight
+
+@Composable
+fun IconButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    isBorderButton: Boolean = false,
+    icon: ImageVector = Icons.Default.Save,
+    iconContentDescription: String? = null,
+    text: String? = null,
+    loadingText: String? = null,
+    containerColor: Color? = null,
+    testTag: String = SAVE_PRODUCT_BUTTON_TAG
+) {
+    SaveProductButtonContent(
+        label = text ?: stringResource(R.string.product_create_submit),
+        loadingLabel = loadingText ?: stringResource(R.string.product_create_loading),
+        enabled = enabled,
+        isLoading = isLoading,
+        isBorderButton = isBorderButton,
+        onClick = onClick,
+        modifier = modifier,
+        icon = icon,
+        iconContentDescription = iconContentDescription,
+        containerColor = containerColor,
+        testTag = testTag
+    )
+}
+
+@Composable
+fun SaveProductButtonContent(
+    label: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    isBorderButton: Boolean = false,
+    loadingLabel: String = label,
+    icon: ImageVector = Icons.Default.Save,
+    iconContentDescription: String? = null,
+    containerColor: Color? = null,
+    testTag: String = SAVE_PRODUCT_BUTTON_TAG
+) {
+    val palette = saveProductButtonPalette(LocalIsDarkTheme.current)
+        .let { if (containerColor != null) it.copy(container = containerColor) else it }
+    Button(
+        onClick = onClick,
+        enabled = enabled && !isLoading,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(dimensionResource(R.dimen.product_submit_button_height))
+            .testTag(testTag),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.product_submit_button_radius)),
+        contentPadding = PaddingValues(
+            horizontal = dimensionResource(R.dimen.product_submit_button_horizontal_padding)
+        ),
+        border = if (isBorderButton) {
+            BorderStroke(
+                width = 1.dp,
+                color = if (enabled || isLoading) palette.container else palette.disabledContent
+            )
+        } else {
+            null
+        },
+        colors = if (isBorderButton) {
+            ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = if (LocalIsDarkTheme.current) palette.content else palette.container,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = when {
+                    !isLoading -> palette.disabledContent
+                    LocalIsDarkTheme.current -> palette.content
+                    else -> palette.container
+                }
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = palette.container,
+                contentColor = palette.content,
+                disabledContainerColor = if (isLoading) palette.container else palette.disabledContainer,
+                disabledContentColor = if (isLoading) palette.content else palette.disabledContent
+            )
+        }
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(
+                dimensionResource(R.dimen.product_submit_button_content_spacing)
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(dimensionResource(R.dimen.product_submit_progress_size))
+                        .testTag(SAVE_PRODUCT_PROGRESS_TAG),
+                    color = LocalContentColor.current,
+                    strokeWidth = dimensionResource(R.dimen.product_submit_progress_stroke)
+                )
+            } else {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = iconContentDescription,
+                    tint = LocalContentColor.current
+                )
+            }
+            Text(
+                text = if (isLoading) loadingLabel else label,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
+
+internal data class SaveProductButtonPalette(
+    val container: Color,
+    val content: Color,
+    val disabledContainer: Color,
+    val disabledContent: Color
+)
+
+internal fun saveProductButtonPalette(isDarkTheme: Boolean) = SaveProductButtonPalette(
+    container = ForestGreenHeader,
+    content = Color.White,
+    disabledContainer = if (isDarkTheme) DarkSurfaceVariant else Color(0xFFDCE8E2),
+    disabledContent = if (isDarkTheme) TextSecondaryDark else TextSecondaryLight
+)
+
+internal const val SAVE_PRODUCT_BUTTON_TAG = "save-product-button"
+internal const val DELETE_PRODUCT_BUTTON_TAG = "delete-product-button"
+internal const val SAVE_PRODUCT_PROGRESS_TAG = "save-product-progress"
+
+@Preview(showBackground = true, name = "Salvar produto habilitado")
+@Composable
+private fun IconButtonEnabledPreview() {
+    LucroVarejoTheme {
+        IconButton(enabled = true, onClick = {})
+    }
+}
+
+@Preview(showBackground = true, name = "Salvar produto desabilitado")
+@Composable
+private fun IconButtonDisabledPreview() {
+    LucroVarejoTheme {
+        IconButton(enabled = false, onClick = {})
+    }
+}

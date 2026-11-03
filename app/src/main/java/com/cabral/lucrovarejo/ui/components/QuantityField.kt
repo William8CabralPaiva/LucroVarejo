@@ -38,7 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
 
@@ -75,13 +75,17 @@ fun QuantityFieldContent(
     val quantity = value.coerceIn(MIN_QUANTITY, MAX_QUANTITY)
     val shape = RoundedCornerShape(8.dp)
     val borderColor = MaterialTheme.colorScheme.outlineVariant
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
     val label = stringResource(labelResId)
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = DarkPrimaryContainer,
+            color = accentColor,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(4.dp))
@@ -95,7 +99,7 @@ fun QuantityFieldContent(
                 modifier = Modifier
                     .weight(1f)
                     .clip(shape)
-                    .background(MaterialTheme.colorScheme.surface, shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, shape)
                     .border(1.dp, borderColor, shape)
                     .padding(start = 12.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -103,7 +107,7 @@ fun QuantityFieldContent(
                 Icon(
                     imageVector = Icons.Outlined.Inventory2,
                     contentDescription = null,
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 TextField(
@@ -118,6 +122,10 @@ fun QuantityFieldContent(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = TextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.primary,
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
@@ -155,6 +163,10 @@ private fun QuantityButton(
     shape: RoundedCornerShape,
     onClick: () -> Unit,
 ) {
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
     IconButton(
         onClick = onClick,
         enabled = enabled,
@@ -167,7 +179,7 @@ private fun QuantityButton(
         Icon(
             imageVector = icon,
             contentDescription = stringResource(descriptionResId),
-            tint = if (enabled) DarkPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            tint = if (enabled) accentColor else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

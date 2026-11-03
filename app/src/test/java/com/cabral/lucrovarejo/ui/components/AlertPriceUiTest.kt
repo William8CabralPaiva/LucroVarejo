@@ -24,7 +24,7 @@ class AlertPriceUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Lucro desta venda").assertIsDisplayed()
+        composeRule.onNodeWithText("Lucro mensal").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 50,90").assertIsDisplayed()
     }
 
@@ -36,7 +36,7 @@ class AlertPriceUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Custo desta compra").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo mensal").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 50,90").assertIsDisplayed()
     }
 }

@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
@@ -33,7 +35,10 @@ fun LoadingButton(
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.testTag(LOADING_INDICATOR_TAG)
+                modifier = Modifier
+                    .size(16.dp)
+                    .testTag(LOADING_INDICATOR_TAG),
+                strokeWidth = 2.dp
             )
         } else {
             Text(stringResource(textId))
@@ -50,6 +55,18 @@ internal const val LOADING_INDICATOR_TAG = "loading-indicator"
 private fun LoadingButtonPreview() {
     LucroVarejoTheme {
         LoadingButton(
+            textId = R.string.register_submit,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun LoadingButtonLoadingPreview() {
+    LucroVarejoTheme {
+        LoadingButton(
+            isLoading = true,
             textId = R.string.register_submit,
             onClick = {}
         )

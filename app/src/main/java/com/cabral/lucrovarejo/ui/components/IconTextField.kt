@@ -32,8 +32,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.R
 
 enum class IconTextFieldType {
@@ -96,13 +96,17 @@ fun IconTextFieldContent(
     val fieldShape = RoundedCornerShape(8.dp)
     val label = stringResource(labelResId)
     val placeholder = stringResource(placeholderResId)
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -127,7 +131,7 @@ fun IconTextFieldContent(
                     contentDescription = iconContentDescriptionResId?.let {
                         stringResource(it)
                     },
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
             },
             supportingText = supportingText,
@@ -144,6 +148,10 @@ fun IconTextFieldContent(
             ),
             shape = fieldShape,
             colors = TextFieldDefaults.colors(
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                cursorColor = MaterialTheme.colorScheme.primary,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
                 disabledContainerColor = Color.Transparent,
@@ -155,7 +163,7 @@ fun IconTextFieldContent(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surface, fieldShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant, fieldShape)
                 .border(
                     width = 1.dp,
                     color = if (isError) {
@@ -177,13 +185,13 @@ internal fun filterIconTextFieldInput(value: String, type: IconTextFieldType): S
             value.forEach { character ->
                 when {
                     character in '0'..'9' -> append(character)
-                    character == '.' && !decimalSeparatorAdded -> {
+                    (character == '.' || character == ',') && !decimalSeparatorAdded -> {
                         append(character)
                         decimalSeparatorAdded = true
                     }
                 }
             }
-        }
+        }.replace(',', '.')
     }
 
 @Preview(showBackground = true, name = "Campo de texto stateful")

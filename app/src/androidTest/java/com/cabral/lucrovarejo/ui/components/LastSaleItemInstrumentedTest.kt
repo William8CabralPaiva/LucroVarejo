@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
-import com.google.firebase.Timestamp
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -22,14 +21,14 @@ class LastSaleItemInstrumentedTest {
     @Test
     fun displaysTodaySaleAndHandlesTap() {
         val wasClicked = booleanArrayOf(false)
-        val saleTimestamp = Timestamp.now()
+        val saleDate = Calendar.getInstance().time
 
         composeRule.setContent {
             LucroVarejoTheme {
                 LastSaleItem(
                     productName = "Bolsa Feminina",
                     priceInCents = 8990,
-                    timestamp = saleTimestamp,
+                    saleDate = saleDate,
                     onClick = { wasClicked[0] = true }
                 )
             }
@@ -52,7 +51,7 @@ class LastSaleItemInstrumentedTest {
                 LastSaleItem(
                     productName = "Mochila Escolar",
                     priceInCents = 12990,
-                    timestamp = Timestamp(yesterday),
+                    saleDate = yesterday,
                     onClick = {}
                 )
             }

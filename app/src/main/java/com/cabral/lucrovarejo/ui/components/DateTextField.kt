@@ -34,7 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
 import java.text.SimpleDateFormat
@@ -76,13 +76,17 @@ fun DateTextFieldContent(
     var showDatePicker by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(8.dp)
     val label = stringResource(labelResId)
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -101,7 +105,7 @@ fun DateTextFieldContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .background(MaterialTheme.colorScheme.surface, shape)
+                .background(MaterialTheme.colorScheme.surfaceVariant, shape)
                 .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
                 .clickable { showDatePicker = true }
                 .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -111,7 +115,7 @@ fun DateTextFieldContent(
                 modifier = modifier.clickable { showDatePicker = true },
                 imageVector = Icons.Outlined.CalendarMonth,
                 contentDescription = null,
-                tint = DarkPrimaryContainer
+                tint = accentColor
             )
             Text(
                 text = dateMillis?.let(::formatSaleDatePtBr)
@@ -128,7 +132,7 @@ fun DateTextFieldContent(
             Icon(
                 imageVector = Icons.Outlined.CalendarMonth,
                 contentDescription = stringResource(R.string.date_select_description),
-                tint = DarkPrimaryContainer,
+                tint = accentColor,
                 modifier = Modifier.size(24.dp)
             )
         }

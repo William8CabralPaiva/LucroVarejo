@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    jacoco
 }
 
 android {
@@ -25,6 +26,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+        }
         release {
             optimization {
                 enable = false
@@ -37,9 +41,31 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+//    testOptions {
+//        unitTests.isIncludeAndroidResources = true
+//        unitTests.all {
+//            it.extensions.configure(JacocoTaskExtension::class.java) {
+//                // Robolectric's android-all classes are already instrumented; JaCoCo must not touch them
+//                isIncludeNoLocationClasses = false
+//                excludes = listOf("jdk.internal.*", "android.*", "androidx.*", "com.android.*", "org.robolectric.*", "sun.*")
+//            }
+//        }
+//    }
+
+    //RoboEletric
     testOptions {
-        unitTests.isIncludeAndroidResources = true
+        unitTests {
+            isIncludeAndroidResources = true
+            all {
+                it.jvmArgs("-noverify")
+                it.extensions.configure(JacocoTaskExtension::class.java) {
+                    isIncludeNoLocationClasses = true
+                    excludes = listOf("jdk.internal.*")
+                }
+            }
+        }
     }
 }
 
@@ -53,9 +79,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
     implementation(libs.hilt.android)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
@@ -64,6 +93,8 @@ dependencies {
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.paging.testing)
+    testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.robolectric)

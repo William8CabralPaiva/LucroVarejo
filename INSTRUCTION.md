@@ -49,6 +49,7 @@ Use como referencia de organizacao e estilo o projeto [Lucro de Receitas](https:
 - `SaleItem`: produto, quantidade, preco unitario vendido, desconto e alocacoes de custo por lote.
 
 Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios exatos (por exemplo, centavos em `Long` ou `BigDecimal` na camada de dominio); nao use `Float` ou `Double` para calcular dinheiro. Persistir datas com formato consistente e converter para o fuso local apenas para apresentacao e agrupamento mensal.
+- Para todos os valores em dinheiro, o model usado pelo app/UI representa o valor em unidade monetaria com `BigDecimal`, enquanto os models de request persistem o valor como inteiro em centavos (por exemplo, `R$ 12,34` corresponde a `1234`). Cada funcionalidade deve ter models separados para o app/UI e para request/persistencia, com conversoes explicitas entre eles. Converter de `BigDecimal` para centavos sem arredondamento silencioso e rejeitar valores com fracao menor que um centavo ou fora do limite do tipo inteiro usado pelo request; converter de volta com escala de duas casas. Aplicar a mesma regra a custos, precos, descontos, totais e qualquer outro valor monetario.
 
 ## Organizacao e padroes tecnicos
 
@@ -59,6 +60,10 @@ Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios 
 - Manter textos apresentados ao usuario em `app/src/main/res/values/strings.xml` e acessa-los com `stringResource`; nao escrever textos da interface diretamente em composables ou ViewModels. ViewModels podem armazenar IDs de recursos anotados com `@StringRes`, sem depender de `Context`.
 - Manter medidas de layout em `app/src/main/res/values/dimens.xml` e acessa-las com `dimensionResource`; evitar valores `dp` diretamente nos composables de tela.
 - Reutilizar o tema, componentes, navegacao e padroes de estado existentes antes de criar alternativas. Manter textos da interface em portugues e seguir acessibilidade basica (rotulos, contraste e alvos de toque).
+- Centralizar a estilizacao de componentes Material3 de uso repetido (ex.: `Switch`) em um wrapper proprio em `ui/components` (ex.: `AppSwitch`, com `appSwitchColors()`), em vez de repetir `colors = SwitchDefaults.colors(...)` em cada tela. Assim, mudar o padrao visual de um componente em um unico lugar reflete em todo o app.
+- Telas que rodam dentro de um `Scaffold` com `topBar`/`bottomBar` que ja repassa `innerPadding` (ex.: o `Scaffold` de `LoggedFlowScreen`) nao devem aplicar `Modifier.windowInsetsPadding(WindowInsets.safeDrawing)` por conta propria: isso soma o inset do sistema duas vezes e cria espaco vazio indevido. Esse `windowInsetsPadding` so se aplica a telas fora desse `Scaffold` (ex.: Login, Cadastro).
+- Campos de data que representam uma vigencia/inicio (`effectiveFrom` e similares) devem vir pre-preenchidos com a data atual ao abrir o formulario, em vez de vazios; o usuario pode alterar livremente.
+- Para rolar a tela ate um elemento que acabou de aparecer apos uma selecao (ex.: um card revelado ao marcar um chip), usar `BringIntoViewRequester` anexado ao elemento-alvo e disparar `bringIntoView()` dentro de um `LaunchedEffect` chaveado no estado que mudou (nao direto no callback de clique): o clique apenas atualiza o estado e marca um "pendente"; o `LaunchedEffect` roda depois que a recomposicao ja incluiu o elemento na arvore, evitando que a chamada ocorra antes dele existir.
 - Colocar configuracao Firebase nos arquivos e mecanismos apropriados do projeto. Nunca incluir chaves privadas, credenciais de servidor ou segredos no app.
 - Evitar alterar telas e comportamentos fora do escopo da funcionalidade em andamento. Fazer mudancas pequenas que preservem o build e as rotas existentes.
 
@@ -90,3 +95,19 @@ Os nomes podem seguir as convencoes Kotlin do repositorio. Use tipos monetarios 
 - O resumo de cada mes confere com a soma das receitas liquidas menos o CMV das vendas daquele mes, inclusive quando os custos de compra variam entre lotes.
 - Regras de calculo, arredondamento, validacao de saldo e agrupamento mensal possuem testes unitarios.
 - Dados financeiros nao podem ser lidos ou alterados por sessoes sem autorizacao nas regras do Firebase.
+
+
+## Atualizacao reativa de dados
+
+- O Firestore e a fonte de verdade. Telas que exibem dados que mudam apos um cadastro (resumo mensal, ultimas vendas, listas) devem observar um `Flow` exposto pelo Repository, alimentado por `addSnapshotListener` via `callbackFlow` com `awaitClose` para remover o listener.
+- Nao usar `ActivityResult`, `onResume()`, flags em `savedStateHandle` ou chamadas de "refresh" manuais para sincronizar telas apos salvar uma venda/compra. A tela de cadastro apenas salva e exibe o feedback; as demais telas atualizam por observacao.
+- Manter uma ViewModel por tela, convertendo o `Flow` em estado observavel (`StateFlow`). Valores derivados (lucro total, agregacoes mensais) devem ser recalculados a cada nova emissao.
+- Cada tela observa so as consultas de que precisa; compartilhar fluxos entre telas apenas se houver listeners ou consultas redundantes.
+- Testes de ViewModel e Repository devem usar fluxos falsos (por exemplo, `MutableStateFlow`) e verificar que uma nova emissao atualiza o estado.
+- O vínculo com o Firestore deve ficar no datasource: para a tela de Vendas,
+  `FirebaseSalesRemoteDataSource.observeSalesChanges` observa
+  `stores/{storeKey}/purchases` com `addSnapshotListener` e converte cada alteração em uma
+  emissão de `callbackFlow`. `ObserveSalesChangesUseCase` apenas repassa o `Flow` do Repository
+  para `SalesViewModel`; ele não deve conhecer Firebase nem criar listeners.
+- Produtos e vendas observam coleções distintas. Mudanças em `products` atualizam quem observa
+  produtos; Home e Vendas devem reagir a alterações em `purchases` após salvar uma venda.

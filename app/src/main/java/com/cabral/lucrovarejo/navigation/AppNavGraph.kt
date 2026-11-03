@@ -1,41 +1,18 @@
 package com.cabral.lucrovarejo.navigation
 
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ReceiptLong
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.cabral.lucrovarejo.ui.screens.ConfigScreen
-import com.cabral.lucrovarejo.ui.screens.HomeScreen
+
+import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
-import com.cabral.lucrovarejo.ui.screens.SalesScreen
-import com.cabral.lucrovarejo.ui.screens.SplashScreen
-import com.cabral.lucrovarejo.ui.screens.SummaryScreen
+import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
+import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
-
-private data class LoggedBottomNavItem(
-    val route: String,
-    val label: String,
-    val icon: ImageVector
-)
 
 @Composable
 fun AppNavGraph(
@@ -44,33 +21,67 @@ fun AppNavGraph(
     isUserAuthenticated: Boolean = false,
     onSignOut: () -> Unit = {},
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
-    onThemeModeChanged: (ThemeMode) -> Unit = {}
+    onThemeModeChanged: (ThemeMode) -> Unit = {},
+    homeViewModel: HomeViewModel? = null,
+    salesViewModel: SalesViewModel? = null,
+    productViewModel: ProductViewModel? = null,
+) {
+    AppNavGraphContent(
+        navController = navController,
+        startDestination = startDestination,
+        isUserAuthenticated = isUserAuthenticated,
+        onSignOut = onSignOut,
+        splashScreen = { onSplashFinished -> LaunchedEffect(Unit) { onSplashFinished() } },
+        loginScreen = { goToRegisterScreen, goToLoggedFlow ->
+            LoginScreen(goToRegisterScreen, goToLoggedFlow)
+        },
+        registerScreen = { onBackPress, onRegisterSuccess ->
+            RegisterScreen(onBackPress, onRegisterSuccess)
+        },
+        loggedFlowScreen = { onLogout ->
+            LoggedFlowScreen(
+                currentThemeMode = currentThemeMode,
+                onThemeModeChanged = onThemeModeChanged,
+                homeViewModel = homeViewModel,
+                salesViewModel = salesViewModel,
+                productViewModel = productViewModel,
+                onLogout = onLogout
+            )
+        }
+    )
+}
+
+@Composable
+internal fun AppNavGraphContent(
+    navController: NavHostController,
+    startDestination: String,
+    isUserAuthenticated: Boolean,
+    onSignOut: () -> Unit,
+    splashScreen: @Composable (() -> Unit) -> Unit,
+    loginScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    registerScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    loggedFlowScreen: @Composable (() -> Unit) -> Unit,
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
         composable(NotLoggedRoutes.SPLASH) {
-            SplashScreen(
-                onSplashFinished = {
-                    val destination = if (isUserAuthenticated) {
-                        LoggedRoutes.HOME
-                    } else {
-                        NotLoggedRoutes.LOGIN
-                    }
-                    navController.navigate(destination) {
-                        popUpTo(NotLoggedRoutes.SPLASH) { inclusive = true }
-                    }
+            splashScreen {
+                navController.navigate(
+                    if (isUserAuthenticated) LoggedRoutes.HOME else NotLoggedRoutes.LOGIN
+                ) {
+                    popUpTo(NotLoggedRoutes.SPLASH) { inclusive = true }
                 }
-            )
+            }
         }
 
         composable(NotLoggedRoutes.LOGIN) {
-            LoginScreen(
-                goToRegisterScreen = {
+            loginScreen(
+                {
                     navController.navigate(NotLoggedRoutes.REGISTER)
                 },
-                goToLoggedFlow = {
+                {
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
@@ -79,11 +90,9 @@ fun AppNavGraph(
         }
 
         composable(NotLoggedRoutes.REGISTER) {
-            RegisterScreen(
-                onBackPress = {
-                    navController.popBackStack()
-                },
-                onRegisterSuccess = {
+            registerScreen(
+                navController::popBackStack,
+                {
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
@@ -92,113 +101,11 @@ fun AppNavGraph(
         }
 
         composable(LoggedRoutes.HOME) {
-            LoggedFlowScreen(
-                currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
-                onLogout = {
-                    onSignOut()
-                    navController.navigate(NotLoggedRoutes.LOGIN) {
-                        popUpTo(LoggedRoutes.HOME) { inclusive = true }
-                    }
+            loggedFlowScreen {
+                onSignOut()
+                navController.navigate(NotLoggedRoutes.LOGIN) {
+                    popUpTo(LoggedRoutes.HOME) { inclusive = true }
                 }
-            )
-        }
-    }
-}
-
-@Composable
-private fun LoggedFlowScreen(
-    currentThemeMode: ThemeMode,
-    onThemeModeChanged: (ThemeMode) -> Unit,
-    onLogout: () -> Unit
-) {
-    val innerNavController = rememberNavController()
-    val dividerColor = MaterialTheme.colorScheme.outline
-    val items = listOf(
-        LoggedBottomNavItem(route = LoggedRoutes.HOME, label = "Início", icon = Icons.Default.Home),
-        LoggedBottomNavItem(route = LoggedRoutes.SALES, label = "Vendas", icon = Icons.AutoMirrored.Filled.ReceiptLong),
-        LoggedBottomNavItem(route = LoggedRoutes.SUMMARY, label = "Resumo", icon = Icons.Default.BarChart)
-    )
-
-    Scaffold(
-        bottomBar = {
-            val currentRoute = innerNavController.currentBackStackEntryAsState().value?.destination?.route
-                ?: LoggedRoutes.HOME
-            if (items.any { it.route == currentRoute }) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 0.dp,
-                    modifier = Modifier.drawBehind {
-                        drawLine(
-                            color = dividerColor,
-                            start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                            end = androidx.compose.ui.geometry.Offset(size.width, 0f),
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-                ) {
-                    items.forEach { item ->
-                        NavigationBarItem(
-                            selected = currentRoute == item.route,
-                            onClick = {
-                                innerNavController.navigate(item.route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(innerNavController.graph.startDestinationId) {
-                                        saveState = true
-                                    }
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = item.icon,
-                                    contentDescription = item.label
-                                )
-                            },
-                            label = { Text(item.label) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                indicatorColor = MaterialTheme.colorScheme.surface
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = innerNavController,
-            startDestination = LoggedRoutes.HOME,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(LoggedRoutes.HOME) {
-                HomeScreen(
-                    goToConfigScreen = {
-                        innerNavController.navigate(LoggedRoutes.CONFIG)
-                    },
-                    onLogout = onLogout
-                )
-            }
-
-            composable(LoggedRoutes.SALES) {
-                SalesScreen()
-            }
-
-            composable(LoggedRoutes.SUMMARY) {
-                SummaryScreen()
-            }
-
-            composable(LoggedRoutes.CONFIG) {
-                ConfigScreen(
-                    currentThemeMode = currentThemeMode,
-                    onThemeModeChanged = onThemeModeChanged,
-                    onBackPress = {
-                        innerNavController.popBackStack()
-                    }
-                )
             }
         }
     }

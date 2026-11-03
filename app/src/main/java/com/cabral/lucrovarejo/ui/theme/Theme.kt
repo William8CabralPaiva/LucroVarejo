@@ -9,10 +9,14 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+val LocalIsDarkTheme = compositionLocalOf { false }
 
 private val LightColorScheme = lightColorScheme(
     primary = ForestGreenHeader,
@@ -102,16 +106,17 @@ fun LucroVarejoTheme(
             val window = (view.context as? Activity)?.window
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, view)
-                // true = dark icons (for light backgrounds), false = light icons (for dark backgrounds)
-                insetsController.isAppearanceLightStatusBars = !useDarkTheme
+                insetsController.isAppearanceLightStatusBars = false
                 insetsController.isAppearanceLightNavigationBars = !useDarkTheme
             }
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

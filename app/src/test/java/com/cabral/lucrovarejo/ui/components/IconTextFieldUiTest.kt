@@ -7,11 +7,14 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.graphics.Color
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import org.junit.Assert.assertEquals
@@ -106,5 +109,50 @@ class IconTextFieldUiTest {
         composeRule.runOnIdle {
             assertEquals("12.34", currentValue)
         }
+    }
+
+    @Test
+    fun moneyFieldNormalizesPortugueseDecimalComma() {
+        var currentValue = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                IconTextFieldContent(
+                    value = currentValue,
+                    onValueChange = { currentValue = it },
+                    labelResId = R.string.product_paid_value_label,
+                    placeholderResId = R.string.product_paid_value_placeholder,
+                    icon = Icons.Outlined.MonetizationOn,
+                    type = IconTextFieldType.MONEY,
+                    required = true
+                )
+            }
+        }
+
+        composeRule.onNode(hasSetTextAction()).performTextInput("12,34")
+
+        composeRule.runOnIdle {
+            assertEquals("12.34", currentValue)
+        }
+    }
+
+    @Test
+    fun formFieldAccentIsGreenInLightThemeAndLightInDarkTheme() {
+        val lightPrimary = Color(0xFF0C3829)
+        val darkOnSurface = Color.White
+
+        assertEquals(
+            lightPrimary,
+            formFieldAccentColor(
+                lightColorScheme(primary = lightPrimary),
+                isDarkTheme = false
+            )
+        )
+        assertEquals(
+            darkOnSurface,
+            formFieldAccentColor(
+                darkColorScheme(onSurface = darkOnSurface),
+                isDarkTheme = true
+            )
+        )
     }
 }

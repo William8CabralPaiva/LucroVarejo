@@ -32,30 +32,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.cabral.lucrovarejo.ui.theme.DarkPrimaryContainer
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
 
 @Composable
 fun Spinner(
-    categories: List<String>,
+    items: List<String>,
     modifier: Modifier = Modifier,
     initialValue: String? = null,
-    @StringRes labelResId: Int = R.string.product_category_label,
-    @StringRes placeholderResId: Int = R.string.product_category_placeholder,
+    @StringRes textId: Int,
+    @StringRes placeholderResId: Int,
     required: Boolean = false,
-    onCategorySelected: (String) -> Unit = {},
+    onItemSelected: (String) -> Unit = {},
 ) {
-    var selectedCategory by remember { mutableStateOf(initialValue) }
+    var selectedItem by remember { mutableStateOf(initialValue) }
     SpinnerContent(
-        selectedCategory = selectedCategory,
-        categories = categories,
-        onCategorySelected = {
-            selectedCategory = it
-            onCategorySelected(it)
+        selectedItem = selectedItem,
+        items = items,
+        onItemSelected = {
+            selectedItem = it
+            onItemSelected(it)
         },
         modifier = modifier,
-        labelResId = labelResId,
+        textId = textId,
         placeholderResId = placeholderResId,
         required = required
     )
@@ -63,12 +63,12 @@ fun Spinner(
 
 @Composable
 fun SpinnerContent(
-    selectedCategory: String?,
-    categories: List<String>,
-    onCategorySelected: (String) -> Unit,
+    selectedItem: String?,
+    items: List<String>,
+    onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    @StringRes labelResId: Int = R.string.product_category_label,
-    @StringRes placeholderResId: Int = R.string.product_category_placeholder,
+    @StringRes textId: Int,
+    @StringRes placeholderResId: Int,
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -77,7 +77,11 @@ fun SpinnerContent(
     val shape = RoundedCornerShape(8.dp)
     val borderColor = if (isError) MaterialTheme.colorScheme.error
     else MaterialTheme.colorScheme.outlineVariant
-    val label = stringResource(labelResId)
+    val accentColor = formFieldAccentColor(
+        colorScheme = MaterialTheme.colorScheme,
+        isDarkTheme = LocalIsDarkTheme.current
+    )
+    val label = stringResource(textId)
     val placeholder = stringResource(placeholderResId)
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -85,7 +89,7 @@ fun SpinnerContent(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
-                color = DarkPrimaryContainer,
+                color = accentColor,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -105,7 +109,7 @@ fun SpinnerContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(shape)
-                    .background(MaterialTheme.colorScheme.surface, shape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, shape)
                     .border(1.dp, borderColor, shape)
                     .clickable(enabled = enabled) { expanded = true }
                     .padding(horizontal = 16.dp, vertical = 16.dp),
@@ -114,11 +118,11 @@ fun SpinnerContent(
                 Icon(
                     imageVector = Icons.Outlined.FolderOpen,
                     contentDescription = null,
-                    tint = DarkPrimaryContainer
+                    tint = accentColor
                 )
                 Text(
-                    text = selectedCategory ?: placeholder,
-                    color = if (selectedCategory == null) {
+                    text = selectedItem ?: placeholder,
+                    color = if (selectedItem == null) {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     } else {
                         MaterialTheme.colorScheme.onSurface
@@ -129,20 +133,20 @@ fun SpinnerContent(
                 )
                 Icon(
                     imageVector = Icons.Filled.ArrowDropDown,
-                    contentDescription = stringResource(R.string.category_open_description),
-                    tint = DarkPrimaryContainer
+                    contentDescription = stringResource(R.string.spinner_open_description),
+                    tint = accentColor
                 )
             }
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                categories.forEach { category ->
+                items.forEach { item ->
                     DropdownMenuItem(
-                        text = { Text(category) },
+                        text = { Text(item) },
                         onClick = {
-                            onCategorySelected(category)
+                            onItemSelected(item)
                             expanded = false
                         }
                     )
@@ -152,17 +156,19 @@ fun SpinnerContent(
     }
 }
 
-@Preview(showBackground = true, name = "Categoria")
+@Preview(showBackground = true, name = "Produto")
 @Composable
 private fun SpinnerPreview() {
     LucroVarejoTheme {
         Spinner(
-            categories = listOf(
-                stringResource(R.string.sample_category_bags),
-                stringResource(R.string.sample_category_backpacks),
-                stringResource(R.string.sample_category_accessories)
+            textId = R.string.product,
+            placeholderResId = R.string.product_placeholder,
+            items = listOf(
+                "Bolsa",
+                "Mochila",
+                "Acessório"
             ),
-            initialValue = stringResource(R.string.sample_category_bags),
+            initialValue = "Bolsa",
             modifier = Modifier.padding(16.dp)
         )
     }
