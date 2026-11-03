@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.DarkSurfaceVariant
@@ -34,26 +36,13 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.TextSecondaryDark
 import com.cabral.lucrovarejo.ui.theme.TextSecondaryLight
 
-internal data class SaveProductButtonPalette(
-    val container: Color,
-    val content: Color,
-    val disabledContainer: Color,
-    val disabledContent: Color
-)
-
-internal fun saveProductButtonPalette(isDarkTheme: Boolean) = SaveProductButtonPalette(
-    container = ForestGreenHeader,
-    content = Color.White,
-    disabledContainer = if (isDarkTheme) DarkSurfaceVariant else Color(0xFFDCE8E2),
-    disabledContent = if (isDarkTheme) TextSecondaryDark else TextSecondaryLight
-)
-
 @Composable
 fun IconButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isBorderButton: Boolean = false,
     icon: ImageVector = Icons.Default.Save,
     iconContentDescription: String? = null,
     text: String? = null,
@@ -66,6 +55,7 @@ fun IconButton(
         loadingLabel = loadingText ?: stringResource(R.string.product_create_loading),
         enabled = enabled,
         isLoading = isLoading,
+        isBorderButton = isBorderButton,
         onClick = onClick,
         modifier = modifier,
         icon = icon,
@@ -82,6 +72,7 @@ fun SaveProductButtonContent(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false,
+    isBorderButton: Boolean = false,
     loadingLabel: String = label,
     icon: ImageVector = Icons.Default.Save,
     iconContentDescription: String? = null,
@@ -101,12 +92,29 @@ fun SaveProductButtonContent(
         contentPadding = PaddingValues(
             horizontal = dimensionResource(R.dimen.product_submit_button_horizontal_padding)
         ),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = palette.container,
-            contentColor = palette.content,
-            disabledContainerColor = if (isLoading) palette.container else palette.disabledContainer,
-            disabledContentColor = if (isLoading) palette.content else palette.disabledContent
-        )
+        border = if (isBorderButton) {
+            BorderStroke(
+                width = 1.dp,
+                color = if (enabled || isLoading) palette.container else palette.disabledContent
+            )
+        } else {
+            null
+        },
+        colors = if (isBorderButton) {
+            ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = palette.container,
+                disabledContainerColor = Color.Transparent,
+                disabledContentColor = if (isLoading) palette.container else palette.disabledContent
+            )
+        } else {
+            ButtonDefaults.buttonColors(
+                containerColor = palette.container,
+                contentColor = palette.content,
+                disabledContainerColor = if (isLoading) palette.container else palette.disabledContainer,
+                disabledContentColor = if (isLoading) palette.content else palette.disabledContent
+            )
+        }
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(
@@ -137,6 +145,20 @@ fun SaveProductButtonContent(
         }
     }
 }
+
+internal data class SaveProductButtonPalette(
+    val container: Color,
+    val content: Color,
+    val disabledContainer: Color,
+    val disabledContent: Color
+)
+
+internal fun saveProductButtonPalette(isDarkTheme: Boolean) = SaveProductButtonPalette(
+    container = ForestGreenHeader,
+    content = Color.White,
+    disabledContainer = if (isDarkTheme) DarkSurfaceVariant else Color(0xFFDCE8E2),
+    disabledContent = if (isDarkTheme) TextSecondaryDark else TextSecondaryLight
+)
 
 internal const val SAVE_PRODUCT_BUTTON_TAG = "save-product-button"
 internal const val DELETE_PRODUCT_BUTTON_TAG = "delete-product-button"

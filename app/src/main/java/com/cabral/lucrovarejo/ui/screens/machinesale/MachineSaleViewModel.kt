@@ -5,13 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
-import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.toRateBps
-import com.cabral.lucrovarejo.domain.payment.usecase.AddTerminalFeeUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.AddPaymentMachineUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.CreateTerminalUseCase
-import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalFeesUseCase
-import com.cabral.lucrovarejo.domain.payment.usecase.ResolveFeeForDateUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetPaymentMachinesUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetFilteredCurrentTariffUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.UpdateTerminalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
@@ -26,16 +26,16 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MachineSaleViewModel @Inject constructor(
-    private val getTerminalFees: GetTerminalFeesUseCase,
+    private val getPaymentMachines: GetPaymentMachinesUseCase,
     private val createTerminal: CreateTerminalUseCase,
     private val updateTerminal: UpdateTerminalUseCase,
-    private val addTerminalFee: AddTerminalFeeUseCase,
-    private val resolveFeeForDate: ResolveFeeForDateUseCase,
+    private val addPaymentMachine: AddPaymentMachineUseCase,
+    private val getFilteredCurrentTariff: GetFilteredCurrentTariffUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MachineSaleUiState(isLoading = false))
     val uiState: StateFlow<MachineSaleUiState> = _uiState.asStateFlow()
 
-    private var existingFees: List<TerminalFeeModel> = emptyList()
+    private var existingTariffs: List<PaymentMachineModel> = emptyList()
 
     // Chamado a partir da tela (LaunchedEffect) com a maquininha vinda do back stack, se houver.
     fun loadTerminal(terminal: PaymentTerminalModel?) {
@@ -43,29 +43,29 @@ class MachineSaleViewModel @Inject constructor(
         if (_uiState.value.terminalId == terminalKey) return
         _uiState.update { it.copy(terminalId = terminalKey, isLoading = true) }
         viewModelScope.launch {
-            existingFees = runCatching { getTerminalFees(terminalKey).first() }.getOrDefault(emptyList())
+            existingTariffs = runCatching { getPaymentMachines(terminalKey).first() }.getOrDefault(emptyList())
             _uiState.update { state ->
                 state.copy(
                     name = terminal.name,
                     selectedMethods = terminal.enabledMethods,
-                    cashChargesFee = existingFees.any { it.method == TerminalPaymentType.CASH },
+                    cashChargesTariff = existingTariffs.any { it.method == TerminalPaymentType.CASH },
                     availableBrands = terminal.brands,
-                    selectedDebitBrandIds = existingFees
+                    selectedDebitBrandIds = existingTariffs
                         .filter { it.method == TerminalPaymentType.DEBIT }
                         .mapNotNull { it.brandId }
                         .toSet(),
-                    selectedCreditBrandIds = existingFees
+                    selectedCreditBrandIds = existingTariffs
                         .filter { it.method == TerminalPaymentType.CREDIT }
                         .mapNotNull { it.brandId }
                         .toSet(),
-                    creditInstallmentsByBrand = existingFees
+                    creditInstallmentsByBrand = existingTariffs
                         .filter { it.method == TerminalPaymentType.CREDIT }
                         .groupBy { it.brandId.orEmpty() }
-                        .mapValues { (_, fees) -> fees.mapNotNull { it.installments }.distinct().sorted() },
+                        .mapValues { (_, tariffs) -> tariffs.mapNotNull { it.installments }.distinct().sorted() },
                     isLoading = false
                 )
             }
-            recomputeFeeEntries()
+            recomputeTariffEntries()
         }
     }
 
@@ -80,12 +80,12 @@ class MachineSaleViewModel @Inject constructor(
             if (!selected.add(method)) selected.remove(method)
             state.copy(selectedMethods = selected, methodsError = null)
         }
-        recomputeFeeEntries()
+        recomputeTariffEntries()
     }
 
-    fun onCashChargesFeeToggle(enabled: Boolean) {
-        _uiState.update { it.copy(cashChargesFee = enabled) }
-        recomputeFeeEntries()
+    fun onCashChargesTariffToggle(enabled: Boolean) {
+        _uiState.update { it.copy(cashChargesTariff = enabled) }
+        recomputeTariffEntries()
     }
 
     // Bandeira é cadastrada diretamente na maquininha; o próprio nome (normalizado) é usado como id.
@@ -104,7 +104,7 @@ class MachineSaleViewModel @Inject constructor(
             if (!selected.add(brandId)) selected.remove(brandId)
             state.copy(selectedDebitBrandIds = selected)
         }
-        recomputeFeeEntries()
+        recomputeTariffEntries()
     }
 
     fun onToggleCreditBrand(brandId: String) {
@@ -113,7 +113,7 @@ class MachineSaleViewModel @Inject constructor(
             if (!selected.add(brandId)) selected.remove(brandId)
             state.copy(selectedCreditBrandIds = selected)
         }
-        recomputeFeeEntries()
+        recomputeTariffEntries()
     }
 
     fun onAddCreditInstallment(brandId: String, installment: Int) {
@@ -125,20 +125,20 @@ class MachineSaleViewModel @Inject constructor(
                     (brandId to (current + installment).sorted())
             )
         }
-        recomputeFeeEntries()
+        recomputeTariffEntries()
     }
 
-    fun onFeeRateChange(entryId: String, text: String) {
+    fun onTariffRateChange(entryId: String, text: String) {
         _uiState.update { state ->
-            state.copy(feeEntries = state.feeEntries.map { entry ->
+            state.copy(tariffEntries = state.tariffEntries.map { entry ->
                 if (entry.id == entryId) entry.copy(rateText = text, error = null) else entry
             })
         }
     }
 
-    fun onFeeDateChange(entryId: String, millis: Long) {
+    fun onTariffDateChange(entryId: String, millis: Long) {
         _uiState.update { state ->
-            state.copy(feeEntries = state.feeEntries.map { entry ->
+            state.copy(tariffEntries = state.tariffEntries.map { entry ->
                 if (entry.id == entryId) entry.copy(effectiveFromMillis = millis, error = null) else entry
             })
         }
@@ -155,14 +155,14 @@ class MachineSaleViewModel @Inject constructor(
             return
         }
 
-        val invalidEntries = state.feeEntries.filter { entry ->
+        val invalidEntries = state.tariffEntries.filter { entry ->
             entry.rateText.isNotBlank() && entry.effectiveFromMillis != null && entry.parseRateBpsOrNull() == null
         }
         if (invalidEntries.isNotEmpty()) {
             _uiState.update { s ->
-                s.copy(feeEntries = s.feeEntries.map { entry ->
+                s.copy(tariffEntries = s.tariffEntries.map { entry ->
                     if (entry.id in invalidEntries.map { it.id }) {
-                        entry.copy(error = R.string.terminal_form_fee_rate_invalid)
+                        entry.copy(error = R.string.terminal_form_Tariff_rate_invalid)
                     } else entry
                 })
             }
@@ -182,12 +182,12 @@ class MachineSaleViewModel @Inject constructor(
                 val saved = if (state.terminalId == null) createTerminal(terminal) else updateTerminal(terminal)
                 val terminalId = requireNotNull(saved.key)
 
-                state.feeEntries
+                state.tariffEntries
                     .filter { it.rateText.isNotBlank() && it.effectiveFromMillis != null }
                     .forEach { entry ->
                         val rateBps = entry.parseRateBpsOrNull() ?: return@forEach
-                        addTerminalFee(
-                            TerminalFeeModel(
+                        addPaymentMachine(
+                            PaymentMachineModel(
                                 terminalId = terminalId,
                                 method = entry.method,
                                 brandId = entry.brandId,
@@ -202,7 +202,7 @@ class MachineSaleViewModel @Inject constructor(
                 _uiState.update { it.copy(isSaving = false, saved = true) }
             }.onFailure { failure ->
                 val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_fee_duplicate_date
+                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_Tariff_duplicate_date
                     else -> R.string.terminal_form_save_error
                 }
                 _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
@@ -210,12 +210,12 @@ class MachineSaleViewModel @Inject constructor(
         }
     }
 
-    private fun recomputeFeeEntries() {
+    private fun recomputeTariffEntries() {
         _uiState.update { state ->
-            val entries = mutableListOf<FeeEntryUi>()
+            val entries = mutableListOf<TariffEntryUi>()
             val now = Date()
 
-            if (state.selectedMethods.contains(TerminalPaymentType.CASH) && state.cashChargesFee) {
+            if (state.selectedMethods.contains(TerminalPaymentType.CASH) && state.cashChargesTariff) {
                 entries += buildEntry(TerminalPaymentType.CASH, null, null, null, now)
             }
             if (state.selectedMethods.contains(TerminalPaymentType.PIX)) {
@@ -235,11 +235,11 @@ class MachineSaleViewModel @Inject constructor(
             }
 
             // Preserva o que o usuário já digitou nos slots que continuam existindo.
-            val previousById = state.feeEntries.associateBy { it.id }
+            val previousById = state.tariffEntries.associateBy { it.id }
             val merged = entries.map { entry ->
                 previousById[entry.id]?.copy(currentRateBps = entry.currentRateBps) ?: entry
             }
-            state.copy(feeEntries = merged)
+            state.copy(tariffEntries = merged)
         }
     }
 
@@ -249,24 +249,24 @@ class MachineSaleViewModel @Inject constructor(
         brandName: String?,
         installments: Int?,
         date: Date,
-    ): FeeEntryUi {
-        val feesForKey = existingFees.filter {
+    ): TariffEntryUi {
+        val tariffsForKey = existingTariffs.filter {
             it.method == method && it.brandId == brandId && it.installments == installments
         }
-        val currentFee = resolveFeeForDate(feesForKey, date)
-        return FeeEntryUi(
+        val currentTariff = getFilteredCurrentTariff(tariffsForKey, date)
+        return TariffEntryUi(
             method = method,
             brandId = brandId,
             brandName = brandName,
             installments = installments,
             effectiveFromMillis = date.time,
-            currentRateBps = currentFee?.rateBps
+            currentRateBps = currentTariff?.rateBps
         )
     }
 
 }
 
-private fun FeeEntryUi.parseRateBpsOrNull(): Int? {
+private fun TariffEntryUi.parseRateBpsOrNull(): Int? {
     val normalized = rateText.replace(',', '.')
     val value = normalized.toBigDecimalOrNull() ?: return null
     if (value < BigDecimal.ZERO || value > BigDecimal.valueOf(100)) return null

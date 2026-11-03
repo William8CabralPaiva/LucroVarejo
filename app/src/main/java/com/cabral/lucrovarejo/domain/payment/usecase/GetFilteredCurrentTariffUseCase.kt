@@ -1,6 +1,6 @@
 package com.cabral.lucrovarejo.domain.payment.usecase
 
-import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import java.util.Date
 import javax.inject.Inject
 
@@ -9,8 +9,8 @@ import javax.inject.Inject
  * (maquininha + tipo + bandeira + parcela), escolhe a de maior `effectiveFrom <= date`.
  * Função pura e testável, sem dependência de Android/Firebase.
  */
-class ResolveFeeForDateUseCase @Inject constructor() {
-    operator fun invoke(fees: List<TerminalFeeModel>, date: Date): TerminalFeeModel? =
-        fees.filter { !it.effectiveFrom.after(date) }
+class GetFilteredCurrentTariffUseCase @Inject constructor() {
+    operator fun invoke(tariffs: List<PaymentMachineModel>, date: Date): PaymentMachineModel? =
+        tariffs.filter { !it.effectiveFrom.after(date) }
             .maxByOrNull { it.effectiveFrom }
 }

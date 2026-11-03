@@ -38,7 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Percent
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.ui.components.DateTextFieldContent
@@ -50,7 +50,7 @@ import java.util.Date
 
 @Composable
 fun MachineHistoryScreen(
-    slot: FeeSlotKey,
+    slot: PaymentMachineHistoryArgs,
     viewModel: MachineHistoryViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -104,7 +104,7 @@ fun MachineHistoryContent(
                 ) { Text(text = stringResource(state.loadError)) }
             }
 
-            state.fees.isEmpty() -> {
+            state.tariffs.isEmpty() -> {
                 Column(
                     modifier = Modifier.fillMaxSize().padding(innerPadding),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -119,8 +119,8 @@ fun MachineHistoryContent(
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(state.fees, key = { it.historyKey() }) { fee ->
-                        MachineHistoryItem(fee = fee, isCurrent = fee.historyKey() == state.currentFeeKey)
+                    items(state.tariffs, key = { it.historyKey() }) { tariff ->
+                        MachineHistoryItem(tariff = tariff, isCurrent = tariff.historyKey() == state.currentTariffKey)
                     }
                 }
             }
@@ -128,7 +128,7 @@ fun MachineHistoryContent(
     }
 
     if (state.showAddDialog) {
-        AddFeeDialog(
+        AddTariffDialog(
             state = state,
             onDismiss = onDismissAddDialog,
             onRateChange = onRateChange,
@@ -139,7 +139,7 @@ fun MachineHistoryContent(
 }
 
 @Composable
-private fun MachineHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
+private fun MachineHistoryItem(tariff: PaymentMachineModel, isCurrent: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -151,7 +151,7 @@ private fun MachineHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "${fee.rateBps.bpsToRate()}%", style = MaterialTheme.typography.titleMedium)
+                Text(text = "${tariff.rateBps.bpsToRate()}%", style = MaterialTheme.typography.titleMedium)
                 if (isCurrent) {
                     AssistChip(onClick = {}, label = { Text(stringResource(R.string.machine_history_current_badge)) })
                 }
@@ -160,7 +160,7 @@ private fun MachineHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
             Text(
                 text = stringResource(
                     R.string.machine_history_effective_from,
-                    formatSaleDatePtBr(fee.effectiveFrom.time)
+                    formatSaleDatePtBr(tariff.effectiveFrom.time)
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -170,7 +170,7 @@ private fun MachineHistoryItem(fee: TerminalFeeModel, isCurrent: Boolean) {
 }
 
 @Composable
-private fun AddFeeDialog(
+private fun AddTariffDialog(
     state: MachineHistoryUiState,
     onDismiss: () -> Unit,
     onRateChange: (String) -> Unit,
@@ -185,8 +185,8 @@ private fun AddFeeDialog(
                 IconTextFieldContent(
                     value = state.rateText,
                     onValueChange = onRateChange,
-                    labelResId = R.string.terminal_form_fee_rate_label,
-                    placeholderResId = R.string.terminal_form_fee_rate_placeholder,
+                    labelResId = R.string.terminal_form_Tariff_rate_label,
+                    placeholderResId = R.string.terminal_form_Tariff_rate_placeholder,
                     icon = Icons.Outlined.Percent,
                     type = IconTextFieldType.MONEY,
                     required = true,
@@ -196,7 +196,7 @@ private fun AddFeeDialog(
                 DateTextFieldContent(
                     dateMillis = state.effectiveFromMillis,
                     onDateChange = onDateChange,
-                    labelResId = R.string.terminal_form_fee_effective_from_label,
+                    labelResId = R.string.terminal_form_Tariff_effective_from_label,
                     required = true
                 )
                 state.dateError?.let {
@@ -227,8 +227,8 @@ private fun MachineHistoryContentPreview() {
                 method = TerminalPaymentType.CREDIT,
                 brandName = "Visa",
                 installments = 1,
-                fees = listOf(
-                    TerminalFeeModel(
+                tariffs = listOf(
+                    PaymentMachineModel(
                         terminalId = "1",
                         method = TerminalPaymentType.CREDIT,
                         brandId = "1",
@@ -237,7 +237,7 @@ private fun MachineHistoryContentPreview() {
                         effectiveFrom = Date()
                     )
                 ),
-                currentFeeKey = "k"
+                currentTariffKey = "k"
             ),
             onShowAddDialog = {},
             onDismissAddDialog = {},

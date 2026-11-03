@@ -8,7 +8,7 @@ import java.io.Serializable
  * para abrir a tela de histÃ³rico. Passado via `SavedStateHandle` do back stack, como
  * jÃ¡ Ã© feito com `ProductModel`/`PurchaseModel`.
  */
-data class FeeSlotKey(
+data class PaymentMachineHistoryArgs(
     val terminalId: String,
     val method: TerminalPaymentType,
     val brandId: String? = null,

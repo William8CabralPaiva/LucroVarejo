@@ -25,12 +25,12 @@ histórico **nunca é sobrescrito**.
 
 ## Modelo de dados (Firestore, dentro da loja)
 - `stores/{storeId}/paymentTerminals/{terminalId}`: `name`, `active`, `enabledMethods` (lista de CASH/PIX/DEBIT/CREDIT), `brands` (lista de nomes de bandeira, exclusiva desta maquininha — não há `cardBrands` global)
-- `stores/{storeId}/paymentTerminals/{terminalId}/fees/{feeId}` (append-only):
+- `stores/{storeId}/paymentTerminals/{terminalId}/tariffs/{tariffId}` (append-only):
   `method`, `brandId?`, `installments?` (nº exato da parcela), `rateBps`, `effectiveFrom`, `createdAt`
-- `firestore.rules`: fees só `create`/`read` (sem `update`/`delete`); demais com acesso restrito à sessão da loja.
+- `firestore.rules`: tariffs só `create`/`read` (sem `update`/`delete`); demais com acesso restrito à sessão da loja.
 
 Camadas (seguindo INSTRUCTION.md: models UI separados de request, `strings.xml`, stateful/stateless):
-- `domain/payment`: evoluir `PaymentMethods` para CASH, PIX, DEBIT, CREDIT (hoje há CASH, PIX, CARD); `PaymentTerminalModel` (com `brands: List<String>` próprio da maquininha), `TerminalFeeModel`, `PaymentFailure`; use cases (CRUD de maquininha, `AddTerminalFeeUseCase`, `GetTerminalFeesUseCase`, `ResolveFeeForDateUseCase` — puro e testável).
+- `domain/payment`: evoluir `PaymentMethods` para CASH, PIX, DEBIT, CREDIT (hoje há CASH, PIX, CARD); `PaymentTerminalModel` (com `brands: List<String>` próprio da maquininha), `PaymentMachineModel`, `PaymentFailure`; use cases (CRUD de maquininha, `AddPaymentMachineUseCase`, `GetPaymentMachinesUseCase`, `GetFilteredCurrentTariffUseCase` — puro e testável).
 - `data/payment`: `*Request` (bps `Int`, data ISO), `*Record`, mappers, `FirebasePayment*DataSource`, repositório, módulo Hilt.
 - `ui/screens/...`: telas abaixo. Atualizar `PaymentMethodsUi` (nomes via `stringResource`, e corrigir o encoding quebrado atual).
 
@@ -48,11 +48,11 @@ No cadastro da maquininha, os 4 tipos de pagamento ficam em um **`SecondaryTabRo
 3. **Histórico de tarifas** por tipo/bandeira/parcela: ordenado por vigência, atual destacada, botão "Nova tarifa" (% + data de início, também pré-preenchida com a data atual). No crédito, o histórico deve ser independente para cada combinação de bandeira e parcela. Nunca edita registro antigo.
 
 ## Todos (ordem sugerida)
-1. `payment-domain` — modelos de domínio, enum com DEBIT/CREDIT, `ResolveFeeForDate` + testes unitários (vigência, empate, retroativo, bps).
-2. `payment-data` — requests/records/mappers, data sources Firestore, repositório, DI, regras do Firestore (fees append-only).
+1. `payment-domain` — modelos de domínio, enum com DEBIT/CREDIT, `GetFilteredCurrentTariff` + testes unitários (vigência, empate, retroativo, bps).
+2. `payment-data` — requests/records/mappers, data sources Firestore, repositório, DI, regras do Firestore (tariffs append-only).
 3. `terminal-list-screen` — lista de maquininhas + rota/navegação e entrada em Configurações.
 4. `terminal-form-screen` — formulário com chips (FilterChip) de tipo e bandeira (cadastrada inline, por maquininha); tarifas por tipo/bandeira/parcela, seleção de parcelas por Spinner, data de início.
-5. `fee-history-screen` — histórico e nova tarifa com vigência.
+5. `tariff-history-screen` — histórico e nova tarifa com vigência.
 6. `strings-and-validation` — textos em `strings.xml`, validações (%, datas, parcelas entre 1 e 12 sem duplicidade, duplicidade de vigência), estados vazio/erro/loading, confirmação ao arquivar.
 7. `sale-integration` — **fora do escopo deste planejamento**. A implementação de Nova Venda pertence a outro fluxo e será desenvolvida separadamente, consumindo as configurações cadastradas aqui.
 

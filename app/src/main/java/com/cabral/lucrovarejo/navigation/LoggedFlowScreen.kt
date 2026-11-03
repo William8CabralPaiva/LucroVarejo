@@ -18,11 +18,10 @@ import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
-import com.cabral.lucrovarejo.ui.screens.SummaryScreen
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.machinehistory.MachineHistoryScreen
-import com.cabral.lucrovarejo.ui.screens.machinehistory.FeeSlotKey
+import com.cabral.lucrovarejo.ui.screens.machinehistory.PaymentMachineHistoryArgs
 import com.cabral.lucrovarejo.ui.screens.home.HomeScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.addproduct.AddProductScreen
@@ -207,7 +206,7 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.MACHINE_HISTORY) {
             val slot = navController.previousBackStackEntry
                 ?.savedStateHandle
-                ?.get<FeeSlotKey>(LoggedNavigator.FEE_SLOT_KEY)
+                ?.get<PaymentMachineHistoryArgs>(LoggedNavigator.TARIFF_SLOT_KEY)
             if (slot != null) {
                 MachineHistoryScreen(slot = slot)
             }
@@ -250,8 +249,8 @@ private class LoggedNavigator(
         navigateTo(LoggedRoutes.EDIT_MACHINE)
     }
 
-    fun navigateToMachineHistory(slot: FeeSlotKey) {
-        navController.currentBackStackEntry?.savedStateHandle?.set(FEE_SLOT_KEY, slot)
+    fun navigateToMachineHistory(slot: PaymentMachineHistoryArgs) {
+        navController.currentBackStackEntry?.savedStateHandle?.set(TARIFF_SLOT_KEY, slot)
         navigateTo(LoggedRoutes.MACHINE_HISTORY)
     }
 
@@ -263,6 +262,6 @@ private class LoggedNavigator(
         const val PRODUCT_TO_EDIT_KEY = "product_to_edit"
         const val PURCHASE_TO_EDIT_KEY = "purchase_to_edit"
         const val TERMINAL_TO_EDIT_KEY = "terminal_to_edit"
-        const val FEE_SLOT_KEY = "fee_slot_key"
+        const val TARIFF_SLOT_KEY = "tariff_slot_key"
     }
 }

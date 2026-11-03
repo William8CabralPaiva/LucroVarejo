@@ -9,7 +9,7 @@ import java.util.Date
  * é a de maior [effectiveFrom] <= D para a mesma chave. Nunca editar/apagar um registro;
  * corrigir = inserir um novo com nova [effectiveFrom].
  */
-data class TerminalFeeModel(
+data class PaymentMachineModel(
     val terminalId: String,
     val method: TerminalPaymentType,
     val brandId: String?,
@@ -20,7 +20,7 @@ data class TerminalFeeModel(
     val key: String? = null
 ) : Serializable {
     /** Chave de vigência: tarifas com a mesma chave competem pela mesma data. */
-    fun feeKey(): String = listOf(
+    fun tariffKey(): String = listOf(
         terminalId,
         method.name,
         brandId.orEmpty(),

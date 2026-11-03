@@ -1,13 +1,13 @@
 package com.cabral.lucrovarejo.data.payment.di
 
 import com.cabral.lucrovarejo.data.payment.PaymentTerminalRepositoryImpl
-import com.cabral.lucrovarejo.data.payment.TerminalFeeRepositoryImpl
+import com.cabral.lucrovarejo.data.payment.PaymentMachineRepositoryImpl
 import com.cabral.lucrovarejo.data.payment.datasource.FirebasePaymentTerminalRemoteDataSource
-import com.cabral.lucrovarejo.data.payment.datasource.FirebaseTerminalFeeRemoteDataSource
+import com.cabral.lucrovarejo.data.payment.datasource.FirebasePaymentMachineRemoteDataSource
 import com.cabral.lucrovarejo.data.payment.datasource.PaymentTerminalRemoteDataSource
-import com.cabral.lucrovarejo.data.payment.datasource.TerminalFeeRemoteDataSource
+import com.cabral.lucrovarejo.data.payment.datasource.PaymentMachineRemoteDataSource
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalRepository
-import com.cabral.lucrovarejo.domain.payment.TerminalFeeRepository
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -31,13 +31,13 @@ abstract class PaymentModule {
 
     @Binds
     @Singleton
-    abstract fun bindTerminalFeeRemoteDataSource(
-        implementation: FirebaseTerminalFeeRemoteDataSource
-    ): TerminalFeeRemoteDataSource
+    abstract fun bindPaymentMachineRemoteDataSource(
+        implementation: FirebasePaymentMachineRemoteDataSource
+    ): PaymentMachineRemoteDataSource
 
     @Binds
     @Singleton
-    abstract fun bindTerminalFeeRepository(
-        implementation: TerminalFeeRepositoryImpl
-    ): TerminalFeeRepository
+    abstract fun bindPaymentMachineRepository(
+        implementation: PaymentMachineRepositoryImpl
+    ): PaymentMachineRepository
 }

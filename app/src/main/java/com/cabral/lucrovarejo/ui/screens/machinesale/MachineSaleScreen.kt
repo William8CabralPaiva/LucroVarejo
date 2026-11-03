@@ -44,7 +44,7 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
-import com.cabral.lucrovarejo.ui.screens.machinehistory.FeeSlotKey
+import com.cabral.lucrovarejo.ui.screens.machinehistory.PaymentMachineHistoryArgs
 import com.cabral.lucrovarejo.ui.components.AppSwitch
 import com.cabral.lucrovarejo.ui.components.DateTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconButton
@@ -64,7 +64,7 @@ import androidx.compose.material.icons.outlined.PointOfSale
 fun MachineSaleScreen(
     terminal: PaymentTerminalModel? = null,
     onFinished: () -> Unit = {},
-    onOpenMachineHistory: (FeeSlotKey) -> Unit = {},
+    onOpenMachineHistory: (PaymentMachineHistoryArgs) -> Unit = {},
     viewModel: MachineSaleViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -78,17 +78,17 @@ fun MachineSaleScreen(
         state = state,
         onNameChange = resolvedViewModel::onNameChange,
         onToggleMethod = resolvedViewModel::onToggleMethod,
-        onCashChargesFeeToggle = resolvedViewModel::onCashChargesFeeToggle,
+        onCashChargesTariffToggle = resolvedViewModel::onCashChargesTariffToggle,
         onAddBrand = resolvedViewModel::onAddBrand,
         onToggleDebitBrand = resolvedViewModel::onToggleDebitBrand,
         onToggleCreditBrand = resolvedViewModel::onToggleCreditBrand,
         onAddCreditInstallment = resolvedViewModel::onAddCreditInstallment,
-        onFeeRateChange = resolvedViewModel::onFeeRateChange,
-        onFeeDateChange = resolvedViewModel::onFeeDateChange,
+        onTariffRateChange = resolvedViewModel::onTariffRateChange,
+        onTariffDateChange = resolvedViewModel::onTariffDateChange,
         onOpenMachineHistory = { entry ->
             val terminalId = state.terminalId ?: return@MachineSaleContent
             onOpenMachineHistory(
-                FeeSlotKey(
+                PaymentMachineHistoryArgs(
                     terminalId = terminalId,
                     method = entry.method,
                     brandId = entry.brandId,
@@ -110,14 +110,14 @@ fun MachineSaleContent(
     state: MachineSaleUiState,
     onNameChange: (String) -> Unit,
     onToggleMethod: (TerminalPaymentType) -> Unit,
-    onCashChargesFeeToggle: (Boolean) -> Unit,
+    onCashChargesTariffToggle: (Boolean) -> Unit,
     onAddBrand: (String) -> Unit,
     onToggleDebitBrand: (String) -> Unit,
     onToggleCreditBrand: (String) -> Unit,
     onAddCreditInstallment: (String, Int) -> Unit,
-    onFeeRateChange: (String, String) -> Unit,
-    onFeeDateChange: (String, Long) -> Unit,
-    onOpenMachineHistory: (FeeEntryUi) -> Unit = {},
+    onTariffRateChange: (String, String) -> Unit,
+    onTariffDateChange: (String, Long) -> Unit,
+    onOpenMachineHistory: (TariffEntryUi) -> Unit = {},
     onSave: () -> Unit,
 ) {
     Scaffold(
@@ -154,8 +154,8 @@ fun MachineSaleContent(
             return@Scaffold
         }
 
-        val cashEntry = state.feeEntries.firstOrNull { it.method == TerminalPaymentType.CASH }
-        val pixEntry = state.feeEntries.firstOrNull { it.method == TerminalPaymentType.PIX }
+        val cashEntry = state.tariffEntries.firstOrNull { it.method == TerminalPaymentType.CASH }
+        val pixEntry = state.tariffEntries.firstOrNull { it.method == TerminalPaymentType.PIX }
 
         val methods = remember {
             listOf(
@@ -240,17 +240,17 @@ fun MachineSaleContent(
                             TerminalPaymentType.CASH -> {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = stringResource(R.string.terminal_form_cash_charges_fee),
+                                        text = stringResource(R.string.terminal_form_cash_charges_Tariff),
                                         modifier = Modifier.weight(1f)
                                     )
-                                    AppSwitch(checked = state.cashChargesFee, onCheckedChange = onCashChargesFeeToggle)
+                                    AppSwitch(checked = state.cashChargesTariff, onCheckedChange = onCashChargesTariffToggle)
                                 }
-                                if (state.cashChargesFee && cashEntry != null) {
+                                if (state.cashChargesTariff && cashEntry != null) {
                                     Spacer(modifier = Modifier.height(8.dp))
-                                    FeeEntryFields(
+                                    TariffEntryFields(
                                         entry = cashEntry,
-                                        onRateChange = { onFeeRateChange(cashEntry.id, it) },
-                                        onDateChange = { onFeeDateChange(cashEntry.id, it) },
+                                        onRateChange = { onTariffRateChange(cashEntry.id, it) },
+                                        onDateChange = { onTariffDateChange(cashEntry.id, it) },
                                         onOpenHistory = { onOpenMachineHistory(cashEntry) }
                                     )
                                 }
@@ -258,10 +258,10 @@ fun MachineSaleContent(
 
                             TerminalPaymentType.PIX -> {
                                 pixEntry?.let { entry ->
-                                    FeeEntryFields(
+                                    TariffEntryFields(
                                         entry = entry,
-                                        onRateChange = { onFeeRateChange(entry.id, it) },
-                                        onDateChange = { onFeeDateChange(entry.id, it) },
+                                        onRateChange = { onTariffRateChange(entry.id, it) },
+                                        onDateChange = { onTariffDateChange(entry.id, it) },
                                         onOpenHistory = { onOpenMachineHistory(entry) }
                                     )
                                 }
@@ -310,7 +310,7 @@ fun MachineSaleContent(
                                         }
                                     }
                                     state.selectedDebitBrandIds.forEach { brandId ->
-                                        val entry = state.feeEntries.firstOrNull {
+                                        val entry = state.tariffEntries.firstOrNull {
                                             it.method == TerminalPaymentType.DEBIT && it.brandId == brandId
                                         }
                                         if (entry != null) {
@@ -321,10 +321,10 @@ fun MachineSaleContent(
                                                     Modifier.bringIntoViewRequester(it)
                                                 } ?: Modifier
                                             ) {
-                                                FeeEntryFields(
+                                                TariffEntryFields(
                                                     entry = entry,
-                                                    onRateChange = { onFeeRateChange(entry.id, it) },
-                                                    onDateChange = { onFeeDateChange(entry.id, it) },
+                                                    onRateChange = { onTariffRateChange(entry.id, it) },
+                                                    onDateChange = { onTariffDateChange(entry.id, it) },
                                                     onOpenHistory = { onOpenMachineHistory(entry) }
                                                 )
                                             }
@@ -389,7 +389,7 @@ fun MachineSaleContent(
                                                 onAdd = onAddCreditInstallment
                                             )
                                             state.creditInstallmentsByBrand[brandId].orEmpty().forEach { installment ->
-                                                val entry = state.feeEntries.firstOrNull {
+                                                val entry = state.tariffEntries.firstOrNull {
                                                     it.method == TerminalPaymentType.CREDIT &&
                                                         it.brandId == brandId &&
                                                         it.installments == installment
@@ -400,10 +400,10 @@ fun MachineSaleContent(
                                                         text = "${installment}x",
                                                         style = MaterialTheme.typography.labelLarge
                                                     )
-                                                    FeeEntryFields(
+                                                    TariffEntryFields(
                                                         entry = entry,
-                                                        onRateChange = { onFeeRateChange(entry.id, it) },
-                                                        onDateChange = { onFeeDateChange(entry.id, it) },
+                                                        onRateChange = { onTariffRateChange(entry.id, it) },
+                                                        onDateChange = { onTariffDateChange(entry.id, it) },
                                                         onOpenHistory = { onOpenMachineHistory(entry) }
                                                     )
                                                 }
@@ -547,8 +547,8 @@ private fun CreditInstallmentPicker(
 
 /** Campos de tarifa (%) + vigÃªncia de um slot, sem Card prÃ³prio (usado aninhado dentro das seÃ§Ãµes). */
 @Composable
-private fun FeeEntryFields(
-    entry: FeeEntryUi,
+private fun TariffEntryFields(
+    entry: TariffEntryUi,
     onRateChange: (String) -> Unit,
     onDateChange: (Long) -> Unit,
     onOpenHistory: () -> Unit,
@@ -556,8 +556,8 @@ private fun FeeEntryFields(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(
-                if (entry.currentRateBps != null) R.string.terminal_form_current_fee
-                else R.string.terminal_form_no_fee,
+                if (entry.currentRateBps != null) R.string.terminal_form_current_Tariff
+                else R.string.terminal_form_no_Tariff,
                 entry.currentRateBps?.let { "${it.bpsToRate()}%" } ?: ""
             ),
             style = MaterialTheme.typography.bodySmall,
@@ -566,8 +566,8 @@ private fun FeeEntryFields(
         IconTextFieldContent(
             value = entry.rateText,
             onValueChange = onRateChange,
-            labelResId = R.string.terminal_form_fee_rate_label,
-            placeholderResId = R.string.terminal_form_fee_rate_placeholder,
+            labelResId = R.string.terminal_form_Tariff_rate_label,
+            placeholderResId = R.string.terminal_form_Tariff_rate_placeholder,
             icon = Icons.Outlined.Percent,
             type = IconTextFieldType.MONEY,
             required = false,
@@ -577,7 +577,7 @@ private fun FeeEntryFields(
         DateTextFieldContent(
             dateMillis = entry.effectiveFromMillis,
             onDateChange = onDateChange,
-            labelResId = R.string.terminal_form_fee_effective_from_label,
+            labelResId = R.string.terminal_form_Tariff_effective_from_label,
             required = false
         )
         if (entry.currentRateBps != null) {
@@ -599,20 +599,20 @@ private fun MachineSaleContentPreview() {
                 availableBrands = listOf("Visa"),
                 selectedCreditBrandIds = setOf("Visa"),
                 creditInstallmentsByBrand = mapOf("Visa" to listOf(1, 2)),
-                feeEntries = listOf(
-                    FeeEntryUi(method = TerminalPaymentType.PIX),
-                    FeeEntryUi(method = TerminalPaymentType.CREDIT, brandId = "Visa", brandName = "Visa", installments = 1)
+                tariffEntries = listOf(
+                    TariffEntryUi(method = TerminalPaymentType.PIX),
+                    TariffEntryUi(method = TerminalPaymentType.CREDIT, brandId = "Visa", brandName = "Visa", installments = 1)
                 )
             ),
             onNameChange = {},
             onToggleMethod = {},
-            onCashChargesFeeToggle = {},
+            onCashChargesTariffToggle = {},
             onAddBrand = {},
             onToggleDebitBrand = {},
             onToggleCreditBrand = {},
             onAddCreditInstallment = { _, _ -> },
-            onFeeRateChange = { _, _ -> },
-            onFeeDateChange = { _, _ -> },
+            onTariffRateChange = { _, _ -> },
+            onTariffDateChange = { _, _ -> },
             onSave = {}
         )
     }

@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.data.payment.model
 
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
-import com.cabral.lucrovarejo.domain.payment.TerminalFeeModel
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 
 fun PaymentTerminalModel.toRequest(): PaymentTerminalRequest = PaymentTerminalRequest(
@@ -21,7 +21,7 @@ fun PaymentTerminalRecord.toModel(): PaymentTerminalModel = PaymentTerminalModel
     brands = request.brands
 )
 
-fun TerminalFeeModel.toRequest(): TerminalFeeRequest = TerminalFeeRequest(
+fun PaymentMachineModel.toRequest(): PaymentMachineRequest = PaymentMachineRequest(
     method = method.name,
     brandId = brandId,
     installments = installments,
@@ -29,7 +29,7 @@ fun TerminalFeeModel.toRequest(): TerminalFeeRequest = TerminalFeeRequest(
     effectiveFrom = effectiveFrom
 )
 
-fun TerminalFeeRecord.toModel(): TerminalFeeModel = TerminalFeeModel(
+fun PaymentMachineRecord.toModel(): PaymentMachineModel = PaymentMachineModel(
     key = documentId,
     terminalId = terminalId,
     method = TerminalPaymentType.valueOf(request.method),

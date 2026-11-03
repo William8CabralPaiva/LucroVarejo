@@ -56,7 +56,7 @@ fun LoggedRouteTopBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.navigate_back),
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        tint = LightMintContainer
                     )
                 }
             }

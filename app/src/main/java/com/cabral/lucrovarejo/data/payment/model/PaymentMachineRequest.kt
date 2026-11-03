@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.data.payment.model
 import com.google.firebase.firestore.FieldValue
 import java.util.Date
 
-data class TerminalFeeRequest(
+data class PaymentMachineRequest(
     val method: String,
     val brandId: String?,
     val installments: Int?,
