@@ -13,5 +13,12 @@ data class PurchaseModel(
     val quantity: Int,
     val saleDate: Date,
     val paymentMethod: PaymentMethods,
-    val key: String? = null
+    val key: String? = null,
+    val terminalId: String? = null,
+    val terminalName: String? = null,
+    val brand: String? = null,
+    val installments: Int? = null,
+    val tariffRateBps: Int = 0,
+    val tariffId: String? = null,
+    val tariffAmountCents: Long = 0L
 ) : Serializable

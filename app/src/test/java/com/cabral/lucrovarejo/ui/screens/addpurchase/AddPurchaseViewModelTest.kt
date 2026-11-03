@@ -1,6 +1,10 @@
 package com.cabral.lucrovarejo.ui.screens.addpurchase
 
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.payment.usecase.GetFilteredCurrentTariffUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetSaleTariffUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalTariffsUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalsUseCase
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
@@ -65,7 +69,10 @@ class AddPurchaseViewModelTest {
             getProducts = GetProductsUseCase(FakeProductRepository(flowOf(listOf(product)))),
             createPurchase = CreatePurchaseUseCase(purchaseRepository),
             updatePurchase = UpdatePurchaseUseCase(purchaseRepository),
-            deletePurchase = DeletePurchaseUseCase(purchaseRepository)
+            deletePurchase = DeletePurchaseUseCase(purchaseRepository),
+            getTerminals = GetTerminalsUseCase(NoTerminalsRepository),
+            getTerminalTariffs = GetTerminalTariffsUseCase(NoTariffsRepository),
+            getSaleTariff = GetSaleTariffUseCase(GetFilteredCurrentTariffUseCase())
         )
     }
 
@@ -165,7 +172,7 @@ class AddPurchaseViewModelTest {
         viewModel.onProductSelected(productDisplayName(product))
         viewModel.onSalePriceChanged("89,90")
         viewModel.onQuantityChanged(2)
-        viewModel.onPaymentMethodSelected(PaymentMethods.PIX)
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         viewModel.onSaleDateChanged(saleDateMillis)
         val effect = async { viewModel.effects.first() }
 
@@ -183,7 +190,7 @@ class AddPurchaseViewModelTest {
                 saleDate = Date(
                     DateUtils.mergeDateWithExistingTime(saleDateMillis, originalSaleDateMillis)
                 ),
-                paymentMethod = PaymentMethods.PIX
+                paymentMethod = PaymentMethods.CASH
             ),
             purchaseRepository.createdPurchase
         )
@@ -203,7 +210,7 @@ class AddPurchaseViewModelTest {
         assertEquals("Bolsa Feminina", state.form.selectedProduct?.name)
         assertEquals("89.90", state.form.salePrice)
         assertEquals(2, state.form.quantity)
-        assertEquals(PaymentMethods.PIX, state.form.paymentMethod)
+        assertEquals(PaymentMethods.CASH, state.form.paymentMethod)
         assertEquals(existingPurchase.saleDate.time, state.form.saleDateMillis)
     }
 
@@ -245,7 +252,7 @@ class AddPurchaseViewModelTest {
         advanceUntilIdle()
         viewModel.onProductSelected("inexistente")
         viewModel.onProductSelected(productDisplayName(product))
-        viewModel.onPaymentMethodSelected(PaymentMethods.PIX)
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         viewModel.onSalePriceChanged("abc")
 
         viewModel.savePurchase()
@@ -262,7 +269,7 @@ class AddPurchaseViewModelTest {
         advanceUntilIdle()
         viewModel.onProductSelected(productDisplayName(product))
         viewModel.onSalePriceChanged("10")
-        viewModel.onPaymentMethodSelected(PaymentMethods.PIX)
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         val expected = mapOf(
             PurchaseFailure.Reason.NETWORK to R.string.purchase_create_error_network,
             PurchaseFailure.Reason.PERMISSION_DENIED to R.string.purchase_create_error_permission,
@@ -344,14 +351,17 @@ class AddPurchaseViewModelTest {
         salePrice = 8990,
         quantity = 2,
         saleDate = Date(1_700_000_000_000),
-        paymentMethod = PaymentMethods.PIX
+        paymentMethod = PaymentMethods.CASH
     )
     private fun createViewModel(productRepository: ProductRepository): AddPurchaseViewModel =
         AddPurchaseViewModel(
             getProducts = GetProductsUseCase(productRepository),
             createPurchase = CreatePurchaseUseCase(purchaseRepository),
             updatePurchase = UpdatePurchaseUseCase(purchaseRepository),
-            deletePurchase = DeletePurchaseUseCase(purchaseRepository)
+            deletePurchase = DeletePurchaseUseCase(purchaseRepository),
+            getTerminals = GetTerminalsUseCase(NoTerminalsRepository),
+            getTerminalTariffs = GetTerminalTariffsUseCase(NoTariffsRepository),
+            getSaleTariff = GetSaleTariffUseCase(GetFilteredCurrentTariffUseCase())
         )
 
     private class FakeProductRepository(

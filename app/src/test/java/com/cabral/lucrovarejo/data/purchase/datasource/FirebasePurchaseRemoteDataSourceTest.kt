@@ -1,4 +1,4 @@
-﻿package com.cabral.lucrovarejo.data.purchase.datasource
+package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
@@ -50,7 +50,14 @@ class FirebasePurchaseRemoteDataSourceTest {
                 "sale_price",
                 "quantity",
                 "sale_date",
-                "payment_method"
+                "payment_method",
+                "terminal_id",
+                "terminal_name",
+                "brand",
+                "installments",
+                "tariff_rate_bps",
+                "tariff_id",
+                "tariff_amount_cents"
             ),
             fields.keys
         )

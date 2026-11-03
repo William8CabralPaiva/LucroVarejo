@@ -33,6 +33,29 @@ class PurchaseRecordMapperTest {
     }
 
     @Test
+    fun mapsTariffSnapshotFieldsWhenPresent() {
+        val document = documentSnapshot(Date()).also {
+            `when`(it.getString("terminal_id")).thenReturn("t1")
+            `when`(it.getString("terminal_name")).thenReturn("Maquininha A")
+            `when`(it.getString("brand")).thenReturn("Visa")
+            `when`(it.getLong("installments")).thenReturn(3)
+            `when`(it.getLong("tariff_rate_bps")).thenReturn(249)
+            `when`(it.getString("tariff_id")).thenReturn("tariff-1")
+            `when`(it.getLong("tariff_amount_cents")).thenReturn(374)
+        }
+
+        val record = document.toPurchaseRecord()
+
+        assertEquals("t1", record.terminalId)
+        assertEquals("Maquininha A", record.terminalName)
+        assertEquals("Visa", record.brand)
+        assertEquals(3, record.installments)
+        assertEquals(249, record.tariffRateBps)
+        assertEquals("tariff-1", record.tariffId)
+        assertEquals(374L, record.tariffAmountCents)
+    }
+
+    @Test
     fun rejectsDocumentsWithoutRequiredFields() {
         val document = documentSnapshot(Date()).also {
             `when`(it.getString("name")).thenReturn(null)
@@ -90,6 +113,9 @@ class PurchaseRecordMapperTest {
         `when`(document.getLong("quantity")).thenReturn(2)
         `when`(document.getTimestamp("sale_date")).thenReturn(Timestamp(saleDate))
         `when`(document.getString("payment_method")).thenReturn("PIX")
+        `when`(document.getLong("installments")).thenReturn(null)
+        `when`(document.getLong("tariff_rate_bps")).thenReturn(null)
+        `when`(document.getLong("tariff_amount_cents")).thenReturn(null)
         return document
     }
 }

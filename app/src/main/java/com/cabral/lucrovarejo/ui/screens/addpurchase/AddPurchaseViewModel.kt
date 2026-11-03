@@ -3,7 +3,13 @@ package com.cabral.lucrovarejo.ui.screens.addpurchase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
+import com.cabral.lucrovarejo.domain.payment.usecase.GetSaleTariffUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalTariffsUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalsUseCase
 import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
@@ -14,6 +20,7 @@ import com.cabral.lucrovarejo.domain.purchase.usecase.DeletePurchaseUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.UpdatePurchaseUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +43,9 @@ class AddPurchaseViewModel @Inject constructor(
     private val createPurchase: CreatePurchaseUseCase,
     private val updatePurchase: UpdatePurchaseUseCase,
     private val deletePurchase: DeletePurchaseUseCase,
+    private val getTerminals: GetTerminalsUseCase,
+    private val getTerminalTariffs: GetTerminalTariffsUseCase,
+    private val getSaleTariff: GetSaleTariffUseCase,
 ) : ViewModel() {
     private val effectChannel = Channel<Unit>(Channel.BUFFERED)
     val effects: Flow<Unit> = effectChannel.receiveAsFlow()
@@ -47,8 +57,13 @@ class AddPurchaseViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AddPurchaseUiState())
     val uiState: StateFlow<AddPurchaseUiState> = _uiState.asStateFlow()
 
+    // Tarifas ficam em memória só durante a vida da tela; o Firestore já faz o cache offline.
+    private val tariffsByTerminal = mutableMapOf<String, List<PaymentMachineModel>>()
+    private var tariffsJob: Job? = null
+
     init {
         observeProducts()
+        observeTerminals()
     }
 
     fun loadPurchase(purchase: PurchaseModel?) {
@@ -67,10 +82,17 @@ class AddPurchaseViewModel @Inject constructor(
                     salePrice = BigDecimal.valueOf(purchase.salePrice.toLong(), 2).toPlainString(),
                     quantity = purchase.quantity.coerceIn(1, 100),
                     paymentMethod = purchase.paymentMethod,
+                    terminalId = purchase.terminalId,
+                    terminalName = purchase.terminalName,
+                    brand = purchase.brand,
+                    installments = purchase.installments,
                     saleDateMillis = purchase.saleDate.time
-                )
+                ),
+                appliedTariff = AppliedTariff(purchase.tariffId, purchase.tariffRateBps),
+                keepSavedTariff = true
             )
         }
+        loadTariffsForSelection()
     }
 
     fun onProductSelected(displayName: String) {
@@ -106,28 +128,96 @@ class AddPurchaseViewModel @Inject constructor(
     }
 
     fun onPaymentMethodSelected(value: PaymentMethods) {
+        if (_uiState.value.form.paymentMethod == value) return
         _uiState.update {
-            it.copy(form = it.form.copy(paymentMethod = value), errorMessage = null)
+            it.copy(
+                form = it.form.copy(
+                    paymentMethod = value,
+                    terminalId = null,
+                    terminalName = null,
+                    brand = null,
+                    installments = null
+                ),
+                tariffs = emptyList(),
+                appliedTariff = AppliedTariff.NONE,
+                keepSavedTariff = false,
+                tariffNotice = null,
+                errorMessage = null
+            )
+        }
+        loadTariffsForSelection()
+    }
+
+    fun onTerminalSelected(name: String) {
+        val terminal = _uiState.value.terminalOptions.firstOrNull { it.name == name } ?: return
+        val terminalKey = terminal.key ?: return
+        _uiState.update {
+            it.copy(
+                form = it.form.copy(
+                    terminalId = terminalKey,
+                    terminalName = terminal.name,
+                    brand = null,
+                    installments = null
+                ),
+                tariffs = emptyList(),
+                appliedTariff = AppliedTariff.NONE,
+                keepSavedTariff = false,
+                tariffNotice = null,
+                errorMessage = null
+            )
+        }
+        loadTariffs(listOf(terminalKey))
+    }
+
+    fun onBrandSelected(brand: String) {
+        if (brand !in _uiState.value.brandOptions) return
+        _uiState.update {
+            reconcileTariff(
+                it.copy(
+                    form = it.form.copy(brand = brand, installments = null),
+                    keepSavedTariff = false,
+                    tariffNotice = null,
+                    errorMessage = null
+                )
+            )
+        }
+    }
+
+    fun onInstallmentsSelected(installments: Int) {
+        if (installments !in _uiState.value.installmentOptions) return
+        _uiState.update {
+            reconcileTariff(
+                it.copy(
+                    form = it.form.copy(installments = installments),
+                    keepSavedTariff = false,
+                    tariffNotice = null,
+                    errorMessage = null
+                )
+            )
         }
     }
 
     fun onSaleDateChanged(value: Long) {
         _uiState.update {
-            it.copy(
-                form = it.form.copy(
-                    saleDateMillis = DateUtils.mergeDateWithExistingTime(
-                        dateMillis = value,
-                        existingDateTimeMillis = it.form.saleDateMillis
-                    )
-                ),
-                errorMessage = null
+            reconcileTariff(
+                it.copy(
+                    form = it.form.copy(
+                        saleDateMillis = DateUtils.mergeDateWithExistingTime(
+                            dateMillis = value,
+                            existingDateTimeMillis = it.form.saleDateMillis
+                        )
+                    ),
+                    keepSavedTariff = false,
+                    tariffNotice = null,
+                    errorMessage = null
+                )
             )
         }
     }
 
     fun savePurchase() {
         val current = _uiState.value
-        if (current.isSaving || current.isLoadingProducts) return
+        if (current.isSaving || current.isLoadingProducts || current.isLoadingTariffs) return
 
         val form = current.form
         val salePrice = parseSalePrice(form.salePrice)
@@ -138,7 +228,7 @@ class AddPurchaseViewModel @Inject constructor(
         } else {
             null
         }
-        if (form.selectedProduct == null || form.paymentMethod == null || priceError != null) {
+        if (form.selectedProduct == null || !form.isPaymentSelectionComplete || priceError != null) {
             _uiState.update {
                 it.copy(form = it.form.copy(salePriceError = priceError))
             }
@@ -160,7 +250,14 @@ class AddPurchaseViewModel @Inject constructor(
                 .intValueExact(),
             quantity = form.quantity,
             saleDate = Date(form.saleDateMillis),
-            paymentMethod = form.paymentMethod
+            paymentMethod = requireNotNull(form.paymentMethod),
+            terminalId = form.terminalId,
+            terminalName = form.terminalName,
+            brand = form.brand,
+            installments = form.installments,
+            tariffRateBps = current.appliedTariff.rateBps,
+            tariffId = current.appliedTariff.tariffId,
+            tariffAmountCents = current.tariffAmountCents()
         )
         _uiState.update {
             it.copy(
@@ -182,6 +279,10 @@ class AddPurchaseViewModel @Inject constructor(
                     it.copy(
                         isSaving = false,
                         form = PurchaseFormState(),
+                        tariffs = emptyList(),
+                        appliedTariff = AppliedTariff.NONE,
+                        keepSavedTariff = false,
+                        tariffNotice = null,
                         formResetCount = it.formResetCount + 1
                     )
                 }
@@ -259,6 +360,93 @@ class AddPurchaseViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
+    }
+
+    private fun observeTerminals() {
+        getTerminals()
+            .onEach { terminals ->
+                _uiState.update { it.copy(terminals = terminals) }
+                val state = _uiState.value
+                if (state.form.paymentMethod == PaymentMethods.CASH &&
+                    state.tariffs.isEmpty() && !state.isLoadingTariffs
+                ) {
+                    loadTariffsForSelection()
+                }
+            }
+            .catch {
+                _uiState.update { it.copy(errorMessage = R.string.purchase_terminals_load_error) }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    private fun loadTariffsForSelection() {
+        val state = _uiState.value
+        when {
+            state.form.paymentMethod == PaymentMethods.CASH -> loadTariffs(
+                state.terminals
+                    .filter { it.active && TerminalPaymentType.CASH in it.enabledMethods }
+                    .mapNotNull { it.key }
+            )
+
+            state.form.terminalId != null -> loadTariffs(listOf(state.form.terminalId))
+        }
+    }
+
+    private fun loadTariffs(terminalIds: List<String>) {
+        tariffsJob?.cancel()
+        _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
+        if (terminalIds.isEmpty()) return
+        _uiState.update { it.copy(isLoadingTariffs = true) }
+        tariffsJob = viewModelScope.launch {
+            try {
+                val loaded = terminalIds.flatMap { id ->
+                    tariffsByTerminal[id] ?: getTerminalTariffs(id).also { tariffsByTerminal[id] = it }
+                }
+                _uiState.update {
+                    reconcileTariff(it.copy(tariffs = loaded, isLoadingTariffs = false))
+                }
+            } catch (_: PaymentFailure) {
+                _uiState.update {
+                    it.copy(
+                        tariffs = emptyList(),
+                        isLoadingTariffs = false,
+                        errorMessage = R.string.purchase_tariffs_load_error
+                    )
+                }
+            }
+        }
+    }
+
+    // Revalida a seleção contra as tarifas vigentes na data da venda e recalcula a tarifa aplicada.
+    private fun reconcileTariff(state: AddPurchaseUiState): AddPurchaseUiState {
+        if (state.keepSavedTariff || state.isLoadingTariffs) return state
+        var form = state.form
+        var notice = state.tariffNotice
+        if (state.showBrand && form.terminalId != null) {
+            if (form.brand != null && form.brand !in state.brandOptions) {
+                form = form.copy(brand = null, installments = null)
+                notice = R.string.purchase_tariff_selection_cleared
+            } else if (form.installments != null && form.installments !in state.installmentOptions) {
+                form = form.copy(installments = null)
+                notice = R.string.purchase_tariff_selection_cleared
+            }
+        }
+        val updated = state.copy(form = form, tariffNotice = notice)
+        return updated.copy(appliedTariff = resolveTariff(updated))
+    }
+
+    private fun resolveTariff(state: AddPurchaseUiState): AppliedTariff {
+        val form = state.form
+        val method = form.paymentMethod ?: return AppliedTariff.NONE
+        if (!form.isPaymentSelectionComplete) return AppliedTariff.NONE
+        val tariff = getSaleTariff(
+            tariffs = state.tariffs,
+            method = method,
+            brandId = form.brand.takeIf { state.showBrand },
+            installments = form.installments.takeIf { state.showInstallments },
+            saleDate = Date(form.saleDateMillis)
+        )
+        return tariff?.let { AppliedTariff(it.key, it.rateBps) } ?: AppliedTariff.NONE
     }
 
     private fun productErrorMessage(reason: ProductFailure.Reason): Int = when (reason) {

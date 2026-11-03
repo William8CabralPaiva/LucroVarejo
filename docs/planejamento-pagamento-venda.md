@@ -1,4 +1,4 @@
-﻿# Planejamento: forma de pagamento e tarifa na tela Nova Venda (`AddPurchaseScreen`)
+# Planejamento: forma de pagamento e tarifa na tela Nova Venda (`AddPurchaseScreen`)
 
 Complementa `docs/tarifas.md` (cadastro de maquininhas/tarifas), que deixou a integração com a venda "fora do escopo". Este documento cobre essa integração.
 
@@ -78,6 +78,9 @@ A venda deve guardar uma **cópia** da tarifa aplicada, pois o histórico nunca 
 7. `validation-and-states` — loading dos terminais/tarifas, vazio (nenhuma maquininha para o método), erro, mensagem de "sem tarifa vigente nesta data".
 
 Dependências: 3→2; 4→3; 5→4; 6→5; 7 transversal.
+
+## Status
+- Implementados os todos 2–7 (use cases, snapshot, ViewModel, tela, edição, estados). Pendente: exibir a taxa nas telas Vendas/Home e ajuste de regra para o lucro (ver 'Em aberto').
 
 ## Decisões tomadas
 1. Dinheiro: usa a tarifa salva no banco (provavelmente 0).

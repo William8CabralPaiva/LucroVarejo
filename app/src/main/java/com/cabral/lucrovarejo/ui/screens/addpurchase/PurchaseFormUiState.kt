@@ -9,5 +9,9 @@ data class PurchaseFormState(
     val salePriceError: Int? = null,
     val quantity: Int = 1,
     val paymentMethod: PaymentMethods? = null,
+    val terminalId: String? = null,
+    val terminalName: String? = null,
+    val brand: String? = null,
+    val installments: Int? = null,
     val saleDateMillis: Long = System.currentTimeMillis()
 )

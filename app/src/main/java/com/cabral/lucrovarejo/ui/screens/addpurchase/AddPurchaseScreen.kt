@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.components.AutoCompleteTextViewContent
@@ -88,6 +89,9 @@ fun AddPurchaseScreen(
         onSalePriceChanged = viewModel::onSalePriceChanged,
         onQuantityChanged = viewModel::onQuantityChanged,
         onPaymentMethodSelected = viewModel::onPaymentMethodSelected,
+        onTerminalSelected = viewModel::onTerminalSelected,
+        onBrandSelected = viewModel::onBrandSelected,
+        onInstallmentsSelected = viewModel::onInstallmentsSelected,
         onSaleDateChanged = viewModel::onSaleDateChanged,
         onSave = viewModel::savePurchase,
         onDelete = viewModel::onDeleteRequested,
@@ -105,6 +109,9 @@ fun AddPurchaseScreenContent(
     onSalePriceChanged: (String) -> Unit = {},
     onQuantityChanged: (Int) -> Unit = {},
     onPaymentMethodSelected: (PaymentMethods) -> Unit = {},
+    onTerminalSelected: (String) -> Unit = {},
+    onBrandSelected: (String) -> Unit = {},
+    onInstallmentsSelected: (Int) -> Unit = {},
     onSaleDateChanged: (Long) -> Unit = {},
     onSave: () -> Unit = {},
     onDelete: () -> Unit = {},
@@ -146,6 +153,12 @@ fun AddPurchaseScreenContent(
         ?.displayName
     val salePriceError = form.salePriceError?.let { stringResource(it) }
     val errorMessage = state.errorMessage?.let { stringResource(it) }
+    val tariffNotice = state.tariffNotice?.let { stringResource(it) }
+    val installmentLabels = state.installmentOptions.map {
+        stringResource(R.string.purchase_installments_option, it)
+    }
+    val terminalNames = state.terminalOptions.map { it.name }
+    val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")) }
     val profitText = state.profit?.let { profit ->
         remember(profit) {
             NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(profit)
@@ -220,6 +233,68 @@ fun AddPurchaseScreenContent(
                     enabled = !state.isSaving
                 )
 
+                if (state.showTerminal) {
+                    SpinnerContent(
+                        selectedItem = form.terminalName,
+                        items = terminalNames,
+                        onItemSelected = onTerminalSelected,
+                        textId = R.string.purchase_terminal_label,
+                        placeholderResId = R.string.purchase_terminal_placeholder,
+                        required = true,
+                        enabled = !state.isSaving && terminalNames.isNotEmpty()
+                    )
+                    if (terminalNames.isEmpty() && !state.isLoadingTariffs) {
+                        Text(
+                            text = stringResource(R.string.purchase_terminal_empty),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (state.showBrand) {
+                    SpinnerContent(
+                        selectedItem = form.brand,
+                        items = state.brandOptions,
+                        onItemSelected = onBrandSelected,
+                        textId = R.string.purchase_brand_label,
+                        placeholderResId = R.string.purchase_brand_placeholder,
+                        required = true,
+                        enabled = !state.isSaving && form.terminalId != null &&
+                                state.brandOptions.isNotEmpty()
+                    )
+                    if (form.terminalId != null && state.brandOptions.isEmpty() &&
+                        !state.isLoadingTariffs
+                    ) {
+                        Text(
+                            text = stringResource(R.string.purchase_brand_empty),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                if (state.showInstallments) {
+                    SpinnerContent(
+                        selectedItem = form.installments?.let {
+                            stringResource(R.string.purchase_installments_option, it)
+                        },
+                        items = installmentLabels,
+                        onItemSelected = { label ->
+                            state.installmentOptions
+                                .getOrNull(installmentLabels.indexOf(label))
+                                ?.let(onInstallmentsSelected)
+                        },
+                        textId = R.string.purchase_installments_label,
+                        placeholderResId = R.string.purchase_installments_placeholder,
+                        required = true,
+                        enabled = !state.isSaving && form.brand != null &&
+                                state.installmentOptions.isNotEmpty()
+                    )
+                }
+
+                tariffNotice?.let { message ->
+                    Text(text = message, color = MaterialTheme.colorScheme.error)
+                }
+
                 DateTextField(
                     initialDateMillis = form.saleDateMillis,
                     onDateChange = onSaleDateChanged
@@ -231,6 +306,20 @@ fun AddPurchaseScreenContent(
                         salePrice = form.salePrice,
                         cost = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
                             .format(product.cost.multiply(java.math.BigDecimal.valueOf(form.quantity.toLong())))
+                    )
+                }
+
+                if (form.isPaymentSelectionComplete && !state.isLoadingTariffs) {
+                    Text(
+                        text = state.tariffAmount?.let { amount ->
+                            stringResource(
+                                R.string.purchase_tariff_applied,
+                                state.appliedTariff.rateBps.bpsToRate().toPlainString(),
+                                currencyFormat.format(amount)
+                            )
+                        } ?: stringResource(R.string.purchase_tariff_none),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
 

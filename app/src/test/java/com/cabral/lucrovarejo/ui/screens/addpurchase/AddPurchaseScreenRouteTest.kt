@@ -7,6 +7,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.payment.usecase.GetFilteredCurrentTariffUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetSaleTariffUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalTariffsUseCase
+import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalsUseCase
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
@@ -55,7 +59,7 @@ class AddPurchaseScreenRouteTest {
         salePrice = 8990,
         quantity = 2,
         saleDate = Date(1_700_000_000_000),
-        paymentMethod = PaymentMethods.PIX
+        paymentMethod = PaymentMethods.CASH
     )
     private val repository = FakePurchaseRepository()
     private val viewModel = AddPurchaseViewModel(
@@ -67,7 +71,10 @@ class AddPurchaseScreenRouteTest {
         }),
         createPurchase = CreatePurchaseUseCase(repository),
         updatePurchase = UpdatePurchaseUseCase(repository),
-        deletePurchase = DeletePurchaseUseCase(repository)
+        deletePurchase = DeletePurchaseUseCase(repository),
+        getTerminals = GetTerminalsUseCase(NoTerminalsRepository),
+        getTerminalTariffs = GetTerminalTariffsUseCase(NoTariffsRepository),
+        getSaleTariff = GetSaleTariffUseCase(GetFilteredCurrentTariffUseCase())
     )
 
     private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
@@ -76,7 +83,7 @@ class AddPurchaseScreenRouteTest {
     fun savingNewPurchaseCreatesItAndShowsSuccessMessage() {
         viewModel.onProductSelected(productDisplayName(product))
         viewModel.onSalePriceChanged("89,90")
-        viewModel.onPaymentMethodSelected(PaymentMethods.PIX)
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         composeRule.setContent {
             LucroVarejoTheme { AddPurchaseScreen(viewModel = viewModel) }
         }

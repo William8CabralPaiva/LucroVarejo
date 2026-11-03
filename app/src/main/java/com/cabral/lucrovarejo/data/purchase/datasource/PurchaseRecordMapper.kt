@@ -24,5 +24,13 @@ internal fun DocumentSnapshot.toPurchaseRecord(): PurchaseRecord = PurchaseRecor
     }.toDate(),
     paymentMethod = requireNotNull(getString("payment_method")) {
         "Purchase $id has no valid 'payment_method' field"
-    }
+    },
+    terminalId = getString("terminal_id"),
+    terminalName = getString("terminal_name"),
+    brand = getString("brand"),
+    installments = getLong("installments")?.let(Math::toIntExact),
+    // Vendas antigas não têm snapshot de tarifa: assumem sem taxa.
+    tariffRateBps = getLong("tariff_rate_bps")?.let(Math::toIntExact) ?: 0,
+    tariffId = getString("tariff_id"),
+    tariffAmountCents = getLong("tariff_amount_cents") ?: 0L
 )

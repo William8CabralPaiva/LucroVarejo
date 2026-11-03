@@ -79,7 +79,7 @@ class AddPurchaseScreenUiTest {
                         form = PurchaseFormState(
                             selectedProduct = product,
                             salePrice = "89,90",
-                            paymentMethod = PaymentMethods.PIX
+                            paymentMethod = PaymentMethods.CASH
                         ),
                         isLoadingProducts = false
                     ),
