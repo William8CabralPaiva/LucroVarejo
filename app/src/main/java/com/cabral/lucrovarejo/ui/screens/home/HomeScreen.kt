@@ -112,17 +112,19 @@ fun HomeContent(
                     productsSize = summary.productsSold.toInt(),
                     modifier = Modifier.fillMaxWidth()
                 )
-                AlertPurchase(
-                    price = summary.totalTariff.toCurrencyAmount(),
-                    productsSize = 0,
-                    titleRes = R.string.alert_tariff_title,
-                    icon = Icons.Outlined.PointOfSale,
-                    containerColor = DestructiveRed,
-                    contentColor = Color.White,
-                    showProductsInfo = false,
-                    showTrendIcon = false,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if(summary.totalTariff > 0) {
+                    AlertPurchase(
+                        price = summary.totalTariff.toCurrencyAmount(),
+                        productsSize = 0,
+                        titleRes = R.string.alert_tariff_title,
+                        icon = Icons.Outlined.PointOfSale,
+                        containerColor = DestructiveRed,
+                        contentColor = Color.White,
+                        showProductsInfo = false,
+                        showTrendIcon = false,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)

@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.components
+﻿package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -107,11 +106,7 @@ fun PurchaseItemContent(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                ProductIcon(text = productName)
             }
         }
 

@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.components
+﻿package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -81,11 +80,7 @@ fun ProdCodPriceContent(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingBag,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            ProductIcon(text = name)
         }
         Column(
             modifier = Modifier.weight(1f),

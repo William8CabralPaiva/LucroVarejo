@@ -6,3 +6,6 @@
 - dicas de como funciona a maquininha
 - detekt
 - dicas para aparecer o coachmark na aba configuracoes caso ele precisa
+- esqueci a senha
+- esconder card vermelho caso tarifa seja 0
+- titulo na home
