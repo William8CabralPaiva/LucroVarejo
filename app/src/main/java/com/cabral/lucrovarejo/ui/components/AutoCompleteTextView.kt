@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -89,9 +89,10 @@ fun AutoCompleteTextViewContent(
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
+    onTextChanged: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var query by remember(selectedItem) {
+    var query by remember {
         val initialQuery = selectedItem.orEmpty()
         mutableStateOf(
             TextFieldValue(
@@ -99,6 +100,14 @@ fun AutoCompleteTextViewContent(
                 selection = TextRange(initialQuery.length)
             )
         )
+    }
+    LaunchedEffect(selectedItem) {
+        if (selectedItem != null && selectedItem != query.text) {
+            query = TextFieldValue(
+                text = selectedItem,
+                selection = TextRange(selectedItem.length)
+            )
+        }
     }
     val shape = RoundedCornerShape(8.dp)
     val borderColor = if (isError) MaterialTheme.colorScheme.error
@@ -152,8 +161,12 @@ fun AutoCompleteTextViewContent(
                 BasicTextField(
                     value = query,
                     onValueChange = {
+                        val textChanged = it.text != query.text
                         query = it
-                        expanded = true
+                        if (textChanged) {
+                            expanded = true
+                            onTextChanged(it.text)
+                        }
                     },
                     enabled = enabled,
                     singleLine = true,
@@ -165,7 +178,6 @@ fun AutoCompleteTextViewContent(
                         .weight(1f)
                         .padding(start = 16.dp)
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled)
-                        .onFocusChanged { if (it.isFocused) expanded = true }
                         .testTag(AUTO_COMPLETE_TEXT_FIELD_TAG),
                     decorationBox = { innerTextField ->
                         Box(contentAlignment = Alignment.CenterStart) {

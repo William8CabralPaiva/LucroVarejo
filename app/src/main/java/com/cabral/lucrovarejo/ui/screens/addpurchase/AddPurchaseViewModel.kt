@@ -82,6 +82,14 @@ class AddPurchaseViewModel @Inject constructor(
         }
     }
 
+    fun onProductTextChanged(text: String) {
+        _uiState.update { state ->
+            val selected = state.form.selectedProduct ?: return@update state
+            if (productDisplayName(selected) == text) state
+            else state.copy(form = state.form.copy(selectedProduct = null))
+        }
+    }
+
     fun onSalePriceChanged(value: String) {
         _uiState.update {
             it.copy(
