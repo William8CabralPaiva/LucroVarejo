@@ -1,0 +1,111 @@
+style:
+  MagicNumber:
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: true
+    ignoreNamedArgument: true
+    ignoreExtensionFunctions: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/ui/theme/**']
+  MaxLineLength:
+    maxLineLength: 120
+    excludes: ['**/test/**', '**/androidTest/**']
+  UnusedPrivateFunction:
+    ignoreAnnotated: ['Preview']
+  # Os modelos Serializable só trafegam em memória (savedStateHandle), sem persistência.
+  SerialVersionUIDInSerializableClass:
+    active: false
+
+naming:
+  FunctionNaming:
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+exceptions:
+  TooGenericExceptionCaught:
+    # Fronteiras de dados/ViewModel mapeiam qualquer falha (Firebase, rede, fakes) para falhas de dominio,
+    # relancando CancellationException quando suspend.
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+      - '**/data/**'
+      - '**/ui/screens/register/RegisterViewModel.kt'
+
+complexity:
+  LongMethod:
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  CyclomaticComplexMethod:
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    excludes: ['**/test/**', '**/androidTest/**']
+    # ViewModels expoem um handler publico por evento de UI; dividi-los mudaria a API usada por telas e testes.
+    ignoreAnnotated: ['HiltViewModel']
+  LargeClass:
+    excludes: ['**/test/**', '**/androidTest/**']
+
+# Regras do compose-rules (io.nlopez.compose.rules:detekt)
+Compose:
+  ComposableAnnotationNaming:
+    active: true
+  ComposableNaming:
+    active: true
+  ComposableParamOrder:
+    active: true
+  CompositionLocalAllowlist:
+    active: true
+    allowedCompositionLocals: LocalIsDarkTheme
+  CompositionLocalNaming:
+    active: true
+  ContentEmitterReturningValues:
+    active: true
+  ContentTrailingLambda:
+    active: true
+  ContentSlotReused:
+    active: true
+  DefaultsVisibility:
+    active: true
+  LambdaParameterEventTrailing:
+    active: true
+  LambdaParameterInRestartableEffect:
+    active: true
+  Material2:
+    active: false
+  ModifierClickableOrder:
+    active: true
+  ModifierComposed:
+    active: true
+  ModifierMissing:
+    active: true
+  ModifierNaming:
+    active: true
+  ModifierNotUsedAtRoot:
+    active: true
+  ModifierReused:
+    active: true
+  ModifierWithoutDefault:
+    active: true
+  MultipleEmitters:
+    active: true
+  MutableParams:
+    active: true
+  MutableStateAutoboxing:
+    active: true
+  MutableStateParam:
+    active: true
+  PreviewAnnotationNaming:
+    active: true
+  PreviewPublic:
+    active: true
+  RememberMissing:
+    active: true
+  RememberContentMissing:
+    active: true
+  UnstableCollections:
+    active: true
+  ViewModelForwarding:
+    active: true
+  ViewModelInjection:
+    active: true
