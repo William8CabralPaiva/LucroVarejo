@@ -83,7 +83,11 @@ internal fun formatAlertPrice(price: Double): String {
     return "R$ ${formatter.format(price)}"
 }
 
-enum class AlertPriceState(val color: Color, val icon: ImageVector, val textId: Int) {
+enum class AlertPriceState(
+    val color: Color,
+    val icon: ImageVector,
+    val textId: Int
+) {
     PROFIT(LightGreenContainer, Icons.AutoMirrored.Filled.TrendingUp, R.string.alert_profit_title),
     PURCHASE(LightBlueContainer, Icons.Filled.MoneyOff, R.string.alert_purchase_title)
 }

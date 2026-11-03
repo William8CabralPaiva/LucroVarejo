@@ -277,6 +277,7 @@ private fun SalesList(
                             productName = purchase.name,
                             salePriceInCents = purchase.salePrice.toLong() * purchase.quantity,
                             costInCents = purchase.cost.toLong() * purchase.quantity,
+                            tariffInCents = purchase.tariffAmountCents,
                             quantity = purchase.quantity,
                             onClick = { onEditPurchase?.invoke(purchase) },
                         )

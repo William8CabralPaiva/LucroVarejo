@@ -53,7 +53,9 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
                     },
                     quantity = requireNotNull(document.getLong(FIELD_QUANTITY)) {
                         "Purchase ${document.id} has no valid '$FIELD_QUANTITY' field"
-                    }
+                    },
+                    // Vendas antigas não têm tarifa salva.
+                    tariffAmountCents = document.getLong(FIELD_TARIFF_AMOUNT_CENTS) ?: 0L
                 )
             }
         }
@@ -94,6 +96,7 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
         const val FIELD_COST = "cost"
         const val FIELD_SALE_PRICE = "sale_price"
         const val FIELD_QUANTITY = "quantity"
+        const val FIELD_TARIFF_AMOUNT_CENTS = "tariff_amount_cents"
         const val FIELD_SALE_DATE = "sale_date"
     }
 }

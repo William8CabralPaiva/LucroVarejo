@@ -47,10 +47,15 @@ class PurchaseRepositoryImpl @Inject constructor(
                 purchases.fold(MonthlyPurchaseSummary()) { summary, purchase ->
                     val quantity = purchase.quantity
                     val sales = Math.multiplyExact(purchase.salePrice, quantity)
-                    val cost = Math.multiplyExact(purchase.cost, quantity)
+                    // A tarifa da maquininha entra no custo e reduz o lucro.
+                    val cost = Math.addExact(
+                        Math.multiplyExact(purchase.cost, quantity),
+                        purchase.tariffAmountCents
+                    )
                     summary.copy(
                         totalSales = Math.addExact(summary.totalSales, sales),
                         totalCost = Math.addExact(summary.totalCost, cost),
+                        totalTariff = Math.addExact(summary.totalTariff, purchase.tariffAmountCents),
                         totalProfit = Math.addExact(
                             summary.totalProfit,
                             Math.subtractExact(sales, cost)

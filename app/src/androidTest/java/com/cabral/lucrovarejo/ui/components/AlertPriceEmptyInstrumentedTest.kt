@@ -23,7 +23,7 @@ class AlertPriceEmptyInstrumentedTest {
             }
         }
 
-        composeRule.onNodeWithText("Lucro desta venda").assertIsDisplayed()
+        composeRule.onNodeWithText("Lucro mensal").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 0,00").assertIsDisplayed()
         composeRule.onNodeWithText("Nenhuma venda registrada").assertIsDisplayed()
     }
@@ -36,7 +36,7 @@ class AlertPriceEmptyInstrumentedTest {
             }
         }
 
-        composeRule.onNodeWithText("Custo desta compra").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo mensal").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 0,00").assertIsDisplayed()
         composeRule.onNodeWithText("Nenhuma venda registrada").assertIsDisplayed()
     }

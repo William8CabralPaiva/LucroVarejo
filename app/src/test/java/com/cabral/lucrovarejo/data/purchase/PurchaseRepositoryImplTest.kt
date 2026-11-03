@@ -63,7 +63,7 @@ class PurchaseRepositoryImplTest {
         val end = Date(1_762_678_400_000)
         dataSource.purchases.value = listOf(
             PurchaseSummaryRecord(cost = 1200, salePrice = 1500, quantity = 3),
-            PurchaseSummaryRecord(cost = 500, salePrice = 800, quantity = 2)
+            PurchaseSummaryRecord(cost = 500, salePrice = 800, quantity = 2, tariffAmountCents = 150)
         )
 
         val summary = repository.observeMonthlySummary(start, end).first()
@@ -72,8 +72,9 @@ class PurchaseRepositoryImplTest {
         assertEquals(
             MonthlyPurchaseSummary(
                 totalSales = 6100,
-                totalCost = 4600,
-                totalProfit = 1500,
+                totalCost = 4750,
+                totalProfit = 1350,
+                totalTariff = 150,
                 productsSold = 5
             ),
             summary

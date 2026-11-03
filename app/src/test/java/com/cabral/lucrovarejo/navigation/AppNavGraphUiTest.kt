@@ -6,6 +6,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
@@ -96,7 +99,8 @@ class AppNavGraphUiTest {
 
         composeRule
             .onNode(hasText("Ver todas").and(hasClickAction()))
-            .performClick()
+            .performScrollTo()
+            .performSemanticsAction(SemanticsActions.OnClick)
 
         composeRule.runOnIdle {
             assertTrue(salesNavigationRequested)

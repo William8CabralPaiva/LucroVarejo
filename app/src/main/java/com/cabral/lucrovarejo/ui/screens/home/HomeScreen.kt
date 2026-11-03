@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -24,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,6 +40,7 @@ import com.cabral.lucrovarejo.ui.components.AlertPurchase
 import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.LastSaleItem
 import com.cabral.lucrovarejo.ui.components.MonthYearSelector
+import com.cabral.lucrovarejo.ui.theme.DestructiveRed
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
@@ -113,6 +116,17 @@ fun HomeContent(
                 AlertPurchase(
                     price = summary.totalSales.toCurrencyAmount(),
                     productsSize = summary.productsSold.toInt(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                AlertPurchase(
+                    price = summary.totalTariff.toCurrencyAmount(),
+                    productsSize = 0,
+                    titleRes = R.string.alert_tariff_title,
+                    icon = Icons.Outlined.PointOfSale,
+                    containerColor = DestructiveRed,
+                    contentColor = Color.White,
+                    showProductsInfo = false,
+                    showTrendIcon = false,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(
@@ -207,6 +221,7 @@ private fun HomeContentPreview() {
                     totalSales = 845_000,
                     totalCost = 520_000,
                     totalProfit = 325_000,
+                    totalTariff = 12_500,
                     productsSold = 32
                 ),
                 isLoading = false

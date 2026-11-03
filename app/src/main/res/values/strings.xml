@@ -28,8 +28,9 @@
     <string name="register_error_permission_denied">O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas.</string>
     <string name="register_error_network">Sem conexão com o Firebase. Verifique sua internet e tente novamente.</string>
     <string name="register_error_generic">Não foi possível concluir o cadastro no Firebase. Tente novamente mais tarde.</string>
-    <string name="alert_profit_title">Lucro desta venda</string>
-    <string name="alert_purchase_title">Custo desta compra</string>
+    <string name="alert_profit_title">Lucro mensal</string>
+    <string name="alert_purchase_title">Custo mensal</string>
+    <string name="alert_tariff_title">Tarifas da Maquininha</string>
     <string name="alert_month_purchase">Vendas do mês</string>
     <string name="sale_products">produtos vendidos</string>
     <string name="alert_no_products">Nenhuma venda registrada</string>
@@ -171,7 +172,7 @@
     <string name="sample_category_accessories">Acessórios</string>
     <string name="field_required_marker">*</string>
     <string name="field_optional_marker">(opcional)</string>
-    <string name="purchase_item_cost_profit">Custo: %1$s  •  Lucro: %2$s</string>
+    <string name="purchase_item_cost_profit">Custo: %1$s  •  Tarifa: %2$s  •  Lucro: %3$s</string>
     <string name="purchase_item_quantity">%1$d un.</string>
     <string name="purchase_item_options">Mais opções</string>
     <string name="sales_search_placeholder">Buscar produto...</string>

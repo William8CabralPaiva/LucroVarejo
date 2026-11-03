@@ -36,7 +36,8 @@ import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
-// Valores em centavos, como no PurchaseModel; preço, custo e lucro são totais da venda.
+// Valores em centavos, como no PurchaseModel; preço, custo, tarifa e lucro são totais da venda.
+// O lucro já desconta a tarifa.
 @Composable
 fun PurchaseItem(
     productName: String,
@@ -45,13 +46,15 @@ fun PurchaseItem(
     quantity: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    tariffInCents: Long = 0L,
     image: Painter? = null
 ) {
-    val profitInCents = salePriceInCents - costInCents
+    val profitInCents = salePriceInCents - costInCents - tariffInCents
     PurchaseItemContent(
         productName = productName,
         formattedPrice = formatAlertPrice(salePriceInCents / 100.0),
         formattedCost = formatAlertPrice(costInCents / 100.0),
+        formattedTariff = formatAlertPrice(tariffInCents / 100.0),
         formattedProfit = formatAlertPrice(profitInCents / 100.0),
         quantity = quantity,
         onClick = onClick,
@@ -65,6 +68,7 @@ fun PurchaseItemContent(
     productName: String,
     formattedPrice: String,
     formattedCost: String,
+    formattedTariff: String,
     formattedProfit: String,
     quantity: Int,
     onClick: () -> Unit,
@@ -128,6 +132,7 @@ fun PurchaseItemContent(
                 text = stringResource(
                     R.string.purchase_item_cost_profit,
                     formattedCost,
+                    formattedTariff,
                     formattedProfit
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -150,6 +155,7 @@ fun PurchaseItemPreview() {
             productName = "Bolsa Feminina",
             salePriceInCents = 8990,
             costInCents = 5000,
+            tariffInCents = 224,
             quantity = 1,
             onClick = {}
         )

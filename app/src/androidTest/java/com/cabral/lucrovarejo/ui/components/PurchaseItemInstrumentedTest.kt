@@ -25,6 +25,7 @@ class PurchaseItemInstrumentedTest {
                     productName = "Bolsa Feminina",
                     salePriceInCents = 8990,
                     costInCents = 5000,
+                    tariffInCents = 224,
                     quantity = 1,
                     onClick = { wasClicked[0] = true }
                 )
@@ -33,7 +34,7 @@ class PurchaseItemInstrumentedTest {
 
         composeRule.onNodeWithText("Bolsa Feminina").assertIsDisplayed().performClick()
         composeRule.onNodeWithText("R$ 89,90").assertIsDisplayed()
-        composeRule.onNodeWithText("Custo: R$ 50,00 \u2022 Lucro: R$ 39,90").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo: R$ 50,00 \u2022 Tarifa: R$ 2,24 \u2022 Lucro: R$ 37,66").assertIsDisplayed()
         composeRule.onNodeWithText("1 un.").assertIsDisplayed()
         composeRule.runOnIdle { assertTrue(wasClicked[0]) }
     }
