@@ -94,11 +94,13 @@ fun ProdCodPriceContent(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = stringResource(R.string.product_code_value, code),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if(code.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.product_code_value, code),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
                 text = formattedCost,
                 style = MaterialTheme.typography.bodyMedium,
