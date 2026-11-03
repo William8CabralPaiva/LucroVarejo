@@ -87,7 +87,6 @@ class AppNavGraphUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 HomeScreen(
-                    goToProductScreen = {},
                     goToSalesScreen = { salesNavigationRequested = true },
                     viewModel = HomeViewModel(
                         GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),

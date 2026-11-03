@@ -135,9 +135,6 @@ private fun LoggedDestinationNavHost(
     ) {
         composable(LoggedRoutes.HOME) {
             HomeScreen(
-                goToProductScreen = {
-                    navigator.navigateTo(LoggedRoutes.ADD_PRODUCT)
-                },
                 goToSalesScreen = {
                     navigator.navigateToTab(LoggedRoutes.SALES)
                 },

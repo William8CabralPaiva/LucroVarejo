@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -45,7 +43,6 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun HomeScreen(
-    goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit,
     viewModel: HomeViewModel? = null,
 ) {
@@ -58,7 +55,6 @@ fun HomeScreen(
         isLatestSalesLoading = state.isLatestPurchasesLoading,
         hasLatestSalesError = state.hasLatestPurchasesError,
         onMonthYearChange = resolvedViewModel::onMonthYearChanged,
-        goToProductScreen = goToProductScreen,
         goToSalesScreen = goToSalesScreen,
     )
 }
@@ -70,22 +66,10 @@ fun HomeContent(
     isLatestSalesLoading: Boolean = false,
     hasLatestSalesError: Boolean = false,
     onMonthYearChange: (year: Int, month: Int) -> Unit,
-    goToProductScreen: () -> Unit,
     goToSalesScreen: () -> Unit = {},
 ) {
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = goToProductScreen,
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add)
-                )
-            }
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     )
     { innerPadding ->
         Column(
@@ -227,7 +211,6 @@ private fun HomeContentPreview() {
                 isLoading = false
             ),
             onMonthYearChange = { _, _ -> },
-            goToProductScreen = {},
             goToSalesScreen = {},
         )
     }

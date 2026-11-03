@@ -172,8 +172,9 @@
     <string name="sample_category_accessories">Acessórios</string>
     <string name="field_required_marker">*</string>
     <string name="field_optional_marker">(opcional)</string>
-    <string name="purchase_item_cost_profit">Custo: %1$s  •  Tarifa: %2$s  •  Lucro: %3$s</string>
-    <string name="purchase_item_quantity">%1$d un.</string>
+    <string name="purchase_item_price_quantity">%1$s  •  %2$d un.</string>
+    <string name="purchase_item_cost_tariff">Custo: %1$s  •  Tarifa: %2$s</string>
+    <string name="purchase_item_profit">Lucro: %1$s</string>
     <string name="purchase_item_options">Mais opções</string>
     <string name="sales_search_placeholder">Buscar produto...</string>
     <string name="sales_filter_by_date">Filtrar por data</string>

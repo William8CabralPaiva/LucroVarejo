@@ -34,7 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.ProfitGreen
 
 // Valores em centavos, como no PurchaseModel; preço, custo, tarifa e lucro são totais da venda.
 // O lucro já desconta a tarifa.
@@ -123,23 +125,29 @@ fun PurchaseItemContent(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.purchase_item_price_quantity, formattedPrice, quantity),
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.purchase_item_profit, formattedProfit),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (LocalIsDarkTheme.current) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        ProfitGreen
+                    }
+                )
+            }
             Text(
-                text = formattedPrice,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = stringResource(
-                    R.string.purchase_item_cost_profit,
-                    formattedCost,
-                    formattedTariff,
-                    formattedProfit
-                ),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.purchase_item_quantity, quantity),
+                text = stringResource(R.string.purchase_item_cost_tariff, formattedCost, formattedTariff),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

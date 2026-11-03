@@ -33,9 +33,9 @@ class PurchaseItemInstrumentedTest {
         }
 
         composeRule.onNodeWithText("Bolsa Feminina").assertIsDisplayed().performClick()
-        composeRule.onNodeWithText("R$ 89,90").assertIsDisplayed()
-        composeRule.onNodeWithText("Custo: R$ 50,00 \u2022 Tarifa: R$ 2,24 \u2022 Lucro: R$ 37,66").assertIsDisplayed()
-        composeRule.onNodeWithText("1 un.").assertIsDisplayed()
+        composeRule.onNodeWithText("R$ 89,90 \u2022 1 un.").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo: R$ 50,00 \u2022 Tarifa: R$ 2,24").assertIsDisplayed()
+        composeRule.onNodeWithText("Lucro: R$ 37,66").assertIsDisplayed()
         composeRule.runOnIdle { assertTrue(wasClicked[0]) }
     }
 }
