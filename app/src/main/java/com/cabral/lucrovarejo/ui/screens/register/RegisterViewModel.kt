@@ -37,6 +37,17 @@ class RegisterViewModel @Inject constructor(
         }
     }
 
+    fun onDisplayNameChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                displayName = value,
+                displayNameError = RegisterValidator.validateDisplayName(value),
+                errorMessage = null,
+                isRegistered = false
+            )
+        }
+    }
+
     fun onEmailChanged(value: String) {
         val email = value.trim()
         _uiState.update {
@@ -83,17 +94,25 @@ class RegisterViewModel @Inject constructor(
     fun register() {
         val current = _uiState.value
         val storeError = StoreNameValidator.validate(current.storeName)
+        val displayNameError = RegisterValidator.validateDisplayName(current.displayName)
         val emailError = RegisterValidator.validateEmail(current.email)
         val passwordError = RegisterValidator.validatePassword(current.password)
         val confirmPasswordError = validateConfirmPassword(
             current.password,
             current.confirmPassword
         )
-        val errors = listOfNotNull(storeError, emailError, passwordError, confirmPasswordError)
+        val errors = listOfNotNull(
+            storeError,
+            displayNameError,
+            emailError,
+            passwordError,
+            confirmPasswordError
+        )
         if (errors.isNotEmpty()) {
             _uiState.update {
                 it.copy(
                     storeNameError = storeError,
+                    displayNameError = displayNameError,
                     emailError = emailError,
                     passwordError = passwordError,
                     confirmPasswordError = confirmPasswordError
@@ -108,7 +127,8 @@ class RegisterViewModel @Inject constructor(
                 registerStore(
                     storeName = current.storeName.lowercase(Locale.ROOT),
                     email = current.email,
-                    password = current.password
+                    password = current.password,
+                    displayName = current.displayName
                 )
                 _uiState.update { it.copy(isLoading = false, isRegistered = true) }
             } catch (_: StoreAlreadyRegisteredException) {

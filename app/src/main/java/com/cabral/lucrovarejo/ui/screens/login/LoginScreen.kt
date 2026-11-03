@@ -87,7 +87,7 @@ internal fun LoginScreenContent(
             OutlinedTextField(
                 value = state.storeName,
                 onValueChange = onStoreNameChange,
-                label = { Text("Loja") },
+                label = { Text("Usuário") },
                 singleLine = true,
                 enabled = !state.isLoading,
                 modifier = Modifier

@@ -16,12 +16,26 @@ class AuthRepositoryImplTest {
         val repository = AuthRepositoryImpl(remote)
 
         // When: registration is requested with padded mixed-case values.
-        repository.registerStore(" My-Store.1 ", " owner@example.com ", "secret1")
+        repository.registerStore(" My-Store.1 ", " owner@example.com ", "secret1", " Minha Loja ")
 
         // Then: identifiers and profile fields are normalized before reaching Firebase.
         assertEquals("my-store.1@auth.lucrovarejo.invalid", remote.createdEmail)
         assertEquals("secret1", remote.createdPassword)
-        assertEquals(StoreProfile("my-store.1", "owner@example.com"), remote.createdProfile)
+        assertEquals(
+            StoreProfile("my-store.1", "owner@example.com", "Minha Loja"),
+            remote.createdProfile
+        )
+    }
+
+    @Test
+    fun blankStoredDisplayNameIsTreatedAsMissing() = runTest {
+        val remote = FakeAuthRemoteDataSource().apply { displayName = "  " }
+        val repository = AuthRepositoryImpl(remote)
+
+        assertEquals(null, repository.getStoreDisplayName())
+
+        remote.displayName = " Minha Loja "
+        assertEquals("Minha Loja", repository.getStoreDisplayName())
     }
 
     @Test
@@ -69,6 +83,9 @@ class AuthRepositoryImplTest {
         var signedInEmail: String? = null
         var signedInPassword: String? = null
         var signedOut = false
+        var displayName: String? = null
+
+        override suspend fun fetchDisplayName(): String? = displayName
 
         override suspend fun createAccount(
             technicalEmail: String,

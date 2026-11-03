@@ -70,6 +70,7 @@ class RegisterValidationTest {
     fun registrationRequiresMatchingPasswordConfirmation() {
         // Given: otherwise valid registration data with matching and mismatching passwords.
         val matching = RegisterUiState(
+            displayName = "Minha Loja",
             storeName = "loja123",
             email = "owner@example.com",
             password = "123456",
@@ -80,6 +81,7 @@ class RegisterValidationTest {
         // When: checking if each registration form can be submitted.
         // Then: submission is valid only if confirmation matches the password.
         assertEquals(true, matching.isFormValid)
+        assertEquals(false, matching.copy(displayName = "  ").isFormValid)
         assertEquals(false, mismatching.isFormValid)
     }
 }

@@ -41,7 +41,7 @@ class LoginViewModel @Inject constructor(
         val current = _uiState.value
         if (current.storeName.isBlank() || current.password.isBlank()) {
             _uiState.update {
-                it.copy(errorMessage = "Informe a loja e a senha.")
+                it.copy(errorMessage = "Informe o usuário e a senha.")
             }
             return
         }

@@ -35,12 +35,12 @@ class AuthHiltInjectionTest {
 
     @Test
     fun hiltWiresUseCaseRepositoryAndTestDataSource() = runTest {
-        registerStore(" Mi-Loja.1 ", " contato@exemplo.com ", "senha123")
+        registerStore(" Mi-Loja.1 ", " contato@exemplo.com ", "senha123", " Mi Loja ")
 
         assertEquals("mi-loja.1@auth.lucrovarejo.invalid", fakeRemoteDataSource.savedTechnicalEmail)
         assertEquals("senha123", fakeRemoteDataSource.savedPassword)
         assertEquals(
-            StoreProfile("mi-loja.1", "contato@exemplo.com"),
+            StoreProfile("mi-loja.1", "contato@exemplo.com", "Mi Loja"),
             fakeRemoteDataSource.savedProfile
         )
         assertEquals(repository.hasSession, fakeRemoteDataSource.hasSession)

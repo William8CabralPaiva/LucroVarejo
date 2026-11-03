@@ -56,6 +56,12 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun fetchDisplayName(): String? = try {
+        firebaseClient.fetchDisplayName()
+    } catch (exception: Exception) {
+        throw mapFailure(exception)
+    }
+
     override fun signOut() {
         firebaseClient.signOut()
     }

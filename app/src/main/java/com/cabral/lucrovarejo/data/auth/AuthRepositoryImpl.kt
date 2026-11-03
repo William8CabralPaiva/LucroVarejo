@@ -17,17 +17,26 @@ class AuthRepositoryImpl @Inject constructor(
     override val storeKey: String?
         get() = remoteDataSource.storeKey
 
-    override suspend fun registerStore(storeName: String, email: String, password: String) {
+    override suspend fun registerStore(
+        storeName: String,
+        email: String,
+        password: String,
+        displayName: String
+    ) {
         val normalizedStoreName = storeName.trim().lowercase(Locale.ROOT)
         remoteDataSource.createAccount(
             technicalEmail = technicalEmail(normalizedStoreName),
             password = password,
             profile = StoreProfile(
                 storeName = normalizedStoreName,
-                contactEmail = email.trim()
+                contactEmail = email.trim(),
+                displayName = displayName.trim()
             )
         )
     }
+
+    override suspend fun getStoreDisplayName(): String? =
+        remoteDataSource.fetchDisplayName()?.trim()?.takeIf { it.isNotEmpty() }
 
     override suspend fun signIn(storeName: String, password: String) {
         remoteDataSource.signIn(

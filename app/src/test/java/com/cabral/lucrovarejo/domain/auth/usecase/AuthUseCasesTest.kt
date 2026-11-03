@@ -14,12 +14,13 @@ class AuthUseCasesTest {
         val repository = FakeAuthRepository()
 
         // When: registering with mixed-case store name and padded email.
-        RegisterStoreUseCase(repository)(" My-Store.1 ", " owner@example.com ", "secret1")
+        RegisterStoreUseCase(repository)(" My-Store.1 ", " owner@example.com ", "secret1", " Minha Loja ")
 
         // Then: normalized values are sent to the repository.
         assertEquals("my-store.1", repository.registeredStore)
         assertEquals("owner@example.com", repository.registeredEmail)
         assertEquals("secret1", repository.registeredPassword)
+        assertEquals("Minha Loja", repository.registeredDisplayName)
     }
 
     @Test
@@ -56,15 +57,24 @@ class AuthUseCasesTest {
         var registeredStore: String? = null
         var registeredEmail: String? = null
         var registeredPassword: String? = null
+        var registeredDisplayName: String? = null
         var signedInStore: String? = null
         var signedInPassword: String? = null
         var signedOut = false
 
-        override suspend fun registerStore(storeName: String, email: String, password: String) {
+        override suspend fun registerStore(
+            storeName: String,
+            email: String,
+            password: String,
+            displayName: String
+        ) {
             registeredStore = storeName
             registeredEmail = email
             registeredPassword = password
+            registeredDisplayName = displayName
         }
+
+        override suspend fun getStoreDisplayName(): String? = null
 
         override suspend fun signIn(storeName: String, password: String) {
             signedInStore = storeName

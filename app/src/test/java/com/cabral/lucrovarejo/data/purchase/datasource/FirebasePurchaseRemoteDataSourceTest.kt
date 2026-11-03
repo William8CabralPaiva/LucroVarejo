@@ -224,7 +224,14 @@ class FirebasePurchaseRemoteDataSourceTest {
         override val hasSession: Boolean
             get() = storeKey != null
 
-        override suspend fun registerStore(storeName: String, email: String, password: String) = Unit
+        override suspend fun registerStore(
+            storeName: String,
+            email: String,
+            password: String,
+            displayName: String
+        ) = Unit
+
+        override suspend fun getStoreDisplayName(): String? = null
 
         override suspend fun signIn(storeName: String, password: String) = Unit
 

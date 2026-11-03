@@ -51,6 +51,7 @@ fun RegisterScreen(
 
     RegisterScreenContent(
         state = state,
+        onDisplayNameChange = viewModel::onDisplayNameChanged,
         onStoreNameChange = viewModel::onStoreNameChanged,
         onEmailChange = viewModel::onEmailChanged,
         onPasswordChange = viewModel::onPasswordChanged,
@@ -63,6 +64,7 @@ fun RegisterScreen(
 @Composable
 internal fun RegisterScreenContent(
     state: RegisterUiState,
+    onDisplayNameChange: (String) -> Unit,
     onStoreNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
@@ -91,6 +93,23 @@ internal fun RegisterScreenContent(
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_title_spacing)))
+
+            OutlinedTextField(
+                value = state.displayName,
+                onValueChange = onDisplayNameChange,
+                label = { Text(stringResource(R.string.register_display_name_label)) },
+                supportingText = {
+                    state.displayNameError?.let { Text(stringResource(it)) }
+                },
+                isError = state.displayNameError != null,
+                singleLine = true,
+                enabled = !state.isLoading,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_DISPLAY_NAME_FIELD_TAG)
+            )
+
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
             OutlinedTextField(
                 value = state.storeName,
@@ -193,6 +212,7 @@ internal fun RegisterScreenContent(
 }
 
 internal const val REGISTER_TITLE_TAG = "register-title"
+internal const val REGISTER_DISPLAY_NAME_FIELD_TAG = "register-display-name-field"
 internal const val REGISTER_STORE_NAME_FIELD_TAG = "register-store-name-field"
 internal const val REGISTER_EMAIL_FIELD_TAG = "register-email-field"
 internal const val REGISTER_PASSWORD_FIELD_TAG = "register-password-field"
@@ -205,11 +225,13 @@ private fun RegisterScreenPreview() {
     LucroVarejoTheme {
         RegisterScreenContent(
             state = RegisterUiState(
+                displayName = "Loja Exemplo",
                 storeName = "lojaexemplo",
                 email = "contato@exemplo.com",
                 password = "segura123",
                 confirmPassword = "segura123"
             ),
+            onDisplayNameChange = {},
             onStoreNameChange = {},
             onEmailChange = {},
             onPasswordChange = {},

@@ -23,6 +23,7 @@ fun LoggedRouteTopBar(
     route: String,
     onBackPress: () -> Unit,
     modifier: Modifier = Modifier,
+    homeTitle: String? = null,
 ) {
 
     val titleId = when (route) {
@@ -45,7 +46,11 @@ fun LoggedRouteTopBar(
         modifier = modifier,
         title = {
             Text(
-                text = stringResource(titleId),
+                text = if (route == LoggedRoutes.HOME && !homeTitle.isNullOrBlank()) {
+                    homeTitle
+                } else {
+                    stringResource(titleId)
+                },
                 color = LightMintContainer,
                 fontWeight = FontWeight.Bold
             )

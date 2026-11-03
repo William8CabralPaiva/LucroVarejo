@@ -19,6 +19,7 @@ import com.cabral.lucrovarejo.ui.screens.register.REGISTER_BACK_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_CONFIRM_PASSWORD_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_EMAIL_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_PASSWORD_FIELD_TAG
+import com.cabral.lucrovarejo.ui.screens.register.REGISTER_DISPLAY_NAME_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_STORE_NAME_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_TITLE_TAG
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreenContent
@@ -43,6 +44,7 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(),
+                    onDisplayNameChange = {},
                     onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
@@ -54,10 +56,11 @@ class RegisterScreenUiTest {
         }
 
         composeRule.onNodeWithTag(REGISTER_TITLE_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(REGISTER_DISPLAY_NAME_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
         composeRule.onNodeWithContentDescription("Mostrar senha").performClick()
         composeRule.onNodeWithContentDescription("Ocultar senha").assertIsDisplayed()
@@ -74,6 +77,7 @@ class RegisterScreenUiTest {
                 var formState by remember {
                     mutableStateOf(
                         RegisterUiState(
+                            displayName = "Minha Loja",
                             password = "senha123",
                             confirmPassword = "senha123"
                         )
@@ -81,6 +85,7 @@ class RegisterScreenUiTest {
                 }
                 RegisterScreenContent(
                     state = formState,
+                    onDisplayNameChange = {},
                     onStoreNameChange = {
                         storeName = it
                         formState = formState.copy(storeName = it)
@@ -116,12 +121,14 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(
+                        displayName = "Minha Loja",
                         storeName = "minhaloja",
                         email = "loja@example.com",
                         password = "senha123",
                         confirmPassword = "senha123",
                         isLoading = true
                     ),
+                    onDisplayNameChange = {},
                     onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
@@ -148,11 +155,13 @@ class RegisterScreenUiTest {
                 RegisterScreenContent(
                     state = RegisterUiState(
                         storeNameError = com.cabral.lucrovarejo.R.string.register_store_required,
+                        displayNameError = com.cabral.lucrovarejo.R.string.register_display_name_required,
                         emailError = com.cabral.lucrovarejo.R.string.register_email_invalid,
                         passwordError = com.cabral.lucrovarejo.R.string.register_password_too_short,
                         confirmPasswordError = com.cabral.lucrovarejo.R.string.register_password_mismatch,
                         errorMessage = com.cabral.lucrovarejo.R.string.register_error_network
                     ),
+                    onDisplayNameChange = {},
                     onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
@@ -164,6 +173,7 @@ class RegisterScreenUiTest {
         }
 
         listOf(
+            "Informe o usuário.",
             "Informe o nome da loja.",
             "Informe um e-mail válido.",
             "A senha deve ter pelo menos 6 caracteres.",

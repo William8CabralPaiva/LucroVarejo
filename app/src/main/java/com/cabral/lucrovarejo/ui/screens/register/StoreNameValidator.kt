@@ -21,6 +21,9 @@ object StoreNameValidator {
 }
 
 internal object RegisterValidator {
+    @StringRes fun validateDisplayName(value: String): Int? =
+        if (value.isBlank()) R.string.register_display_name_required else null
+
     private val emailPattern =
         Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
 

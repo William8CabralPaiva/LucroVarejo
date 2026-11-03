@@ -29,6 +29,8 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
         savedPassword = password
     }
 
+    override suspend fun fetchDisplayName(): String? = savedProfile?.displayName
+
     override fun signOut() {
         hasSession = false
     }

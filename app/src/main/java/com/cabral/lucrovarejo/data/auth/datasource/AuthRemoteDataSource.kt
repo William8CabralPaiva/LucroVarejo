@@ -2,7 +2,8 @@ package com.cabral.lucrovarejo.data.auth.datasource
 
 data class StoreProfile(
     val storeName: String,
-    val contactEmail: String
+    val contactEmail: String,
+    val displayName: String
 )
 
 interface AuthRemoteDataSource {
@@ -16,6 +17,8 @@ interface AuthRemoteDataSource {
     )
 
     suspend fun signIn(technicalEmail: String, password: String)
+
+    suspend fun fetchDisplayName(): String?
 
     fun signOut()
 }
@@ -31,6 +34,8 @@ interface FirebaseAuthStoreClient {
     suspend fun deleteCurrentUser()
 
     suspend fun signIn(email: String, password: String)
+
+    suspend fun fetchDisplayName(): String?
 
     fun signOut()
 }

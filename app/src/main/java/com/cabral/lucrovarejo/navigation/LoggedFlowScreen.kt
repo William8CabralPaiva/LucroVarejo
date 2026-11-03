@@ -50,6 +50,7 @@ internal fun LoggedFlowScreen(
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
+    storeName: String? = null,
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) { LoggedNavigator(navController) }
@@ -81,6 +82,7 @@ internal fun LoggedFlowScreen(
         topBar = {
             LoggedRouteTopBar(
                 route = currentRoute,
+                homeTitle = storeName,
                 onBackPress = navigator::navigateBack
             )
         },

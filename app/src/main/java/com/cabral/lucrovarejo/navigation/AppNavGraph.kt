@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +13,7 @@ import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
+import com.cabral.lucrovarejo.ui.store.StoreViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 @Composable
@@ -25,6 +27,7 @@ fun AppNavGraph(
     homeViewModel: HomeViewModel? = null,
     salesViewModel: SalesViewModel? = null,
     productViewModel: ProductViewModel? = null,
+    storeViewModel: StoreViewModel? = null,
 ) {
     AppNavGraphContent(
         navController = navController,
@@ -39,13 +42,19 @@ fun AppNavGraph(
             RegisterScreen(onBackPress, onRegisterSuccess)
         },
         loggedFlowScreen = { onLogout ->
+            LaunchedEffect(storeViewModel) { storeViewModel?.load() }
+            val storeState = storeViewModel?.uiState?.collectAsState()?.value
             LoggedFlowScreen(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChange = onThemeModeChange,
                 homeViewModel = homeViewModel,
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,
-                onLogout = onLogout
+                storeName = storeState?.displayName,
+                onLogout = {
+                    storeViewModel?.clear()
+                    onLogout()
+                }
             )
         }
     )

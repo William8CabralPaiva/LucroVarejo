@@ -28,6 +28,7 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
                 mapOf(
                     FIELD_STORE_NAME to profile.storeName,
                     FIELD_EMAIL to profile.contactEmail,
+                    FIELD_DISPLAY_NAME to profile.displayName,
                     FIELD_CREATED_AT to FieldValue.serverTimestamp()
                 )
             )
@@ -42,6 +43,15 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
+    override suspend fun fetchDisplayName(): String? {
+        val uid = auth.currentUser?.uid ?: return null
+        return firestore.collection(FIELD_STORES)
+            .document(uid)
+            .get()
+            .await()
+            .getString(FIELD_DISPLAY_NAME)
+    }
+
     override fun signOut() {
         auth.signOut()
     }
@@ -50,6 +60,7 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
         const val FIELD_STORES = "stores"
         const val FIELD_STORE_NAME = "storeName"
         const val FIELD_EMAIL = "email"
+        const val FIELD_DISPLAY_NAME = "displayName"
         const val FIELD_CREATED_AT = "createdAt"
     }
 }

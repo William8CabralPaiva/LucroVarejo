@@ -13,7 +13,7 @@ class FirebaseAuthRemoteDataSourceTest {
         // Given: a fake Firebase client and a store profile.
         val client = FakeFirebaseAuthStoreClient()
         val dataSource = FirebaseAuthRemoteDataSourceImpl(client)
-        val profile = StoreProfile("loja-1", "owner@example.com")
+        val profile = StoreProfile("loja-1", "owner@example.com", "Loja 1")
 
         // When: the data source creates the account.
         dataSource.createAccount("loja-1@auth.lucrovarejo.invalid", "secret1", profile)
@@ -39,7 +39,7 @@ class FirebaseAuthRemoteDataSourceTest {
             dataSource.createAccount(
                 "loja-1@auth.lucrovarejo.invalid",
                 "secret1",
-                StoreProfile("loja-1", "owner@example.com")
+                StoreProfile("loja-1", "owner@example.com", "Loja 1")
             )
         }
             .exceptionOrNull()
@@ -106,5 +106,7 @@ class FirebaseAuthRemoteDataSourceTest {
         override fun signOut() {
             signedOut = true
         }
+
+        override suspend fun fetchDisplayName(): String? = null
     }
 }

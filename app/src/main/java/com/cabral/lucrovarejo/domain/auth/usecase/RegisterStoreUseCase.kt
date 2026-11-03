@@ -7,11 +7,17 @@ import java.util.Locale
 class RegisterStoreUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
-    suspend operator fun invoke(storeName: String, email: String, password: String) {
+    suspend operator fun invoke(
+        storeName: String,
+        email: String,
+        password: String,
+        displayName: String
+    ) {
         repository.registerStore(
             storeName = storeName.trim().lowercase(Locale.ROOT),
             email = email.trim(),
-            password = password
+            password = password,
+            displayName = displayName.trim()
         )
     }
 }
