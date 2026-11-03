@@ -95,11 +95,11 @@ class MachineHistoryViewModel @Inject constructor(
             ?.let { runCatching { it.toRateBps() }.getOrNull() }
 
         if (rateBps == null) {
-            _uiState.update { it.copy(rateError = R.string.terminal_form_Tariff_rate_invalid) }
+            _uiState.update { it.copy(rateError = R.string.terminal_form_tariff_rate_invalid) }
             return
         }
         if (state.effectiveFromMillis == null) {
-            _uiState.update { it.copy(dateError = R.string.terminal_form_Tariff_rate_required) }
+            _uiState.update { it.copy(dateError = R.string.terminal_form_tariff_rate_required) }
             return
         }
 
@@ -120,8 +120,8 @@ class MachineHistoryViewModel @Inject constructor(
                 _uiState.update { it.copy(isSaving = false, showAddDialog = false) }
             }.onFailure { failure ->
                 val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_Tariff_duplicate_date
-                    else -> R.string.terminal_form_Tariff_save_error
+                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
+                    else -> R.string.terminal_form_tariff_save_error
                 }
                 _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
             }

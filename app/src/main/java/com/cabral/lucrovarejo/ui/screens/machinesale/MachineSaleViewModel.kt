@@ -17,10 +17,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import java.math.BigDecimal
 import java.util.Date
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,6 +37,14 @@ class MachineSaleViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MachineSaleUiState(isLoading = false))
     val uiState: StateFlow<MachineSaleUiState> = _uiState.asStateFlow()
+
+    // Emitido a cada salvamento com sucesso (a tela mostra o Snackbar).
+    private val savedChannel = Channel<Unit>(Channel.BUFFERED)
+    val saved: Flow<Unit> = savedChannel.receiveAsFlow()
+
+    // Emitido apos "Salvar e voltar": a tela deve voltar para a lista.
+    private val completionChannel = Channel<Unit>(Channel.BUFFERED)
+    val completions: Flow<Unit> = completionChannel.receiveAsFlow()
 
     private var existingTariffs: List<PaymentMachineModel> = emptyList()
 
@@ -144,7 +155,7 @@ class MachineSaleViewModel @Inject constructor(
         }
     }
 
-    fun onSave() {
+    fun onSave(closeAfter: Boolean) {
         val state = _uiState.value
         if (state.name.isBlank()) {
             _uiState.update { it.copy(nameError = R.string.terminal_form_name_required) }
@@ -162,14 +173,14 @@ class MachineSaleViewModel @Inject constructor(
             _uiState.update { s ->
                 s.copy(tariffEntries = s.tariffEntries.map { entry ->
                     if (entry.id in invalidEntries.map { it.id }) {
-                        entry.copy(error = R.string.terminal_form_Tariff_rate_invalid)
+                        entry.copy(error = R.string.terminal_form_tariff_rate_invalid)
                     } else entry
                 })
             }
             return
         }
 
-        _uiState.update { it.copy(isSaving = true, saveError = null) }
+        _uiState.update { it.copy(isSaving = true, closeAfterSave = closeAfter, saveError = null) }
         viewModelScope.launch {
             runCatching {
                 val terminal = PaymentTerminalModel(
@@ -181,6 +192,8 @@ class MachineSaleViewModel @Inject constructor(
                 )
                 val saved = if (state.terminalId == null) createTerminal(terminal) else updateTerminal(terminal)
                 val terminalId = requireNotNull(saved.key)
+                // Evita criar outra maquininha se um novo "Salvar" ocorrer apos falha parcial ou sucesso.
+                _uiState.update { it.copy(terminalId = terminalId) }
 
                 state.tariffEntries
                     .filter { it.rateText.isNotBlank() && it.effectiveFromMillis != null }
@@ -198,11 +211,27 @@ class MachineSaleViewModel @Inject constructor(
                         )
                     }
                 terminalId
-            }.onSuccess {
-                _uiState.update { it.copy(isSaving = false, saved = true) }
+            }.onSuccess { terminalId ->
+                savedChannel.send(Unit)
+                if (closeAfter) {
+                    _uiState.update { it.copy(isSaving = false) }
+                    completionChannel.send(Unit)
+                } else {
+                    existingTariffs = runCatching { getPaymentMachines(terminalId).first() }
+                        .getOrDefault(existingTariffs)
+                    _uiState.update { s ->
+                        s.copy(
+                            isSaving = false,
+                            tariffEntries = s.tariffEntries.map {
+                                it.copy(rateText = "", effectiveFromMillis = null, error = null)
+                            }
+                        )
+                    }
+                    recomputeTariffEntries()
+                }
             }.onFailure { failure ->
                 val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_Tariff_duplicate_date
+                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
                     else -> R.string.terminal_form_save_error
                 }
                 _uiState.update { it.copy(isSaving = false, saveError = errorRes) }

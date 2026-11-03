@@ -64,14 +64,24 @@ import androidx.compose.material.icons.outlined.PointOfSale
 fun MachineSaleScreen(
     terminal: PaymentTerminalModel? = null,
     onFinished: () -> Unit = {},
+    onShowMessage: (String) -> Unit = {},
     onOpenMachineHistory: (PaymentMachineHistoryArgs) -> Unit = {},
     viewModel: MachineSaleViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
+    val savedMessage = stringResource(R.string.terminal_form_saved)
 
     LaunchedEffect(resolvedViewModel, terminal) {
         resolvedViewModel.loadTerminal(terminal)
+    }
+
+    LaunchedEffect(resolvedViewModel, savedMessage) {
+        resolvedViewModel.saved.collect { onShowMessage(savedMessage) }
+    }
+
+    LaunchedEffect(resolvedViewModel) {
+        resolvedViewModel.completions.collect { onFinished() }
     }
 
     MachineSaleContent(
@@ -98,10 +108,6 @@ fun MachineSaleScreen(
         },
         onSave = resolvedViewModel::onSave,
     )
-
-    if (state.saved) {
-        onFinished()
-    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -118,7 +124,7 @@ fun MachineSaleContent(
     onTariffRateChange: (String, String) -> Unit,
     onTariffDateChange: (String, Long) -> Unit,
     onOpenMachineHistory: (TariffEntryUi) -> Unit = {},
-    onSave: () -> Unit,
+    onSave: (closeAfter: Boolean) -> Unit,
 ) {
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -134,11 +140,22 @@ fun MachineSaleContent(
                     }
                     IconButton(
                         enabled = state.canSubmit,
-                        onClick = onSave,
-                        isLoading = state.isSaving,
+                        onClick = { onSave(false) },
+                        isLoading = state.isSaving && !state.closeAfterSave,
                         icon = Icons.Default.Save,
                         text = stringResource(R.string.terminal_form_save),
                         loadingText = stringResource(R.string.terminal_form_saving)
+                    )
+                    IconButton(
+                        enabled = state.canSubmit,
+                        onClick = { onSave(true) },
+                        modifier = Modifier.padding(top = 8.dp),
+                        isLoading = state.isSaving && state.closeAfterSave,
+                        isBorderButton = true,
+                        icon = Icons.Default.Save,
+                        text = stringResource(R.string.terminal_form_save_and_back),
+                        loadingText = stringResource(R.string.terminal_form_saving),
+                        testTag = SAVE_AND_BACK_BUTTON_TAG
                     )
                 }
             }
@@ -240,7 +257,7 @@ fun MachineSaleContent(
                             TerminalPaymentType.CASH -> {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = stringResource(R.string.terminal_form_cash_charges_Tariff),
+                                        text = stringResource(R.string.terminal_form_cash_charges_tariff),
                                         modifier = Modifier.weight(1f)
                                     )
                                     AppSwitch(checked = state.cashChargesTariff, onCheckedChange = onCashChargesTariffToggle)
@@ -556,8 +573,8 @@ private fun TariffEntryFields(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(
-                if (entry.currentRateBps != null) R.string.terminal_form_current_Tariff
-                else R.string.terminal_form_no_Tariff,
+                if (entry.currentRateBps != null) R.string.terminal_form_current_tariff
+                else R.string.terminal_form_no_tariff,
                 entry.currentRateBps?.let { "${it.bpsToRate()}%" } ?: ""
             ),
             style = MaterialTheme.typography.bodySmall,
@@ -566,8 +583,8 @@ private fun TariffEntryFields(
         IconTextFieldContent(
             value = entry.rateText,
             onValueChange = onRateChange,
-            labelResId = R.string.terminal_form_Tariff_rate_label,
-            placeholderResId = R.string.terminal_form_Tariff_rate_placeholder,
+            labelResId = R.string.terminal_form_tariff_rate_label,
+            placeholderResId = R.string.terminal_form_tariff_rate_placeholder,
             icon = Icons.Outlined.Percent,
             type = IconTextFieldType.MONEY,
             required = false,
@@ -577,7 +594,7 @@ private fun TariffEntryFields(
         DateTextFieldContent(
             dateMillis = entry.effectiveFromMillis,
             onDateChange = onDateChange,
-            labelResId = R.string.terminal_form_Tariff_effective_from_label,
+            labelResId = R.string.terminal_form_tariff_effective_from_label,
             required = false
         )
         if (entry.currentRateBps != null) {
@@ -587,6 +604,8 @@ private fun TariffEntryFields(
         }
     }
 }
+
+private const val SAVE_AND_BACK_BUTTON_TAG = "save-and-back-machine-button"
 
 @Preview(showBackground = true, name = "Form maquininha")
 @Composable

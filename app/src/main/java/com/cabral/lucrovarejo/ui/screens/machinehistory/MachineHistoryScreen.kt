@@ -185,8 +185,8 @@ private fun AddTariffDialog(
                 IconTextFieldContent(
                     value = state.rateText,
                     onValueChange = onRateChange,
-                    labelResId = R.string.terminal_form_Tariff_rate_label,
-                    placeholderResId = R.string.terminal_form_Tariff_rate_placeholder,
+                    labelResId = R.string.terminal_form_tariff_rate_label,
+                    placeholderResId = R.string.terminal_form_tariff_rate_placeholder,
                     icon = Icons.Outlined.Percent,
                     type = IconTextFieldType.MONEY,
                     required = true,
@@ -196,7 +196,7 @@ private fun AddTariffDialog(
                 DateTextFieldContent(
                     dateMillis = state.effectiveFromMillis,
                     onDateChange = onDateChange,
-                    labelResId = R.string.terminal_form_Tariff_effective_from_label,
+                    labelResId = R.string.terminal_form_tariff_effective_from_label,
                     required = true
                 )
                 state.dateError?.let {

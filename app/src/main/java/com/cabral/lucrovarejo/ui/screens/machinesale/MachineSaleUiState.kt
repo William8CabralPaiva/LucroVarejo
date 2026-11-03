@@ -35,8 +35,9 @@ data class MachineSaleUiState(
     val tariffEntries: List<TariffEntryUi> = emptyList(),
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
+    // Indica qual botao disparou o salvamento em andamento ("Salvar e voltar" = true).
+    val closeAfterSave: Boolean = false,
     @StringRes val saveError: Int? = null,
-    val saved: Boolean = false,
 ) {
     val canSubmit: Boolean
         get() = name.isNotBlank() && selectedMethods.isNotEmpty() && !isSaving

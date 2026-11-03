@@ -103,9 +103,13 @@ fun SaveProductButtonContent(
         colors = if (isBorderButton) {
             ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = palette.container,
+                contentColor = if (LocalIsDarkTheme.current) palette.content else palette.container,
                 disabledContainerColor = Color.Transparent,
-                disabledContentColor = if (isLoading) palette.container else palette.disabledContent
+                disabledContentColor = when {
+                    !isLoading -> palette.disabledContent
+                    LocalIsDarkTheme.current -> palette.content
+                    else -> palette.container
+                }
             )
         } else {
             ButtonDefaults.buttonColors(

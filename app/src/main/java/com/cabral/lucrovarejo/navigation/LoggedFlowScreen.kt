@@ -5,10 +5,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,6 +39,7 @@ import com.cabral.lucrovarejo.ui.screens.machinelist.MachineListScreen
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -55,9 +61,23 @@ internal fun LoggedFlowScreen(
 
     val isDark = LocalIsDarkTheme.current
     val scaffoldContainerColor = if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
+    val snackBarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val showMessage: (String) -> Unit = { message ->
+        scope.launch { snackBarHostState.showSnackbar(message) }
+    }
 
     Scaffold(
         containerColor = scaffoldContainerColor,
+        snackbarHost = {
+            SnackbarHost(hostState = snackBarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = ForestGreenHeader,
+                    contentColor = Color.White
+                )
+            }
+        },
         topBar = {
             LoggedRouteTopBar(
                 route = currentRoute,
@@ -85,6 +105,7 @@ internal fun LoggedFlowScreen(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChanged = onThemeModeChanged,
                 onLogout = onLogout,
+                onShowMessage = showMessage,
                 homeViewModel = homeViewModel,
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel
@@ -100,6 +121,7 @@ private fun LoggedDestinationNavHost(
     currentThemeMode: ThemeMode,
     onThemeModeChanged: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
+    onShowMessage: (String) -> Unit,
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
@@ -188,7 +210,8 @@ private fun LoggedDestinationNavHost(
 
         composable(LoggedRoutes.ADD_MACHINE) {
             MachineSaleScreen(
-                onFinished = navigator::navigateBack,
+                onFinished = navigator::navigateBackToConfig,
+                onShowMessage = onShowMessage,
                 onOpenMachineHistory = navigator::navigateToMachineHistory
             )
         }
@@ -198,7 +221,8 @@ private fun LoggedDestinationNavHost(
                 terminal = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<PaymentTerminalModel>(LoggedNavigator.TERMINAL_TO_EDIT_KEY),
-                onFinished = navigator::navigateBack,
+                onFinished = navigator::navigateBackToConfig,
+                onShowMessage = onShowMessage,
                 onOpenMachineHistory = navigator::navigateToMachineHistory
             )
         }
@@ -256,6 +280,13 @@ private class LoggedNavigator(
 
     fun navigateBack() {
         navController.popBackStack()
+    }
+
+    // Volta direto para Configuracoes, descartando a lista de maquininhas e o formulario.
+    fun navigateBackToConfig() {
+        if (!navController.popBackStack(LoggedRoutes.CONFIG, inclusive = false)) {
+            navController.popBackStack()
+        }
     }
 
     companion object {
