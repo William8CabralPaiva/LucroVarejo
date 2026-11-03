@@ -13,23 +13,28 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
     var savedPassword: String? = null
     var savedProfile: StoreProfile? = null
     var signedInTechnicalEmail: String? = null
+    var resetEmail: String? = null
 
     override suspend fun createAccount(
-        technicalEmail: String,
+        email: String,
         password: String,
         profile: StoreProfile
     ) {
-        savedTechnicalEmail = technicalEmail
+        savedTechnicalEmail = email
         savedPassword = password
         savedProfile = profile
     }
 
-    override suspend fun signIn(technicalEmail: String, password: String) {
-        signedInTechnicalEmail = technicalEmail
+    override suspend fun signIn(email: String, password: String) {
+        signedInTechnicalEmail = email
         savedPassword = password
     }
 
     override suspend fun fetchDisplayName(): String? = savedProfile?.displayName
+
+    override suspend fun requestPasswordReset(email: String) {
+        resetEmail = email
+    }
 
     override fun signOut() {
         hasSession = false

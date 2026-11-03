@@ -52,6 +52,10 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
             .getString(FIELD_DISPLAY_NAME)
     }
 
+    override suspend fun requestPasswordReset(email: String) {
+        auth.sendPasswordResetEmail(email).await()
+    }
+
     override fun signOut() {
         auth.signOut()
     }

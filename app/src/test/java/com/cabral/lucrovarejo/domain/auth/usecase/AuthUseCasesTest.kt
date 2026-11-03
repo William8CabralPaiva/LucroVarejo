@@ -24,16 +24,25 @@ class AuthUseCasesTest {
     }
 
     @Test
-    fun signInNormalizesStoreNameButKeepsPassword() = runTest {
+    fun signInTrimsEmailButKeepsPassword() = runTest {
         // Given: a sign-in use case backed by a fake repository.
         val repository = FakeAuthRepository()
 
         // When: signing in with a mixed-case store name.
-        SignInUseCase(repository)(" My-Store.1 ", "secret1")
+        SignInUseCase(repository)(" owner@example.com ", "secret1")
 
         // Then: only the store name is normalized.
-        assertEquals("my-store.1", repository.signedInStore)
+        assertEquals("owner@example.com", repository.signedInStore)
         assertEquals("secret1", repository.signedInPassword)
+    }
+
+    @Test
+    fun requestPasswordResetTrimsEmail() = runTest {
+        val repository = FakeAuthRepository()
+
+        RequestPasswordResetUseCase(repository)(" owner@example.com ")
+
+        assertEquals("owner@example.com", repository.resetEmail)
     }
 
     @Test
@@ -61,6 +70,7 @@ class AuthUseCasesTest {
         var signedInStore: String? = null
         var signedInPassword: String? = null
         var signedOut = false
+        var resetEmail: String? = null
 
         override suspend fun registerStore(
             storeName: String,
@@ -76,9 +86,13 @@ class AuthUseCasesTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun signIn(storeName: String, password: String) {
-            signedInStore = storeName
+        override suspend fun signIn(identifier: String, password: String) {
+            signedInStore = identifier
             signedInPassword = password
+        }
+
+        override suspend fun requestPasswordReset(email: String) {
+            resetEmail = email
         }
 
         override fun signOut() {

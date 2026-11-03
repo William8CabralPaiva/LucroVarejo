@@ -16,10 +16,10 @@ class FirebaseAuthRemoteDataSourceTest {
         val profile = StoreProfile("loja-1", "owner@example.com", "Loja 1")
 
         // When: the data source creates the account.
-        dataSource.createAccount("loja-1@auth.lucrovarejo.invalid", "secret1", profile)
+        dataSource.createAccount("loja-1@exemplo.com", "secret1", profile)
 
         // Then: the profile is associated with the newly created Firebase UID.
-        assertEquals("loja-1@auth.lucrovarejo.invalid", client.createdEmail)
+        assertEquals("loja-1@exemplo.com", client.createdEmail)
         assertEquals("secret1", client.createdPassword)
         assertEquals("uid-1", client.savedUid)
         assertEquals(profile, client.savedProfile)
@@ -37,7 +37,7 @@ class FirebaseAuthRemoteDataSourceTest {
         // When: account registration is attempted.
         val failure = runCatching {
             dataSource.createAccount(
-                "loja-1@auth.lucrovarejo.invalid",
+                "loja-1@exemplo.com",
                 "secret1",
                 StoreProfile("loja-1", "owner@example.com", "Loja 1")
             )
@@ -58,14 +58,37 @@ class FirebaseAuthRemoteDataSourceTest {
 
         // When: session state, sign-in, and sign-out are requested.
         assertTrue(dataSource.hasSession)
-        dataSource.signIn("loja@auth.lucrovarejo.invalid", "secret1")
+        dataSource.signIn("loja@exemplo.com", "secret1")
         assertEquals("firebase-uid-123", dataSource.storeKey)
         dataSource.signOut()
 
-        assertEquals("loja@auth.lucrovarejo.invalid", client.signedInEmail)
+        assertEquals("loja@exemplo.com", client.signedInEmail)
         assertEquals("secret1", client.signedInPassword)
         // Then: each operation is delegated to the client.
         assertTrue(client.signedOut)
+    }
+
+    @Test
+    fun requestsPasswordResetThroughClient() = runTest {
+        val client = FakeFirebaseAuthStoreClient()
+        val dataSource = FirebaseAuthRemoteDataSourceImpl(client)
+
+        dataSource.requestPasswordReset("loja@exemplo.com")
+
+        assertEquals("loja@exemplo.com", client.resetEmail)
+    }
+
+    @Test
+    fun passwordResetFailureIsMappedToAuthFailure() = runTest {
+        val client = FakeFirebaseAuthStoreClient().apply {
+            resetFailure = IllegalStateException("offline")
+        }
+        val dataSource = FirebaseAuthRemoteDataSourceImpl(client)
+
+        val failure = runCatching { dataSource.requestPasswordReset("loja@exemplo.com") }
+            .exceptionOrNull()
+
+        assertTrue(failure is AuthFailure)
     }
 
     private class FakeFirebaseAuthStoreClient : FirebaseAuthStoreClient {
@@ -80,6 +103,8 @@ class FirebaseAuthRemoteDataSourceTest {
         var signedOut = false
         var signedInEmail: String? = null
         var signedInPassword: String? = null
+        var resetEmail: String? = null
+        var resetFailure: Exception? = null
 
         override suspend fun createUser(email: String, password: String): String {
             createdEmail = email
@@ -101,6 +126,11 @@ class FirebaseAuthRemoteDataSourceTest {
             signedInEmail = email
             signedInPassword = password
             storeKey = "firebase-uid-123"
+        }
+
+        override suspend fun requestPasswordReset(email: String) {
+            resetFailure?.let { throw it }
+            resetEmail = email
         }
 
         override fun signOut() {

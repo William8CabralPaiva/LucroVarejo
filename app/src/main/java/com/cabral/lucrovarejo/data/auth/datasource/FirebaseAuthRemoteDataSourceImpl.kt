@@ -19,12 +19,12 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         get() = firebaseClient.storeKey
 
     override suspend fun createAccount(
-        technicalEmail: String,
+        email: String,
         password: String,
         profile: StoreProfile
     ) {
         val uid = try {
-            firebaseClient.createUser(technicalEmail, password)
+            firebaseClient.createUser(email, password)
         } catch (_: FirebaseAuthUserCollisionException) {
             throw StoreAlreadyRegisteredException()
         } catch (exception: Exception) {
@@ -48,9 +48,9 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun signIn(technicalEmail: String, password: String) {
+    override suspend fun signIn(email: String, password: String) {
         try {
-            firebaseClient.signIn(technicalEmail, password)
+            firebaseClient.signIn(email, password)
         } catch (exception: Exception) {
             throw mapFailure(exception)
         }
@@ -60,6 +60,14 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         firebaseClient.fetchDisplayName()
     } catch (exception: Exception) {
         throw mapFailure(exception)
+    }
+
+    override suspend fun requestPasswordReset(email: String) {
+        try {
+            firebaseClient.requestPasswordReset(email)
+        } catch (exception: Exception) {
+            throw mapFailure(exception)
+        }
     }
 
     override fun signOut() {

@@ -23,13 +23,13 @@ class AuthRepositoryImpl @Inject constructor(
         password: String,
         displayName: String
     ) {
-        val normalizedStoreName = storeName.trim().lowercase(Locale.ROOT)
+        val normalizedEmail = email.trim()
         remoteDataSource.createAccount(
-            technicalEmail = technicalEmail(normalizedStoreName),
+            email = normalizedEmail,
             password = password,
             profile = StoreProfile(
-                storeName = normalizedStoreName,
-                contactEmail = email.trim(),
+                storeName = storeName.trim().lowercase(Locale.ROOT),
+                contactEmail = normalizedEmail,
                 displayName = displayName.trim()
             )
         )
@@ -38,17 +38,25 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun getStoreDisplayName(): String? =
         remoteDataSource.fetchDisplayName()?.trim()?.takeIf { it.isNotEmpty() }
 
-    override suspend fun signIn(storeName: String, password: String) {
-        remoteDataSource.signIn(
-            technicalEmail = technicalEmail(storeName.trim().lowercase(Locale.ROOT)),
-            password = password
-        )
+    override suspend fun signIn(identifier: String, password: String) {
+        remoteDataSource.signIn(email = authEmail(identifier), password = password)
+    }
+
+    override suspend fun requestPasswordReset(email: String) {
+        remoteDataSource.requestPasswordReset(email.trim())
     }
 
     override fun signOut() {
         remoteDataSource.signOut()
     }
 
-    private fun technicalEmail(storeName: String) =
-        "$storeName@auth.lucrovarejo.invalid"
+    // Contas antigas foram criadas com e-mail técnico derivado do usuário.
+    private fun authEmail(identifier: String): String {
+        val value = identifier.trim()
+        return if (value.contains('@')) value else "${value.lowercase(Locale.ROOT)}@$LEGACY_AUTH_DOMAIN"
+    }
+
+    private companion object {
+        const val LEGACY_AUTH_DOMAIN = "auth.lucrovarejo.invalid"
+    }
 }

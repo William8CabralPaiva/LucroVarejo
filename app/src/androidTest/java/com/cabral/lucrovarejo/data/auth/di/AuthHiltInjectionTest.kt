@@ -37,12 +37,31 @@ class AuthHiltInjectionTest {
     fun hiltWiresUseCaseRepositoryAndTestDataSource() = runTest {
         registerStore(" Mi-Loja.1 ", " contato@exemplo.com ", "senha123", " Mi Loja ")
 
-        assertEquals("mi-loja.1@auth.lucrovarejo.invalid", fakeRemoteDataSource.savedTechnicalEmail)
+        assertEquals("contato@exemplo.com", fakeRemoteDataSource.savedTechnicalEmail)
         assertEquals("senha123", fakeRemoteDataSource.savedPassword)
         assertEquals(
             StoreProfile("mi-loja.1", "contato@exemplo.com", "Mi Loja"),
             fakeRemoteDataSource.savedProfile
         )
         assertEquals(repository.hasSession, fakeRemoteDataSource.hasSession)
+    }
+
+    @Test
+    fun signInUsesEmailAsIsAndUsernameAsLegacyAddress() = runTest {
+        repository.signIn(" contato@exemplo.com ", "senha123")
+        assertEquals("contato@exemplo.com", fakeRemoteDataSource.signedInTechnicalEmail)
+
+        repository.signIn(" Mi-Loja.1 ", "senha123")
+        assertEquals(
+            "mi-loja.1@auth.lucrovarejo.invalid",
+            fakeRemoteDataSource.signedInTechnicalEmail
+        )
+    }
+
+    @Test
+    fun passwordResetReachesRemoteDataSourceWithTrimmedEmail() = runTest {
+        repository.requestPasswordReset(" contato@exemplo.com ")
+
+        assertEquals("contato@exemplo.com", fakeRemoteDataSource.resetEmail)
     }
 }

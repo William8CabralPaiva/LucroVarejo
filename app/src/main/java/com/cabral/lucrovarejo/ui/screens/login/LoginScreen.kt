@@ -27,16 +27,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.LoadingButton
 import com.cabral.lucrovarejo.ui.components.PasswordTextField
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun LoginScreen(
     goToRegisterScreen: () -> Unit,
     goToLoggedFlow: () -> Unit,
+    goToForgotPassword: () -> Unit = {},
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -48,20 +52,22 @@ fun LoginScreen(
 
     LoginScreenContent(
         state = state,
-        onStoreNameChange = viewModel::onStoreNameChanged,
+        onEmailChange = viewModel::onEmailChanged,
         onPasswordChange = viewModel::onPasswordChanged,
         onSubmit = viewModel::signIn,
-        onRegister = goToRegisterScreen
+        onRegister = goToRegisterScreen,
+        onForgotPassword = goToForgotPassword
     )
 }
 
 @Composable
 internal fun LoginScreenContent(
     state: LoginUiState,
-    onStoreNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onRegister: () -> Unit,
+    onForgotPassword: () -> Unit = {},
 ) {
     Surface(
         modifier = Modifier
@@ -85,14 +91,14 @@ internal fun LoginScreenContent(
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = state.storeName,
-                onValueChange = onStoreNameChange,
-                label = { Text("Usuário") },
+                value = state.email,
+                onValueChange = onEmailChange,
+                label = { Text(stringResource(R.string.login_identifier_label)) },
                 singleLine = true,
                 enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(LOGIN_STORE_NAME_FIELD_TAG)
+                    .testTag(LOGIN_EMAIL_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -118,7 +124,7 @@ internal fun LoginScreenContent(
 
             LoadingButton(
                 onClick = onSubmit,
-                enabled = state.storeName.isNotBlank() &&
+                enabled = state.email.isNotBlank() &&
                         state.password.isNotBlank(),
                 isLoading = state.isLoading,
                 textId = R.string.login_submit,
@@ -126,6 +132,13 @@ internal fun LoginScreenContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(
+                onClick = onForgotPassword,
+                modifier = Modifier.testTag(LOGIN_FORGOT_PASSWORD_BUTTON_TAG)
+            ) {
+                Text(stringResource(R.string.login_forgot_password))
+            }
 
             TextButton(
                 onClick = onRegister,
@@ -137,6 +150,22 @@ internal fun LoginScreenContent(
     }
 }
 
-internal const val LOGIN_STORE_NAME_FIELD_TAG = "login-store-name-field"
+internal const val LOGIN_EMAIL_FIELD_TAG = "login-email-field"
 internal const val LOGIN_PASSWORD_FIELD_TAG = "login-password-field"
 internal const val LOGIN_REGISTER_BUTTON_TAG = "login-register-button"
+internal const val LOGIN_FORGOT_PASSWORD_BUTTON_TAG = "login-forgot-password-button"
+
+@Preview(showBackground = true, name = "Login")
+@Composable
+private fun LoginScreenPreview() {
+    LucroVarejoTheme {
+        LoginScreenContent(
+            state = LoginUiState(email = "contato@exemplo.com", password = "segura123"),
+            onEmailChange = {},
+            onPasswordChange = {},
+            onSubmit = {},
+            onRegister = {},
+            onForgotPassword = {}
+        )
+    }
+}

@@ -11,9 +11,11 @@ interface AuthRepository {
         displayName: String
     )
 
-    suspend fun signIn(storeName: String, password: String)
+    suspend fun signIn(identifier: String, password: String)
 
     suspend fun getStoreDisplayName(): String?
+
+    suspend fun requestPasswordReset(email: String)
 
     fun signOut()
 }

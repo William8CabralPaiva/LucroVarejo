@@ -73,7 +73,7 @@ class AppNavGraphContentTest {
                 splashScreen = { onFinish ->
                     TestAction("Finish splash", onFinish)
                 },
-                loginScreen = { goToRegister, goToHome ->
+                loginScreen = { goToRegister, goToHome, _ ->
                     TestAction(
                         text = "Test login",
                         onClick = if (loginNavigatesHome) goToHome else goToRegister

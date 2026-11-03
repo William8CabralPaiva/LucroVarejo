@@ -9,11 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 data class LoginUiState(
-    val storeName: String = "",
+    val email: String = "",
     val password: String = "",
     val errorMessage: String? = null,
     val isLoading: Boolean = false,
@@ -27,9 +26,9 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun onStoreNameChanged(value: String) {
+    fun onEmailChanged(value: String) {
         _uiState.update {
-            it.copy(storeName = value.lowercase(Locale.ROOT), errorMessage = null)
+            it.copy(email = value.trim(), errorMessage = null)
         }
     }
 
@@ -39,9 +38,9 @@ class LoginViewModel @Inject constructor(
 
     fun signIn() {
         val current = _uiState.value
-        if (current.storeName.isBlank() || current.password.isBlank()) {
+        if (current.email.isBlank() || current.password.isBlank()) {
             _uiState.update {
-                it.copy(errorMessage = "Informe o usuário e a senha.")
+                it.copy(errorMessage = "Informe o e-mail ou usuário e a senha.")
             }
             return
         }
@@ -49,7 +48,7 @@ class LoginViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
             try {
-                signInStore(current.storeName, current.password)
+                signInStore(current.email, current.password)
                 _uiState.update { it.copy(isLoading = false, isLoggedIn = true) }
             } catch (_: Exception) {
                 _uiState.update {

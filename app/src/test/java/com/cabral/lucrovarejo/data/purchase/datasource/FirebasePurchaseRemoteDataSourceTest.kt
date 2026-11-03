@@ -233,7 +233,10 @@ class FirebasePurchaseRemoteDataSourceTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun signIn(storeName: String, password: String) = Unit
+        override suspend fun signIn(identifier: String, password: String) = Unit
+
+        override suspend fun requestPasswordReset(email: String) = Unit
+
 
         override fun signOut() = Unit
     }

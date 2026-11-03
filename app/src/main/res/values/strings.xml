@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">Lucro Varejo</string>
     <string name="login_submit">Entrar</string>
+    <string name="login_identifier_label">E-mail ou usuário</string>
+    <string name="login_forgot_password">Esqueci a senha</string>
+    <string name="forgot_password_title">Esqueci a senha</string>
+    <string name="forgot_password_description">Informe seu e-mail. Enviaremos um link para redefinir a senha.</string>
+    <string name="forgot_password_submit">Enviar e-mail</string>
+    <string name="forgot_password_success">Se o e-mail estiver cadastrado, enviamos o link para redefinir a senha.</string>
+    <string name="forgot_password_error">Não foi possível enviar o e-mail. Tente novamente.</string>
     <string name="register_title">Cadastro da loja</string>
     <string name="register_display_name_label">Nome da loja</string>
     <string name="register_display_name_required">Informe o nome da loja.</string>
@@ -24,7 +31,7 @@
     <string name="register_password_too_short">A senha deve ter pelo menos 6 caracteres.</string>
     <string name="register_confirm_password_required">Confirme a senha.</string>
     <string name="register_password_mismatch">As senhas não coincidem.</string>
-    <string name="register_store_taken">Esse usuário já está em uso.</string>
+    <string name="register_store_taken">Esse e-mail já está cadastrado.</string>
     <string name="register_error_provider_disabled">O cadastro por e-mail e senha está desativado no Firebase Authentication.</string>
     <string name="register_error_invalid_identifier">O Firebase rejeitou o identificador da conta. Confira a configuração do projeto.</string>
     <string name="register_error_permission_denied">O Firebase bloqueou a criação do perfil da loja. Verifique se as regras do Firestore foram publicadas.</string>

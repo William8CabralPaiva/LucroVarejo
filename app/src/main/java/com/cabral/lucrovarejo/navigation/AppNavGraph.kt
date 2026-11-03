@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+import com.cabral.lucrovarejo.ui.screens.forgotpassword.ForgotPasswordScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
@@ -35,9 +36,10 @@ fun AppNavGraph(
         isUserAuthenticated = isUserAuthenticated,
         onSignOut = onSignOut,
         splashScreen = { onSplashFinished -> LaunchedEffect(Unit) { onSplashFinished() } },
-        loginScreen = { goToRegisterScreen, goToLoggedFlow ->
-            LoginScreen(goToRegisterScreen, goToLoggedFlow)
+        loginScreen = { goToRegisterScreen, goToLoggedFlow, goToForgotPassword ->
+            LoginScreen(goToRegisterScreen, goToLoggedFlow, goToForgotPassword)
         },
+        forgotPasswordScreen = { onBack -> ForgotPasswordScreen(onBack) },
         registerScreen = { onBackPress, onRegisterSuccess ->
             RegisterScreen(onBackPress, onRegisterSuccess)
         },
@@ -67,9 +69,10 @@ internal fun AppNavGraphContent(
     isUserAuthenticated: Boolean,
     onSignOut: () -> Unit,
     splashScreen: @Composable (() -> Unit) -> Unit,
-    loginScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    loginScreen: @Composable (() -> Unit, () -> Unit, () -> Unit) -> Unit,
     registerScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
     loggedFlowScreen: @Composable (() -> Unit) -> Unit,
+    forgotPasswordScreen: @Composable (() -> Unit) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -94,8 +97,15 @@ internal fun AppNavGraphContent(
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
+                },
+                {
+                    navController.navigate(NotLoggedRoutes.FORGOT_PASSWORD)
                 }
             )
+        }
+
+        composable(NotLoggedRoutes.FORGOT_PASSWORD) {
+            forgotPasswordScreen(navController::popBackStack)
         }
 
         composable(NotLoggedRoutes.REGISTER) {
