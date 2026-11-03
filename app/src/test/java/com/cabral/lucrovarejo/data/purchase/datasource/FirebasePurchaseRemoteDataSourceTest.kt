@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.data.purchase.datasource
+﻿package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
@@ -72,7 +72,7 @@ class FirebasePurchaseRemoteDataSourceTest {
             salePrice = 1500,
             quantity = 2,
             saleDate = Date(1_735_689_600_000),
-            paymentMethod = PaymentMethods.CARD
+            paymentMethod = PaymentMethods.CREDIT
         )
 
         val failure = runCatching { dataSource.createPurchase(request) }.exceptionOrNull()
@@ -148,7 +148,7 @@ class FirebasePurchaseRemoteDataSourceTest {
             salePrice = 1500,
             quantity = 2,
             saleDate = Date(1_735_689_600_000),
-            paymentMethod = PaymentMethods.CARD
+            paymentMethod = PaymentMethods.CREDIT
         )
 
         dataSource.updatePurchase("purchase-1", request)

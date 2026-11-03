@@ -8,5 +8,6 @@ enum class PaymentMethodsUi(
 ) {
     CASH(PaymentMethods.CASH, "Dinheiro"),
     PIX(PaymentMethods.PIX, "Pix"),
-    CARD(PaymentMethods.CARD, "Cartão")
+    DEBIT(PaymentMethods.DEBIT, "Cartão de débito"),
+    CREDIT(PaymentMethods.CREDIT, "Cartão de crédito")
 }
