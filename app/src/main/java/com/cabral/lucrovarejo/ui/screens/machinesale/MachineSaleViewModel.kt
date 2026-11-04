@@ -7,6 +7,7 @@ import com.cabral.lucrovarejo.domain.payment.PaymentFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
+import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.domain.payment.parseRatePercentToBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddPaymentMachineUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.CreateTerminalUseCase
@@ -210,7 +211,10 @@ class MachineSaleViewModel @Inject constructor(
         _uiState.update { it.copy(terminalId = terminalId) }
 
         state.tariffEntries
-            .filter { it.rateText.isNotBlank() && it.effectiveFromMillis != null }
+            .filter {
+                it.rateText.isNotBlank() && it.effectiveFromMillis != null &&
+                    it.rateText != it.initialRateText
+            }
             .forEach { entry ->
                 val rateBps = entry.parseRateBpsOrNull() ?: return@forEach
                 addPaymentMachine(
@@ -238,9 +242,7 @@ class MachineSaleViewModel @Inject constructor(
             _uiState.update { s ->
                 s.copy(
                     isSaving = false,
-                    tariffEntries = s.tariffEntries.map {
-                        it.copy(rateText = "", effectiveFromMillis = null, error = null)
-                    }
+                    tariffEntries = emptyList()
                 )
             }
             recomputeTariffEntries()
@@ -298,11 +300,14 @@ class MachineSaleViewModel @Inject constructor(
             it.method == method && it.brandId == brandId && it.installments == installments
         }
         val currentTariff = getFilteredCurrentTariff(tariffsForKey, date)
+        val currentRateText = currentTariff?.rateBps?.bpsToRate()?.toPlainString().orEmpty()
         return TariffEntryUi(
             method = method,
             brandId = brandId,
             brandName = brandName,
             installments = installments,
+            rateText = currentRateText,
+            initialRateText = currentRateText,
             effectiveFromMillis = date.time,
             currentRateBps = currentTariff?.rateBps
         )

@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
@@ -429,8 +430,13 @@ fun MachineSaleContent(
                                                 if (entry != null) {
                                                     Spacer(modifier = Modifier.height(8.dp))
                                                     Text(
-                                                        text = "${installment}x",
-                                                        style = MaterialTheme.typography.labelLarge
+                                                        text = stringResource(
+                                                            R.string.terminal_form_installment_title,
+                                                            installment,
+                                                            brandId
+                                                        ),
+                                                        style = MaterialTheme.typography.titleMedium,
+                                                        fontWeight = FontWeight.Bold
                                                     )
                                                     TariffEntryFields(
                                                         entry = entry,
@@ -557,7 +563,7 @@ private fun CreditInstallmentPicker(
             Text(
                 text = stringResource(R.string.terminal_form_installments_label) + ": " +
                     configured.joinToString(", ") { "${it}x" },
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyMedium
             )
         }
         if (showPicker && availableInstallments.isNotEmpty()) {

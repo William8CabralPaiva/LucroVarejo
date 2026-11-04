@@ -233,6 +233,7 @@
     <string name="terminal_form_installments_label">Parcelas</string>
     <string name="terminal_form_installments_placeholder">Selecionar parcela</string>
     <string name="terminal_form_add_installment">Adicionar parcela</string>
+    <string name="terminal_form_installment_title">Tarifa do crédito em %1$dx (%2$s)</string>
     <string name="terminal_form_installment_x">%1$dx</string>
     <string name="terminal_form_save">Salvar</string>
     <string name="terminal_form_save_and_back">Salvar e voltar</string>

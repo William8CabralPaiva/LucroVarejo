@@ -10,6 +10,8 @@ data class TariffEntryUi(
     val brandName: String? = null,
     val installments: Int? = null,
     val rateText: String = "",
+    // Tarifa vigente pre-preenchida; so grava novo registro se o texto for diferente dela.
+    val initialRateText: String = "",
     val effectiveFromMillis: Long? = null,
     val currentRateBps: Int? = null,
     @StringRes val error: Int? = null,
