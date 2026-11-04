@@ -71,7 +71,7 @@ class AppNavGraphUiTest {
         composeRule.onNodeWithText("Buscar produto...").assertIsDisplayed()
 
         composeRule.onNodeWithText("Produtos").performClick()
-        composeRule.onNodeWithText("Nenhum produto encontrado.").assertIsDisplayed()
+        composeRule.onNodeWithText("Nenhum produto cadastrado").assertIsDisplayed()
 
         composeRule.onNodeWithText("Configurações").performClick()
         composeRule.onNodeWithText("Modo escuro").assertIsDisplayed()

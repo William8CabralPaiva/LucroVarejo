@@ -85,6 +85,8 @@
     <string name="products_title">Produtos</string>
     <string name="products_search_placeholder">Buscar produto...</string>
     <string name="products_empty">Nenhum produto encontrado.</string>
+    <string name="products_empty_title">Nenhum produto cadastrado</string>
+    <string name="products_empty_message">Os produtos que você cadastrar aparecerão aqui</string>
     <string name="products_load_error">Não foi possível carregar os produtos.</string>
     <string name="products_retry">Tentar novamente</string>
     <string name="products_add">Novo produto</string>
@@ -237,7 +239,8 @@
 
     <string name="terminals_title">Maquininhas</string>
     <string name="terminals_add">Adicionar maquininha</string>
-    <string name="terminals_empty">Nenhuma maquininha cadastrada.</string>
+    <string name="terminals_empty">Nenhuma maquininha cadastrada</string>
+    <string name="terminals_empty_message">Cadastre suas maquininhas para registrar a forma de pagamento e a tarifa nas vendas</string>
     <string name="terminals_load_error">Não foi possível carregar as maquininhas.</string>
     <string name="terminals_archived_badge">Arquivada</string>
     <string name="terminals_archive">Arquivar</string>

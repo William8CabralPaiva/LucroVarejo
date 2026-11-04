@@ -34,10 +34,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
+import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
@@ -100,10 +102,15 @@ fun MachineListContent(
             }
 
             state.items.isEmpty() -> Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = stringResource(R.string.terminals_empty))
+                EmptyList(
+                    title = stringResource(R.string.terminals_empty),
+                    message = stringResource(R.string.terminals_empty_message),
+                    actionText = stringResource(R.string.terminals_add),
+                    onAddPurchase = onAddTerminal
+                )
             }
 
             else -> LazyColumn(
@@ -201,6 +208,30 @@ private fun MachineListContentEmptyPreview() {
     LucroVarejoTheme {
         MachineListContent(
             state = MachineListUiState(isLoading = false),
+            onAddTerminal = {},
+            onArchive = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Maquininhas vazio - escuro")
+@Composable
+private fun MachineListContentEmptyDarkPreview() {
+    LucroVarejoTheme(themeMode = ThemeMode.DARK) {
+        MachineListContent(
+            state = MachineListUiState(isLoading = false),
+            onAddTerminal = {},
+            onArchive = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Maquininhas com erro")
+@Composable
+private fun MachineListContentErrorPreview() {
+    LucroVarejoTheme {
+        MachineListContent(
+            state = MachineListUiState(isLoading = false, hasError = true),
             onAddTerminal = {},
             onArchive = {}
         )
