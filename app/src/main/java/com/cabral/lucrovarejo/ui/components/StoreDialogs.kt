@@ -22,10 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.store.StoreSummary
 import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+
 @Composable
 fun SwitchStoreDialog(
     stores: List<StoreSummary>,
@@ -135,3 +138,35 @@ fun StoreNameDialog(
 }
 
 private const val MAX_STORE_NAME_LENGTH = 100
+
+@Preview(showBackground = true, name = "Trocar loja")
+@Composable
+private fun SwitchStoreDialogPreview() {
+    LucroVarejoTheme {
+        SwitchStoreDialog(
+            stores = listOf(
+                StoreSummary("1", "Loja Centro"),
+                StoreSummary("2", "Loja Shopping"),
+                StoreSummary("3", "")
+            ),
+            activeStoreId = "1",
+            onSelect = {},
+            onCreate = {},
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Nova loja")
+@Composable
+private fun StoreNameDialogPreview() {
+    LucroVarejoTheme {
+        StoreNameDialog(
+            initialName = "",
+            title = R.string.settings_create_store_dialog_title,
+            errorMessage = R.string.settings_create_store_error,
+            onSave = { _, _ -> },
+            onDismiss = {}
+        )
+    }
+}

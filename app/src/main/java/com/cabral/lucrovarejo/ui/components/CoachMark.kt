@@ -43,9 +43,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 
@@ -218,3 +220,23 @@ private fun CoachMarkBubble(
 private val Offset0 = Offset.Zero
 private const val SCRIM_ALPHA = 0.7f
 private const val SCROLL_DELAY_MS = 150L
+
+@Preview(showBackground = true, name = "CoachMark - sem alvo")
+@Composable
+private fun CoachMarkOverlayPreview() {
+    LucroVarejoTheme {
+        CoachMarkOverlay(
+            state = rememberCoachMarkState(),
+            step = CoachStep(
+                target = CoachTarget.NAME_FIELD,
+                titleResId = R.string.coach_tour_name_title,
+                textResId = R.string.coach_tour_name_text,
+                position = 1,
+                total = 3,
+                nextLabelResId = R.string.coach_mark_next
+            ),
+            onNext = {},
+            onSkip = {}
+        )
+    }
+}
