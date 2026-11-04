@@ -43,6 +43,14 @@ class StoreViewModel @Inject constructor(
         _uiState.value = StoreUiState()
     }
 
+    fun showTips() {
+        _uiState.update { it.copy(showTips = true) }
+    }
+
+    fun dismissTips() {
+        _uiState.update { it.copy(showTips = false) }
+    }
+
     // O nome fica no estado compartilhado, entao a Home e as demais telas atualizam sozinhas.
     fun updateDisplayName(name: String, onResult: (Boolean) -> Unit) {
         val trimmed = name.trim()
@@ -65,4 +73,6 @@ class StoreViewModel @Inject constructor(
 data class StoreUiState(
     // Nulo para contas antigas, sem nome da loja cadastrado.
     val displayName: String? = null,
+    // Dicas (coachmark) abertas apos o login manual ou pela opcao Dicas em Configuracoes.
+    val showTips: Boolean = false,
 )

@@ -192,6 +192,32 @@
 
     <!-- Configurações: Maquininhas -->
     <string name="settings_terminals">Maquininhas</string>
+    <string name="settings_tips">Dicas</string>
+    <string name="settings_tips_subtitle">Veja, na própria tela, como cadastrar o crédito e as parcelas.</string>
+    <string name="coach_mark_step_counter">Passo %1$d de %2$d</string>
+    <string name="coach_mark_next">Próximo</string>
+    <string name="coach_mark_skip">Pular</string>
+    <string name="coach_mark_done">Entendi</string>
+    <string name="coach_tour_name_title">    Dê um nome à maquininha</string>
+        <string name="coach_tour_name_text">Primeiro, digite neste campo o nome da maquininha (ex.: Stone, Cielo). Depois toque em Próximo.</string>
+    <string name="coach_tour_credit_tab_title">Abra a aba Crédito</string>
+    <string name="coach_tour_credit_tab_text">Toque em “Crédito” para configurar o recebimento no crédito desta maquininha: bandeiras, parcelas e tarifas.</string>
+    <string name="coach_tour_enable_title">Ative o crédito</string>
+    <string name="coach_tour_enable_text">Toque na chave para aceitar crédito nesta maquininha.</string>
+    <string name="coach_tour_brand_field_title">Cadastre uma bandeira</string>
+    <string name="coach_tour_brand_field_text">Digite o nome da bandeira neste campo (ex.: Visa) e toque em Próximo para adicioná-la.</string>
+    <string name="coach_tour_brand_chip_title">Marque a bandeira</string>
+    <string name="coach_tour_brand_chip_text">Toque na bandeira para selecioná-la. Abrirá um bloco para configurar as parcelas dela.</string>
+    <string name="coach_tour_installment_title">Adicione as parcelas</string>
+    <string name="coach_tour_installment_text">Toque em “Adicionar parcela” e escolha, por exemplo, 1x. Repita para 2x, 3x…</string>
+    <string name="coach_tour_rate_title">Preencha a tarifa</string>
+    <string name="coach_tour_rate_text">Digite aqui a tarifa (%) cobrada nesta parcela. Cada parcela tem a sua própria tarifa.</string>
+    <string name="coach_tour_save_title">Salve a maquininha</string>
+    <string name="coach_tour_save_text">Toque em “Salvar” para guardar as tarifas. Pronto!</string>
+    <string name="coach_tour_prompt_title">Aprenda a cadastrar o crédito</string>
+    <string name="coach_tour_prompt_text">Quer ver, passo a passo na tela, como cadastrar bandeiras, parcelas e tarifas da maquininha?</string>
+    <string name="coach_tour_prompt_confirm">Ver agora</string>
+    <string name="coach_tour_prompt_dismiss">Agora não</string>
     <string name="settings_store_name">Nome da loja</string>
     <string name="settings_store_name_subtitle">Altere o nome exibido na tela inicial.</string>
     <string name="settings_store_name_dialog_title">Alterar nome da loja</string>

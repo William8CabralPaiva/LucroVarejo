@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.ModeNight
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material.icons.outlined.Storefront
@@ -42,6 +43,7 @@ fun ConfigScreen(
     onLogout: () -> Unit = {},
     onNavigateToTerminals: () -> Unit = {},
     storeName: String? = null,
+    onShowTips: () -> Unit = {},
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
@@ -84,6 +86,14 @@ fun ConfigScreen(
                 title = stringResource(R.string.settings_terminals),
                 subtitle = stringResource(R.string.settings_terminals_subtitle),
                 onClick = onNavigateToTerminals
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.Lightbulb,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_tips),
+                subtitle = stringResource(R.string.settings_tips_subtitle),
+                onClick = onShowTips
             )
 
             SettingsItem(

@@ -39,6 +39,7 @@ Em conflito entre código e documentação, o código mostra o estado atual e o 
 - Tarifas são append-only com `effectiveFrom` (data sem hora): vale a de maior `effectiveFrom <= data` para maquininha + tipo + bandeira + parcela (`GetFilteredCurrentTariffUseCase`). Mesma chave + mesma data é rejeitada. Sem update/delete.
 - Desativar maquininha = `active=false`; nunca apagar se houver tarifas ou vendas.
 - Cadastro da maquininha: `SecondaryTabRow`/`Tab` só navega entre tipos; `AppSwitch` na seção habilita o método; Salvar fixo na `bottomBar` do `Scaffold` (`ui/components/IconButton.kt`); parcelas de crédito via Spinner; chip de bandeira rola até o card de tarifa ao ser marcado.
+- Tour guiado ("Dicas" em Configurações ou prompt após login manual): `ui/components/CoachMark.kt` (`Modifier.coachTarget` + `CoachMarkOverlay`) destaca elementos reais de `MachineSaleScreen`; o passo é derivado do estado do formulário. Nome da loja é editável em Configurações via `StoreViewModel.updateDisplayName`; `firestore.rules` valida `displayName` e precisa ser publicada.
 
 ## Pagamento e tarifa na venda (`AddPurchaseScreen`)
 - Spinners em cascata: forma de pagamento → maquininha → bandeira → parcelas (Dinheiro: nenhum; Pix: maquininha; Débito: maquininha + bandeira; Crédito: os três). Cada um só habilita após o anterior; trocar um limpa os seguintes.

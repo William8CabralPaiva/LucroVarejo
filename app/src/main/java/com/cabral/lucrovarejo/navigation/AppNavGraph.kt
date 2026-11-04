@@ -37,7 +37,15 @@ fun AppNavGraph(
         onSignOut = onSignOut,
         splashScreen = { onSplashFinished -> LaunchedEffect(Unit) { onSplashFinished() } },
         loginScreen = { goToRegisterScreen, goToLoggedFlow, goToForgotPassword ->
-            LoginScreen(goToRegisterScreen, goToLoggedFlow, goToForgotPassword)
+            LoginScreen(
+                goToRegisterScreen,
+                {
+                    // Apenas o login manual abre as dicas; a sessao restaurada pela splash nao.
+                    storeViewModel?.showTips()
+                    goToLoggedFlow()
+                },
+                goToForgotPassword
+            )
         },
         forgotPasswordScreen = { onBack -> ForgotPasswordScreen(onBack) },
         registerScreen = { onBackPress, onRegisterSuccess ->
@@ -53,6 +61,8 @@ fun AppNavGraph(
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,
                 storeName = storeState?.displayName,
+                showTips = storeState?.showTips == true,
+                onDismissTips = { storeViewModel?.dismissTips() },
                 onUpdateStoreName = { name, onResult ->
                     storeViewModel?.updateDisplayName(name, onResult) ?: onResult(false)
                 },

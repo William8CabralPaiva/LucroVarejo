@@ -58,7 +58,7 @@ class ConfigScreenUiTest {
             assertEquals(ThemeMode.LIGHT, themeMode)
         }
 
-        composeRule.onNodeWithText("Desconectar").performClick()
+        composeRule.onNodeWithText("Desconectar").performScrollTo().performClick()
         composeRule.runOnIdle {
             assertEquals(1, logoutCount)
         }
@@ -88,6 +88,24 @@ class ConfigScreenUiTest {
 
         composeRule.runOnIdle { assertEquals("Loja Nova", savedName) }
         composeRule.onAllNodesWithText("Alterar nome da loja").assertCountEquals(0)
+    }
+
+    @Test
+    fun tipsItemRequestsTour() {
+        var tipsRequested = 0
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ConfigScreen(
+                    currentThemeMode = ThemeMode.LIGHT,
+                    onThemeModeChange = {},
+                    onShowTips = { tipsRequested++ }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Dicas").performScrollTo().performClick()
+
+        composeRule.runOnIdle { assertEquals(1, tipsRequested) }
     }
 
     @Test

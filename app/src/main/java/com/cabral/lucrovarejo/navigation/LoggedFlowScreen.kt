@@ -3,17 +3,26 @@ package com.cabral.lucrovarejo.navigation
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.cabral.lucrovarejo.R
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -51,6 +60,8 @@ internal fun LoggedFlowScreen(
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
     storeName: String? = null,
+    showTips: Boolean = false,
+    onDismissTips: () -> Unit = {},
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
 ) {
     val navController = rememberNavController()
@@ -63,6 +74,15 @@ internal fun LoggedFlowScreen(
 
     val isDark = LocalIsDarkTheme.current
     val scaffoldContainerColor = if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
+    var machineTourActive by remember { mutableStateOf(false) }
+    // Sair do formulario por outro caminho (ex.: seta de voltar) encerra o tour.
+    LaunchedEffect(currentRoute) {
+        if (currentRoute != LoggedRoutes.ADD_MACHINE) machineTourActive = false
+    }
+    val startMachineTour = {
+        machineTourActive = true
+        navigator.navigateTo(LoggedRoutes.ADD_MACHINE)
+    }
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val showMessage: (String) -> Unit = { message ->
@@ -113,9 +133,34 @@ internal fun LoggedFlowScreen(
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,
                 storeName = storeName,
+                onShowTips = startMachineTour,
+                machineTourActive = machineTourActive,
+                onMachineTourFinish = {
+                    machineTourActive = false
+                    navigator.navigateBack()
+                },
                 onUpdateStoreName = onUpdateStoreName
             )
         }
+    }
+
+    if (showTips) {
+        AlertDialog(
+            onDismissRequest = onDismissTips,
+            title = { Text(stringResource(R.string.coach_tour_prompt_title)) },
+            text = { Text(stringResource(R.string.coach_tour_prompt_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDismissTips()
+                    startMachineTour()
+                }) { Text(stringResource(R.string.coach_tour_prompt_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissTips) {
+                    Text(stringResource(R.string.coach_tour_prompt_dismiss))
+                }
+            }
+        )
     }
 }
 
@@ -131,6 +176,9 @@ private fun LoggedDestinationNavHost(
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
     storeName: String?,
+    onShowTips: () -> Unit,
+    machineTourActive: Boolean,
+    onMachineTourFinish: () -> Unit,
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit,
 ) {
     // O Home recebe novas vendas por Flow (listener do Firestore); por isso a navegacao nao
@@ -203,6 +251,7 @@ private fun LoggedDestinationNavHost(
                 onLogout = onLogout,
                 onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
                 storeName = storeName,
+                onShowTips = onShowTips,
                 onUpdateStoreName = onUpdateStoreName
             )
         }
@@ -218,7 +267,9 @@ private fun LoggedDestinationNavHost(
             MachineSaleScreen(
                 onFinish = navigator::navigateBackToConfig,
                 onShowMessage = onShowMessage,
-                onOpenMachineHistory = navigator::navigateToMachineHistory
+                onOpenMachineHistory = navigator::navigateToMachineHistory,
+                tourActive = machineTourActive,
+                onTourFinish = onMachineTourFinish
             )
         }
 
