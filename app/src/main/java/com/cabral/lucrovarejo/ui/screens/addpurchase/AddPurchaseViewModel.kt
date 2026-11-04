@@ -334,7 +334,19 @@ class AddPurchaseViewModel @Inject constructor(
     private fun observeTerminals() {
         getTerminals()
             .onEach { terminals ->
-                _uiState.update { it.copy(terminals = terminals) }
+                _uiState.update { current ->
+                    val terminalName = terminals
+                        .firstOrNull { it.key != null && it.key == current.form.terminalId }
+                        ?.name
+                    current.copy(
+                        terminals = terminals,
+                        form = if (terminalName != null) {
+                            current.form.copy(terminalName = terminalName)
+                        } else {
+                            current.form
+                        }
+                    )
+                }
                 val state = _uiState.value
                 if (state.form.paymentMethod == PaymentMethods.CASH &&
                     state.tariffs.isEmpty() && !state.isLoadingTariffs
@@ -363,16 +375,21 @@ class AddPurchaseViewModel @Inject constructor(
 
     private fun loadTariffs(terminalIds: List<String>) {
         tariffsJob?.cancel()
-        _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
-        if (terminalIds.isEmpty()) return
-        _uiState.update { it.copy(isLoadingTariffs = true) }
+        if (terminalIds.isEmpty()) {
+            _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
+            return
+        }
+        _uiState.update { it.copy(tariffs = emptyList(), isLoadingTariffs = true) }
         tariffsJob = viewModelScope.launch {
             try {
                 val loaded = terminalIds.flatMap { id ->
                     tariffsByTerminal[id] ?: getTerminalTariffs(id).also { tariffsByTerminal[id] = it }
                 }
+                // Em edição, a primeira carga substitui o snapshot salvo pela tarifa vigente atual.
                 _uiState.update {
-                    reconcileTariff(it.copy(tariffs = loaded, isLoadingTariffs = false))
+                    reconcileTariff(
+                        it.copy(tariffs = loaded, isLoadingTariffs = false, keepSavedTariff = false)
+                    )
                 }
             } catch (_: PaymentFailure) {
                 _uiState.update {
