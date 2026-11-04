@@ -155,7 +155,7 @@
     <string name="purchase_create_error_generic">Não foi possível registrar a venda. Tente novamente.</string>
     <string name="product_name_placeholder">Ex.: Bolsa Feminina</string>
     <string name="product_paid_value_label">Valor pago</string>
-    <string name="product_paid_value_placeholder">0.00</string>
+    <string name="product_paid_value_placeholder">0,00</string>
     <string name="product_category_label">Categoria</string>
     <string name="product_category_placeholder">Selecionar categoria</string>
     <string name="product_description_label">Descrição</string>

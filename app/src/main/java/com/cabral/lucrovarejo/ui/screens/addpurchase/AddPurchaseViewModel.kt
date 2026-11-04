@@ -148,6 +148,14 @@ class AddPurchaseViewModel @Inject constructor(
             )
         }
         loadTariffsForSelection()
+        selectSingleTerminal()
+    }
+
+    // Com uma única maquininha ativa para o método, não há o que escolher.
+    private fun selectSingleTerminal() {
+        val state = _uiState.value
+        if (state.form.terminalId != null) return
+        state.terminalOptions.singleOrNull()?.let { onTerminalSelected(it.name) }
     }
 
     fun onTerminalSelected(name: String) {
@@ -353,6 +361,7 @@ class AddPurchaseViewModel @Inject constructor(
                 ) {
                     loadTariffsForSelection()
                 }
+                if (!_uiState.value.isEditing) selectSingleTerminal()
             }
             .catch {
                 _uiState.update { it.copy(errorMessage = R.string.purchase_terminals_load_error) }

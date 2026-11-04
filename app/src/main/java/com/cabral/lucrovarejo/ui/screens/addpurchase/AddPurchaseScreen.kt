@@ -213,7 +213,7 @@ fun AddPurchaseScreenContent(
                     labelResId = R.string.purchase_sale_price_label,
                     placeholderResId = R.string.product_paid_value_placeholder,
                     icon = Icons.Outlined.MonetizationOn,
-                    type = IconTextFieldType.MONEY,
+                    type = IconTextFieldType.CURRENCY,
                     required = true,
                     enabled = !state.isSaving,
                     isError = form.salePriceError != null,

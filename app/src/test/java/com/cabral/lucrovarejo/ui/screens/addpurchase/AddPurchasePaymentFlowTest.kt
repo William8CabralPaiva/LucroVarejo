@@ -131,7 +131,8 @@ class AddPurchasePaymentFlowTest {
         advanceUntilIdle()
 
         assertEquals(listOf("Maquininha A"), viewModel.uiState.value.terminalOptions.map { it.name })
-        assertTrue(viewModel.uiState.value.brandOptions.isEmpty())
+        // A única maquininha ativa já vem selecionada, então as bandeiras já estão disponíveis.
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
 
         viewModel.onTerminalSelected("Maquininha A")
         advanceUntilIdle()
@@ -154,9 +155,33 @@ class AddPurchasePaymentFlowTest {
         viewModel.onPaymentMethodSelected(PaymentMethods.DEBIT)
 
         val form = viewModel.uiState.value.form
-        assertNull(form.terminalId)
+        // Só há uma maquininha ativa com Débito, então ela é preenchida sozinha.
+        assertEquals("t1", form.terminalId)
         assertNull(form.brand)
         assertNull(form.installments)
+    }
+
+    @Test
+    fun singleActiveTerminalIsSelectedAutomatically() = runTest {
+        advanceUntilIdle()
+        assertNull(viewModel.uiState.value.form.terminalId)
+
+        viewModel.onPaymentMethodSelected(PaymentMethods.CREDIT)
+        advanceUntilIdle()
+
+        val form = viewModel.uiState.value.form
+        assertEquals("t1", form.terminalId)
+        assertEquals("Maquininha A", form.terminalName)
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+    }
+
+    @Test
+    fun cashDoesNotSelectTerminal() = runTest {
+        advanceUntilIdle()
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.form.terminalId)
     }
 
     @Test
