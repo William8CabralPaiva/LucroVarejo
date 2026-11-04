@@ -229,7 +229,7 @@ class AddPurchasePaymentFlowTest {
     }
 
     @Test
-    fun editingKeepsSavedTariffSnapshotUntilPaymentFieldsChange() = runTest {
+    fun editingKeepsSelectionAndRefreshesTariffToCurrentRate() = runTest {
         advanceUntilIdle()
         val saved = PurchaseModel(
             key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
@@ -240,18 +240,29 @@ class AddPurchasePaymentFlowTest {
 
         viewModel.loadPurchase(saved)
         advanceUntilIdle()
-        assertEquals(777, viewModel.uiState.value.appliedTariff.rateBps)
-        assertTrue(viewModel.uiState.value.canSubmit)
+        val state = viewModel.uiState.value
+        assertEquals("t1", state.form.terminalId)
+        assertEquals("Maquininha A", state.form.terminalName)
+        assertEquals(99, state.appliedTariff.rateBps)
+        assertEquals("tp1", state.appliedTariff.tariffId)
+        assertTrue(state.canSubmit)
 
-        viewModel.onSaleDateChanged(date(2026, 7, 11).time)
+        viewModel.savePurchase()
+        advanceUntilIdle()
 
-        assertEquals(99, viewModel.uiState.value.appliedTariff.rateBps)
-        assertNotNull(viewModel.uiState.value.appliedTariff.tariffId)
+        val updated = requireNotNull(purchases.updated)
+        assertEquals(99, updated.tariffRateBps)
+        assertEquals("tp1", updated.tariffId)
+        assertEquals(99L, updated.tariffAmountCents)
     }
 
     private class RecordingPurchaseRepository : PurchaseRepository {
         var created: PurchaseModel? = null
-        override suspend fun updatePurchase(purchase: PurchaseModel) = purchase
+        var updated: PurchaseModel? = null
+        override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
+            updated = purchase
+            return purchase
+        }
         override suspend fun deletePurchase(key: String) = Unit
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
             created = purchase

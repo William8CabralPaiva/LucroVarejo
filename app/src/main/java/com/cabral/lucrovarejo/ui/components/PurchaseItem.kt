@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.components
+﻿package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -54,10 +53,10 @@ fun PurchaseItem(
     val profitInCents = salePriceInCents - costInCents - tariffInCents
     PurchaseItemContent(
         productName = productName,
-        formattedPrice = formatAlertPrice(salePriceInCents / 100.0),
-        formattedCost = formatAlertPrice(costInCents / 100.0),
-        formattedTariff = formatAlertPrice(tariffInCents / 100.0),
-        formattedProfit = formatAlertPrice(profitInCents / 100.0),
+        formattedPrice = formatAlertPrice(salePriceInCents / CENTS_PER_UNIT),
+        formattedCost = formatAlertPrice(costInCents / CENTS_PER_UNIT),
+        formattedTariff = formatAlertPrice(tariffInCents / CENTS_PER_UNIT),
+        formattedProfit = formatAlertPrice(profitInCents / CENTS_PER_UNIT),
         quantity = quantity,
         onClick = onClick,
         modifier = modifier,
@@ -107,11 +106,7 @@ fun PurchaseItemContent(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                ProductIcon(text = productName)
             }
         }
 
@@ -157,7 +152,7 @@ fun PurchaseItemContent(
 
 @Composable
 @Preview(showBackground = true, name = "Venda")
-fun PurchaseItemPreview() {
+private fun PurchaseItemPreview() {
     LucroVarejoTheme {
         PurchaseItem(
             productName = "Bolsa Feminina",

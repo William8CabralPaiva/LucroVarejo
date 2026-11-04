@@ -37,6 +37,8 @@ import java.math.RoundingMode
 import java.util.Date
 import javax.inject.Inject
 
+private const val MAX_QUANTITY = 100
+
 @HiltViewModel
 class AddPurchaseViewModel @Inject constructor(
     private val getProducts: GetProductsUseCase,
@@ -80,7 +82,7 @@ class AddPurchaseViewModel @Inject constructor(
                         description = purchase.description
                     ),
                     salePrice = BigDecimal.valueOf(purchase.salePrice.toLong(), 2).toPlainString(),
-                    quantity = purchase.quantity.coerceIn(1, 100),
+                    quantity = purchase.quantity.coerceIn(1, MAX_QUANTITY),
                     paymentMethod = purchase.paymentMethod,
                     terminalId = purchase.terminalId,
                     terminalName = purchase.terminalName,
@@ -123,7 +125,7 @@ class AddPurchaseViewModel @Inject constructor(
 
     fun onQuantityChanged(value: Int) {
         _uiState.update {
-            it.copy(form = it.form.copy(quantity = value.coerceIn(1, 100)), errorMessage = null)
+            it.copy(form = it.form.copy(quantity = value.coerceIn(1, MAX_QUANTITY)), errorMessage = null)
         }
     }
 
@@ -235,30 +237,7 @@ class AddPurchaseViewModel @Inject constructor(
             return
         }
 
-        val product = form.selectedProduct
-        val purchase = PurchaseModel(
-            key = current.key,
-            cod = product.cod,
-            name = product.name,
-            cost = product.cost
-                .setScale(2, RoundingMode.UNNECESSARY)
-                .movePointRight(2)
-                .intValueExact(),
-            description = product.description,
-            salePrice = requireNotNull(salePrice)
-                .movePointRight(2)
-                .intValueExact(),
-            quantity = form.quantity,
-            saleDate = Date(form.saleDateMillis),
-            paymentMethod = requireNotNull(form.paymentMethod),
-            terminalId = form.terminalId,
-            terminalName = form.terminalName,
-            brand = form.brand,
-            installments = form.installments,
-            tariffRateBps = current.appliedTariff.rateBps,
-            tariffId = current.appliedTariff.tariffId,
-            tariffAmountCents = current.tariffAmountCents()
-        )
+        val purchase = current.toPurchase(form.selectedProduct, requireNotNull(salePrice))
         _uiState.update {
             it.copy(
                 isSaving = true,
@@ -275,17 +254,7 @@ class AddPurchaseViewModel @Inject constructor(
                     return@launch
                 }
                 createPurchase(purchase)
-                _uiState.update {
-                    it.copy(
-                        isSaving = false,
-                        form = PurchaseFormState(),
-                        tariffs = emptyList(),
-                        appliedTariff = AppliedTariff.NONE,
-                        keepSavedTariff = false,
-                        tariffNotice = null,
-                        formResetCount = it.formResetCount + 1
-                    )
-                }
+                _uiState.update { it.resetAfterCreate() }
                 effectChannel.send(Unit)
             } catch (failure: PurchaseFailure) {
                 _uiState.update {
@@ -365,7 +334,19 @@ class AddPurchaseViewModel @Inject constructor(
     private fun observeTerminals() {
         getTerminals()
             .onEach { terminals ->
-                _uiState.update { it.copy(terminals = terminals) }
+                _uiState.update { current ->
+                    val terminalName = terminals
+                        .firstOrNull { it.key != null && it.key == current.form.terminalId }
+                        ?.name
+                    current.copy(
+                        terminals = terminals,
+                        form = if (terminalName != null) {
+                            current.form.copy(terminalName = terminalName)
+                        } else {
+                            current.form
+                        }
+                    )
+                }
                 val state = _uiState.value
                 if (state.form.paymentMethod == PaymentMethods.CASH &&
                     state.tariffs.isEmpty() && !state.isLoadingTariffs
@@ -394,16 +375,21 @@ class AddPurchaseViewModel @Inject constructor(
 
     private fun loadTariffs(terminalIds: List<String>) {
         tariffsJob?.cancel()
-        _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
-        if (terminalIds.isEmpty()) return
-        _uiState.update { it.copy(isLoadingTariffs = true) }
+        if (terminalIds.isEmpty()) {
+            _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
+            return
+        }
+        _uiState.update { it.copy(tariffs = emptyList(), isLoadingTariffs = true) }
         tariffsJob = viewModelScope.launch {
             try {
                 val loaded = terminalIds.flatMap { id ->
                     tariffsByTerminal[id] ?: getTerminalTariffs(id).also { tariffsByTerminal[id] = it }
                 }
+                // Em edição, a primeira carga substitui o snapshot salvo pela tarifa vigente atual.
                 _uiState.update {
-                    reconcileTariff(it.copy(tariffs = loaded, isLoadingTariffs = false))
+                    reconcileTariff(
+                        it.copy(tariffs = loaded, isLoadingTariffs = false, keepSavedTariff = false)
+                    )
                 }
             } catch (_: PaymentFailure) {
                 _uiState.update {
@@ -437,8 +423,8 @@ class AddPurchaseViewModel @Inject constructor(
 
     private fun resolveTariff(state: AddPurchaseUiState): AppliedTariff {
         val form = state.form
-        val method = form.paymentMethod ?: return AppliedTariff.NONE
-        if (!form.isPaymentSelectionComplete) return AppliedTariff.NONE
+        val method = form.paymentMethod
+        if (method == null || !form.isPaymentSelectionComplete) return AppliedTariff.NONE
         val tariff = getSaleTariff(
             tariffs = state.tariffs,
             method = method,
@@ -469,3 +455,35 @@ class AddPurchaseViewModel @Inject constructor(
 
 internal fun productDisplayName(product: ProductModel): String =
     if (product.cod.isBlank()) product.name else "${product.name} (${product.cod})"
+
+private fun AddPurchaseUiState.toPurchase(product: ProductModel, salePrice: BigDecimal) = PurchaseModel(
+    key = key,
+    cod = product.cod,
+    name = product.name,
+    cost = product.cost
+        .setScale(2, RoundingMode.UNNECESSARY)
+        .movePointRight(2)
+        .intValueExact(),
+    description = product.description,
+    salePrice = salePrice.movePointRight(2).intValueExact(),
+    quantity = form.quantity,
+    saleDate = Date(form.saleDateMillis),
+    paymentMethod = requireNotNull(form.paymentMethod),
+    terminalId = form.terminalId,
+    terminalName = form.terminalName,
+    brand = form.brand,
+    installments = form.installments,
+    tariffRateBps = appliedTariff.rateBps,
+    tariffId = appliedTariff.tariffId,
+    tariffAmountCents = tariffAmountCents()
+)
+
+private fun AddPurchaseUiState.resetAfterCreate() = copy(
+    isSaving = false,
+    form = PurchaseFormState(),
+    tariffs = emptyList(),
+    appliedTariff = AppliedTariff.NONE,
+    keepSavedTariff = false,
+    tariffNotice = null,
+    formResetCount = formResetCount + 1
+)

@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -43,13 +44,14 @@ fun RegisterScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val currentOnRegisterSuccess by rememberUpdatedState(onRegisterSuccess)
     LaunchedEffect(state.isRegistered) {
-        if (state.isRegistered) onRegisterSuccess()
+        if (state.isRegistered) currentOnRegisterSuccess()
     }
 
     RegisterScreenContent(
         state = state,
-        onStoreNameChange = viewModel::onStoreNameChanged,
+        onDisplayNameChange = viewModel::onDisplayNameChanged,
         onEmailChange = viewModel::onEmailChanged,
         onPasswordChange = viewModel::onPasswordChanged,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChanged,
@@ -61,7 +63,7 @@ fun RegisterScreen(
 @Composable
 internal fun RegisterScreenContent(
     state: RegisterUiState,
-    onStoreNameChange: (String) -> Unit,
+    onDisplayNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
@@ -91,21 +93,18 @@ internal fun RegisterScreenContent(
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_title_spacing)))
 
             OutlinedTextField(
-                value = state.storeName,
-                onValueChange = onStoreNameChange,
-                label = { Text(stringResource(R.string.register_store_label)) },
+                value = state.displayName,
+                onValueChange = onDisplayNameChange,
+                label = { Text(stringResource(R.string.register_display_name_label)) },
                 supportingText = {
-                    Text(
-                        state.storeNameError?.let { stringResource(it) }
-                            ?: stringResource(R.string.register_store_hint)
-                    )
+                    state.displayNameError?.let { Text(stringResource(it)) }
                 },
-                isError = state.storeNameError != null,
+                isError = state.displayNameError != null,
                 singleLine = true,
                 enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(REGISTER_STORE_NAME_FIELD_TAG)
+                    .testTag(REGISTER_DISPLAY_NAME_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
@@ -191,7 +190,7 @@ internal fun RegisterScreenContent(
 }
 
 internal const val REGISTER_TITLE_TAG = "register-title"
-internal const val REGISTER_STORE_NAME_FIELD_TAG = "register-store-name-field"
+internal const val REGISTER_DISPLAY_NAME_FIELD_TAG = "register-display-name-field"
 internal const val REGISTER_EMAIL_FIELD_TAG = "register-email-field"
 internal const val REGISTER_PASSWORD_FIELD_TAG = "register-password-field"
 internal const val REGISTER_CONFIRM_PASSWORD_FIELD_TAG = "register-confirm-password-field"
@@ -203,12 +202,12 @@ private fun RegisterScreenPreview() {
     LucroVarejoTheme {
         RegisterScreenContent(
             state = RegisterUiState(
-                storeName = "lojaexemplo",
+                displayName = "Loja Exemplo",
                 email = "contato@exemplo.com",
                 password = "segura123",
                 confirmPassword = "segura123"
             ),
-            onStoreNameChange = {},
+            onDisplayNameChange = {},
             onEmailChange = {},
             onPasswordChange = {},
             onConfirmPasswordChange = {},

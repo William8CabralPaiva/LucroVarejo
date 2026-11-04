@@ -26,7 +26,7 @@ data class AddPurchaseUiState(
     val tariffs: List<PaymentMachineModel> = emptyList(),
     val isLoadingTariffs: Boolean = false,
     val appliedTariff: AppliedTariff = AppliedTariff.NONE,
-    // Em edição o snapshot salvo é mantido até o usuário alterar forma/maquininha/bandeira/parcela/data.
+    // Em edição o snapshot salvo vale só até as tarifas atuais carregarem (ou o usuário alterar a seleção).
     val keepSavedTariff: Boolean = false,
     val tariffNotice: Int? = null,
 ) {

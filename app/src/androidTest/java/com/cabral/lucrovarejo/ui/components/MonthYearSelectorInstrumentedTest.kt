@@ -2,7 +2,7 @@ package com.cabral.lucrovarejo.ui.components
 
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
@@ -25,8 +25,8 @@ class MonthYearSelectorInstrumentedTest {
     @Test
     fun displaysAndNavigatesMonthInDarkMode() {
         composeRule.setContent {
-            var year by remember { mutableStateOf(2026) }
-            var month by remember { mutableStateOf(10) }
+            var year by remember { mutableIntStateOf(2026) }
+            var month by remember { mutableIntStateOf(10) }
             LucroVarejoTheme(themeMode = ThemeMode.DARK) {
                 MonthYearSelector(
                     year = year,

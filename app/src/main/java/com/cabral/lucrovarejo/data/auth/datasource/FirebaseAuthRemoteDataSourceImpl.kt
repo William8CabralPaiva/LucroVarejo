@@ -19,17 +19,21 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         get() = firebaseClient.storeKey
 
     override suspend fun createAccount(
-        technicalEmail: String,
+        email: String,
         password: String,
         profile: StoreProfile
     ) {
         val uid = try {
-            firebaseClient.createUser(technicalEmail, password)
+            firebaseClient.createUser(email, password)
         } catch (_: FirebaseAuthUserCollisionException) {
             throw StoreAlreadyRegisteredException()
         } catch (exception: Exception) {
             throw mapFailure(exception)
         }
+        saveProfileOrRollback(uid, profile)
+    }
+
+    private suspend fun saveProfileOrRollback(uid: String, profile: StoreProfile) {
         try {
             firebaseClient.saveStoreProfile(uid = uid, profile = profile)
         } catch (profileFailure: Exception) {
@@ -44,9 +48,31 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun signIn(technicalEmail: String, password: String) {
+    override suspend fun signIn(email: String, password: String) {
         try {
-            firebaseClient.signIn(technicalEmail, password)
+            firebaseClient.signIn(email, password)
+        } catch (exception: Exception) {
+            throw mapFailure(exception)
+        }
+    }
+
+    override suspend fun fetchDisplayName(): String? = try {
+        firebaseClient.fetchDisplayName()
+    } catch (exception: Exception) {
+        throw mapFailure(exception)
+    }
+
+    override suspend fun updateDisplayName(displayName: String) {
+        try {
+            firebaseClient.updateDisplayName(displayName)
+        } catch (exception: Exception) {
+            throw mapFailure(exception)
+        }
+    }
+
+    override suspend fun requestPasswordReset(email: String) {
+        try {
+            firebaseClient.requestPasswordReset(email)
         } catch (exception: Exception) {
             throw mapFailure(exception)
         }
