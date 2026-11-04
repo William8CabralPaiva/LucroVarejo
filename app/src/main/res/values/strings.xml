@@ -222,6 +222,13 @@
     <string name="settings_store_name_subtitle">Altere o nome exibido na tela inicial.</string>
     <string name="settings_store_name_dialog_title">Alterar nome da loja</string>
     <string name="settings_store_name_error">Não foi possível salvar o nome da loja. Tente novamente.</string>
+    <string name="settings_switch_store">Trocar loja</string>
+    <string name="settings_switch_store_subtitle">Loja atual: %1$s</string>
+    <string name="settings_switch_store_dialog_title">Escolha a loja</string>
+    <string name="settings_store_unnamed">Loja sem nome</string>
+    <string name="settings_create_store">Criar nova loja</string>
+    <string name="settings_create_store_dialog_title">Nova loja</string>
+    <string name="settings_create_store_error">Não foi possível criar a loja. Tente novamente.</string>
     <string name="settings_terminals_subtitle">Cadastre maquininhas, métodos aceitos e tarifas.</string>
 
     <string name="dialog_save">Salvar</string>

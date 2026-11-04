@@ -8,13 +8,15 @@ O Cloud Firestore e um banco NoSQL orientado a documentos. Os dados ficam separa
 
 ```text
 stores/{storeId}
+  members/{uid}
   products/{productId}
   purchases/{purchaseId}
   paymentTerminals/{terminalId}
     tariffs/{tariffId}
+users/{uid}/stores/{storeId}
 ```
 
-`storeId` corresponde ao UID da conta autenticada. Os demais IDs sao gerados pelo Firestore. Tudo fica em subcolecoes da loja, nao em colecoes globais.
+Uma conta (e-mail/senha) pode ter varias lojas. O acesso aos dados de `stores/{storeId}` exige que o UID seja o proprio `storeId` (lojas antigas e a primeira loja da conta) ou exista `stores/{storeId}/members/{uid}` (`role = OWNER`). `users/{uid}/stores/{storeId}` (`displayName`, `role`, `createdAt`) e so o atalho para listar as lojas do usuario; contas antigas ganham esse atalho no primeiro carregamento. A loja ativa fica salva localmente por UID (`ActiveStoreHolder`) e a troca/criacao esta em Configuracoes > Trocar loja. O "esqueci a senha" continua por conta (e-mail), nao por loja. Os demais IDs sao gerados pelo Firestore. Tudo fica em subcolecoes da loja, nao em colecoes globais.
 
 > Atencao: no codigo atual, a colecao `purchases` guarda as **vendas** (tem preco e data de venda e forma de pagamento). No `INSTRUCTION.md`, "compra" e o lote de estoque, que ainda nao existe como colecao.
 

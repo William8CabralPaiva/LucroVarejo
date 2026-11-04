@@ -14,9 +14,9 @@ import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.ModeNight
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.BuildConfig
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
+import com.cabral.lucrovarejo.ui.components.StoreNameDialog
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
@@ -45,6 +45,7 @@ fun ConfigScreen(
     storeName: String? = null,
     onShowTips: () -> Unit = {},
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
+    onOpenSwitchStore: () -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
     var showStoreNameDialog by remember { mutableStateOf(false) }
@@ -61,6 +62,14 @@ fun ConfigScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            SettingsItem(
+                icon = Icons.Outlined.Storefront,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_store_name),
+                subtitle = storeName ?: stringResource(R.string.settings_store_name_subtitle),
+                onClick = { showStoreNameDialog = true }
+            )
+
             DarkModeItem(
                 checked = when (currentThemeMode) {
                     ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -70,14 +79,6 @@ fun ConfigScreen(
                 onCheckedChange = { enabled ->
                     onThemeModeChange(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
                 }
-            )
-
-            SettingsItem(
-                icon = Icons.Outlined.Storefront,
-                iconTint = MaterialTheme.colorScheme.primary,
-                title = stringResource(R.string.settings_store_name),
-                subtitle = storeName ?: stringResource(R.string.settings_store_name_subtitle),
-                onClick = { showStoreNameDialog = true }
             )
 
             SettingsItem(
@@ -94,6 +95,17 @@ fun ConfigScreen(
                 title = stringResource(R.string.settings_tips),
                 subtitle = stringResource(R.string.settings_tips_subtitle),
                 onClick = onShowTips
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.SwapHoriz,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_switch_store),
+                subtitle = stringResource(
+                    R.string.settings_switch_store_subtitle,
+                    storeName ?: stringResource(R.string.settings_store_unnamed)
+                ),
+                onClick = onOpenSwitchStore
             )
 
             SettingsItem(
@@ -114,6 +126,8 @@ fun ConfigScreen(
     if (showStoreNameDialog) {
         StoreNameDialog(
             initialName = storeName.orEmpty(),
+            title = R.string.settings_store_name_dialog_title,
+            errorMessage = R.string.settings_store_name_error,
             onSave = onUpdateStoreName,
             onDismiss = { showStoreNameDialog = false }
         )
@@ -133,64 +147,6 @@ fun ConfigScreen(
     }
 }
 
-@Composable
-private fun StoreNameDialog(
-    initialName: String,
-    onSave: (String, (Boolean) -> Unit) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    var name by remember { mutableStateOf(initialName) }
-    var isSaving by remember { mutableStateOf(false) }
-    var hasError by remember { mutableStateOf(false) }
-    val validationError = RegisterValidator.validateDisplayName(name)
-
-    AlertDialog(
-        onDismissRequest = { if (!isSaving) onDismiss() },
-        title = { Text(stringResource(R.string.settings_store_name_dialog_title)) },
-        text = {
-            OutlinedTextField(
-                value = name,
-                onValueChange = {
-                    name = it.take(MAX_STORE_NAME_LENGTH)
-                    hasError = false
-                },
-                label = { Text(stringResource(R.string.register_display_name_label)) },
-                singleLine = true,
-                enabled = !isSaving,
-                isError = hasError || (name.isNotEmpty() && validationError != null),
-                supportingText = {
-                    when {
-                        hasError -> Text(stringResource(R.string.settings_store_name_error))
-                        name.isNotEmpty() && validationError != null ->
-                            Text(stringResource(validationError))
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = validationError == null && !isSaving,
-                onClick = {
-                    isSaving = true
-                    onSave(name) { success ->
-                        isSaving = false
-                        if (success) onDismiss() else hasError = true
-                    }
-                }
-            ) {
-                Text(stringResource(R.string.dialog_save))
-            }
-        },
-        dismissButton = {
-            TextButton(enabled = !isSaving, onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_cancel))
-            }
-        }
-    )
-}
-
-private const val MAX_STORE_NAME_LENGTH = 100
 
 @Composable
 private fun DarkModeItem(

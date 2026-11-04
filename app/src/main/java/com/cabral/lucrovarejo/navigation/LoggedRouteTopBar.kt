@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,6 +25,7 @@ fun LoggedRouteTopBar(
     onBackPress: () -> Unit,
     modifier: Modifier = Modifier,
     homeTitle: String? = null,
+    onSwitchStore: () -> Unit = {},
 ) {
 
     val titleId = when (route) {
@@ -58,6 +60,17 @@ fun LoggedRouteTopBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = ForestGreenHeader
         ),
+        actions = {
+            if (route == LoggedRoutes.HOME) {
+                IconButton(onClick = onSwitchStore) {
+                    Icon(
+                        imageVector = Icons.Outlined.SwapHoriz,
+                        contentDescription = stringResource(R.string.settings_switch_store),
+                        tint = LightMintContainer
+                    )
+                }
+            }
+        },
         navigationIcon = {
             if (showBackButton(route)) {
                 IconButton(onClick = onBackPress) {

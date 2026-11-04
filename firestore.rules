@@ -1,12 +1,43 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /stores/{storeId} {
-      function ownsStore() {
-        return request.auth != null && request.auth.uid == storeId;
+    // Lojas de cada usuario (atalho para listar). O acesso aos dados vem de stores/{id}/members.
+    match /users/{uid}/stores/{storeId} {
+      function isSelf() {
+        return request.auth != null && request.auth.uid == uid;
+      }
+      function validName(data) {
+        return data.displayName is string && data.displayName.size() <= 100;
       }
 
-      allow create: if ownsStore()
+      allow read: if isSelf();
+      allow create: if isSelf()
+        && request.resource.data.keys().hasAll(['displayName', 'role', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['displayName', 'role', 'createdAt'])
+        && validName(request.resource.data)
+        && request.resource.data.role == 'OWNER'
+        && request.resource.data.createdAt == request.time;
+      allow update: if isSelf()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+        && validName(request.resource.data);
+      allow delete: if false;
+    }
+
+    match /stores/{storeId} {
+      // Lojas antigas usam o UID como id; as demais exigem o documento em members.
+      function isMember() {
+        return request.auth != null
+          && (request.auth.uid == storeId
+            || exists(/databases/$(database)/documents/stores/$(storeId)/members/$(request.auth.uid)));
+      }
+      // Na criacao da loja, o membro dono e gravado no mesmo lote.
+      function isCreatingOwnStore() {
+        return request.auth != null
+          && (request.auth.uid == storeId
+            || existsAfter(/databases/$(database)/documents/stores/$(storeId)/members/$(request.auth.uid)));
+      }
+
+      allow create: if isCreatingOwnStore()
         && request.resource.data.keys().hasAll(['displayName', 'email', 'createdAt'])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
@@ -15,8 +46,8 @@ service cloud.firestore {
         && request.resource.data.email.size() <= 254
         && request.auth.token.email.lower() == request.resource.data.email.lower()
         && request.resource.data.createdAt == request.time;
-      allow get: if ownsStore();
-      allow update: if ownsStore()
+      allow get: if isMember();
+      allow update: if isMember()
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
@@ -25,20 +56,32 @@ service cloud.firestore {
         && request.resource.data.email.size() <= 254;
       allow list, delete: if false;
 
+      match /members/{memberUid} {
+        allow get: if request.auth != null && request.auth.uid == memberUid;
+        // So o criador pode se registrar como dono, e apenas se a loja ainda nao existia.
+        allow create: if request.auth != null
+          && request.auth.uid == memberUid
+          && request.resource.data.keys().hasOnly(['role', 'createdAt'])
+          && request.resource.data.role == 'OWNER'
+          && !exists(/databases/$(database)/documents/stores/$(storeId))
+          && existsAfter(/databases/$(database)/documents/stores/$(storeId));
+        allow list, update, delete: if false;
+      }
+
       // Coleções da loja sem exigência de imutabilidade.
       match /products/{productId} {
-        allow read, write: if ownsStore();
+        allow read, write: if isMember();
       }
       match /purchases/{purchaseId} {
-        allow read, write: if ownsStore();
+        allow read, write: if isMember();
       }
       match /paymentTerminals/{terminalId} {
-        allow read, create, update: if ownsStore();
+        allow read, create, update: if isMember();
         allow delete: if false;
 
         // Tarifas são append-only: nunca sobrescrever/apagar o histórico.
         match /tariffs/{tariffId} {
-          allow read, create: if ownsStore();
+          allow read, create: if isMember();
           allow update, delete: if false;
         }
       }

@@ -32,6 +32,9 @@ import androidx.navigation.compose.rememberNavController
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
+import com.cabral.lucrovarejo.domain.store.StoreSummary
+import com.cabral.lucrovarejo.ui.components.StoreNameDialog
+import com.cabral.lucrovarejo.ui.components.SwitchStoreDialog
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
 import com.cabral.lucrovarejo.ui.screens.config.ConfigScreen
 import com.cabral.lucrovarejo.ui.screens.machinehistory.MachineHistoryScreen
@@ -60,6 +63,10 @@ internal fun LoggedFlowScreen(
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
     storeName: String? = null,
+    stores: List<StoreSummary> = emptyList(),
+    activeStoreId: String? = null,
+    onSwitchStore: (String) -> Unit = {},
+    onCreateStore: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
     showTips: Boolean = false,
     onDismissTips: () -> Unit = {},
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
@@ -75,6 +82,8 @@ internal fun LoggedFlowScreen(
     val isDark = LocalIsDarkTheme.current
     val scaffoldContainerColor = if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
     var machineTourActive by remember { mutableStateOf(false) }
+    var showSwitchStoreDialog by remember { mutableStateOf(false) }
+    var showCreateStoreDialog by remember { mutableStateOf(false) }
     // Sair do formulario por outro caminho (ex.: seta de voltar) encerra o tour.
     LaunchedEffect(currentRoute) {
         if (currentRoute != LoggedRoutes.ADD_MACHINE) machineTourActive = false
@@ -104,6 +113,7 @@ internal fun LoggedFlowScreen(
             LoggedRouteTopBar(
                 route = currentRoute,
                 homeTitle = storeName,
+                onSwitchStore = { showSwitchStoreDialog = true },
                 onBackPress = navigator::navigateBack
             )
         },
@@ -133,6 +143,7 @@ internal fun LoggedFlowScreen(
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,
                 storeName = storeName,
+                onOpenSwitchStore = { showSwitchStoreDialog = true },
                 onShowTips = startMachineTour,
                 machineTourActive = machineTourActive,
                 onMachineTourFinish = {
@@ -144,6 +155,31 @@ internal fun LoggedFlowScreen(
         }
     }
 
+    if (showSwitchStoreDialog) {
+        SwitchStoreDialog(
+            stores = stores,
+            activeStoreId = activeStoreId,
+            onSelect = { storeId ->
+                showSwitchStoreDialog = false
+                onSwitchStore(storeId)
+            },
+            onCreate = {
+                showSwitchStoreDialog = false
+                showCreateStoreDialog = true
+            },
+            onDismiss = { showSwitchStoreDialog = false }
+        )
+    }
+
+    if (showCreateStoreDialog) {
+        StoreNameDialog(
+            initialName = "",
+            title = R.string.settings_create_store_dialog_title,
+            errorMessage = R.string.settings_create_store_error,
+            onSave = onCreateStore,
+            onDismiss = { showCreateStoreDialog = false }
+        )
+    }
     if (showTips) {
         AlertDialog(
             onDismissRequest = onDismissTips,
@@ -176,6 +212,7 @@ private fun LoggedDestinationNavHost(
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
     storeName: String?,
+    onOpenSwitchStore: () -> Unit,
     onShowTips: () -> Unit,
     machineTourActive: Boolean,
     onMachineTourFinish: () -> Unit,
@@ -251,6 +288,7 @@ private fun LoggedDestinationNavHost(
                 onLogout = onLogout,
                 onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
                 storeName = storeName,
+                onOpenSwitchStore = onOpenSwitchStore,
                 onShowTips = onShowTips,
                 onUpdateStoreName = onUpdateStoreName
             )

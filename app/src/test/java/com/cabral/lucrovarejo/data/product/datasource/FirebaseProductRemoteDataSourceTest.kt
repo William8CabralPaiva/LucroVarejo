@@ -27,7 +27,7 @@ class FirebaseProductRemoteDataSourceTest {
     @Test
     fun createsUpdatesAndDeletesProductsForTheAuthenticatedStore() = runTest {
         val firebase = firebaseWithAuthenticatedStore()
-        val dataSource = FirebaseProductRemoteDataSource(firebase.auth, firebase.firestore)
+        val dataSource = FirebaseProductRemoteDataSource({ "store-uid" }, firebase.firestore)
         val request = ProductRequest("A-1", "Produto", 1234, "Descricao")
 
         assertEquals("product-1", dataSource.createProduct(request))
@@ -42,7 +42,7 @@ class FirebaseProductRemoteDataSourceTest {
     @Test
     fun requiresAuthenticationForEveryProductOperation() = runTest {
         val dataSource = FirebaseProductRemoteDataSource(
-            mock(FirebaseAuth::class.java),
+            { null },
             mock(FirebaseFirestore::class.java)
         )
         val request = ProductRequest("A-1", "Produto", 1234, "Descricao")
@@ -68,7 +68,7 @@ class FirebaseProductRemoteDataSourceTest {
             registration
         }.`when`(firebase.products).addSnapshotListener(org.mockito.ArgumentMatchers.any())
 
-        val records = FirebaseProductRemoteDataSource(firebase.auth, firebase.firestore)
+        val records = FirebaseProductRemoteDataSource({ "store-uid" }, firebase.firestore)
             .observeProducts()
             .first()
 

@@ -2,8 +2,8 @@ package com.cabral.lucrovarejo.data.payment.datasource
 
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRecord
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRequest
+import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
 import com.cabral.lucrovarejo.domain.payment.PaymentFailure
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebasePaymentMachineRemoteDataSource @Inject constructor(
-    private val auth: FirebaseAuth,
+    private val activeStore: ActiveStoreKeyProvider,
     private val firestore: FirebaseFirestore
 ) : PaymentMachineRemoteDataSource {
     override suspend fun addTariff(terminalId: String, request: PaymentMachineRequest): String {
@@ -38,7 +38,7 @@ class FirebasePaymentMachineRemoteDataSource @Inject constructor(
             .map { document -> document.toPaymentMachineRecord(terminalId) }
 
     private fun tariffsCollection(terminalId: String): CollectionReference {
-        val storeKey = auth.currentUser?.uid
+        val storeKey = activeStore.currentStoreKey()
             ?: throw PaymentFailure(PaymentFailure.Reason.UNAUTHENTICATED)
         return firestore.collection(COLLECTION_STORES)
             .document(storeKey)

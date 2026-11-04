@@ -3,6 +3,7 @@ package com.cabral.lucrovarejo.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,23 +55,32 @@ fun AppNavGraph(
         loggedFlowScreen = { onLogout ->
             LaunchedEffect(storeViewModel) { storeViewModel?.load() }
             val storeState = storeViewModel?.uiState?.collectAsState()?.value
-            LoggedFlowScreen(
-                currentThemeMode = currentThemeMode,
-                onThemeModeChange = onThemeModeChange,
-                homeViewModel = homeViewModel,
-                salesViewModel = salesViewModel,
-                productViewModel = productViewModel,
-                storeName = storeState?.displayName,
-                showTips = storeState?.showTips == true,
-                onDismissTips = { storeViewModel?.dismissTips() },
-                onUpdateStoreName = { name, onResult ->
-                    storeViewModel?.updateDisplayName(name, onResult) ?: onResult(false)
-                },
-                onLogout = {
-                    storeViewModel?.clear()
-                    onLogout()
-                }
-            )
+            // A chave recria o fluxo logado ao trocar de loja, e as telas passam a observar a nova loja.
+            key(storeState?.storeEpoch ?: 0) {
+                LoggedFlowScreen(
+                    currentThemeMode = currentThemeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    homeViewModel = homeViewModel,
+                    salesViewModel = salesViewModel,
+                    productViewModel = productViewModel,
+                    storeName = storeState?.displayName,
+                    stores = storeState?.stores.orEmpty(),
+                    activeStoreId = storeState?.activeStoreId,
+                    onSwitchStore = { storeViewModel?.selectStore(it) },
+                    onCreateStore = { name, onResult ->
+                        storeViewModel?.createStore(name, onResult) ?: onResult(false)
+                    },
+                    showTips = storeState?.showTips == true,
+                    onDismissTips = { storeViewModel?.dismissTips() },
+                    onUpdateStoreName = { name, onResult ->
+                        storeViewModel?.updateDisplayName(name, onResult) ?: onResult(false)
+                    },
+                    onLogout = {
+                        storeViewModel?.clear()
+                        onLogout()
+                    }
+                )
+            }
         }
     )
 }

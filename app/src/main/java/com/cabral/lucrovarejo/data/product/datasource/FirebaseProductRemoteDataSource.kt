@@ -2,8 +2,8 @@ package com.cabral.lucrovarejo.data.product.datasource
 
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
 import com.cabral.lucrovarejo.data.product.model.ProductRecord
+import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
 import com.cabral.lucrovarejo.domain.product.ProductFailure
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -15,11 +15,11 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebaseProductRemoteDataSource @Inject constructor(
-    private val auth: FirebaseAuth,
+    private val activeStore: ActiveStoreKeyProvider,
     private val firestore: FirebaseFirestore
 ) : ProductRemoteDataSource {
     override suspend fun createProduct(request: ProductRequest): String {
-        val storeKey = auth.currentUser?.uid
+        val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
         val productDocument = firestore.collection(COLLECTION_STORES)
             .document(storeKey)
@@ -39,7 +39,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
     }
 
     private fun productDocument(key: String): DocumentReference {
-        val storeKey = auth.currentUser?.uid
+        val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
         return firestore.collection(COLLECTION_STORES)
             .document(storeKey)
@@ -48,7 +48,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
     }
 
     override fun observeProducts(): Flow<List<ProductRecord>> {
-        val storeKey = auth.currentUser?.uid
+        val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
 
         return firestore.collection(COLLECTION_STORES)
