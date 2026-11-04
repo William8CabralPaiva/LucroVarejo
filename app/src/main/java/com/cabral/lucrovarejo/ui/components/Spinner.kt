@@ -35,24 +35,26 @@ import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun Spinner(
-    items: List<String>,
-    modifier: Modifier = Modifier,
-    initialValue: String? = null,
+    items: ImmutableList<String>,
     @StringRes textId: Int,
     @StringRes placeholderResId: Int,
+    modifier: Modifier = Modifier,
+    initialValue: String? = null,
     required: Boolean = false,
-    onItemSelected: (String) -> Unit = {},
+    onItemSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(initialValue) }
     SpinnerContent(
         selectedItem = selectedItem,
         items = items,
-        onItemSelected = {
+        onItemSelect = {
             selectedItem = it
-            onItemSelected(it)
+            onItemSelect(it)
         },
         modifier = modifier,
         textId = textId,
@@ -64,11 +66,11 @@ fun Spinner(
 @Composable
 fun SpinnerContent(
     selectedItem: String?,
-    items: List<String>,
-    onItemSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    items: ImmutableList<String>,
+    onItemSelect: (String) -> Unit,
     @StringRes textId: Int,
     @StringRes placeholderResId: Int,
+    modifier: Modifier = Modifier,
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
@@ -146,7 +148,7 @@ fun SpinnerContent(
                     DropdownMenuItem(
                         text = { Text(item) },
                         onClick = {
-                            onItemSelected(item)
+                            onItemSelect(item)
                             expanded = false
                         }
                     )
@@ -163,7 +165,7 @@ private fun SpinnerPreview() {
         Spinner(
             textId = R.string.product,
             placeholderResId = R.string.product_placeholder,
-            items = listOf(
+            items = persistentListOf(
                 "Bolsa",
                 "Mochila",
                 "Acessório"

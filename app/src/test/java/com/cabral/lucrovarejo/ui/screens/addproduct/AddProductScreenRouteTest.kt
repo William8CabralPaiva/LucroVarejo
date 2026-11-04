@@ -67,7 +67,7 @@ class AddProductScreenRouteTest {
         var finished = 0
         composeRule.setContent {
             LucroVarejoTheme {
-                AddProductScreen(product = existingProduct, onFinished = { finished++ }, viewModel = viewModel)
+                AddProductScreen(product = existingProduct, onFinish = { finished++ }, viewModel = viewModel)
             }
         }
         composeRule.onNodeWithText("Bolsa").assertIsDisplayed()
@@ -83,7 +83,7 @@ class AddProductScreenRouteTest {
         var finished = 0
         composeRule.setContent {
             LucroVarejoTheme {
-                AddProductScreen(product = existingProduct, onFinished = { finished++ }, viewModel = viewModel)
+                AddProductScreen(product = existingProduct, onFinish = { finished++ }, viewModel = viewModel)
             }
         }
 

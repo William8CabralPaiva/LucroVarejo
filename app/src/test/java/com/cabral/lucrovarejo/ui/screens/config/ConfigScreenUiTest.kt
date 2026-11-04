@@ -36,7 +36,7 @@ class ConfigScreenUiTest {
             LucroVarejoTheme(themeMode = currentMode) {
                 ConfigScreen(
                     currentThemeMode = currentMode,
-                    onThemeModeChanged = {
+                    onThemeModeChange = {
                         currentMode = it
                         themeMode = it
                     },
@@ -67,7 +67,7 @@ class ConfigScreenUiTest {
             LucroVarejoTheme {
                 ConfigScreen(
                     currentThemeMode = ThemeMode.LIGHT,
-                    onThemeModeChanged = {},
+                    onThemeModeChange = {},
                     onLogout = {}
                 )
             }

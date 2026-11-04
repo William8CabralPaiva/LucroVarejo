@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -34,8 +35,8 @@ class AutoCompleteTextViewInstrumentedTest {
                 var current by remember { mutableStateOf<String?>(null) }
                 AutoCompleteTextViewContent(
                     selectedItem = current,
-                    items = listOf("Bolsa", "Acessório"),
-                    onItemSelected = {
+                    items = persistentListOf("Bolsa", "Acessório"),
+                    onItemSelect = {
                         current = it
                         selectedItem = it
                     },

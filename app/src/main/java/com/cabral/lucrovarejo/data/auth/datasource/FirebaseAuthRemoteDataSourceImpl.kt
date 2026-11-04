@@ -30,6 +30,10 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         } catch (exception: Exception) {
             throw mapFailure(exception)
         }
+        saveProfileOrRollback(uid, profile)
+    }
+
+    private suspend fun saveProfileOrRollback(uid: String, profile: StoreProfile) {
         try {
             firebaseClient.saveStoreProfile(uid = uid, profile = profile)
         } catch (profileFailure: Exception) {

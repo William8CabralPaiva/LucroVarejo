@@ -70,8 +70,8 @@ class AppNavGraphContentTest {
                 startDestination = NotLoggedRoutes.SPLASH,
                 isUserAuthenticated = isUserAuthenticated,
                 onSignOut = onSignOut,
-                splashScreen = { onFinished ->
-                    TestAction("Finish splash", onFinished)
+                splashScreen = { onFinish ->
+                    TestAction("Finish splash", onFinish)
                 },
                 loginScreen = { goToRegister, goToHome ->
                     TestAction(

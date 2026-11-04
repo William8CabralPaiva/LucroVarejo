@@ -55,7 +55,7 @@ class SalesScreenUiTest {
             SalesContent(
                 state = state,
                 onQueryChange = onQueryChange,
-                onDateSelected = onDateSelected,
+                onDateSelect = onDateSelected,
                 onLoadMore = onLoadMore,
                 onRetry = onRetry,
                 onAddPurchase = onAddPurchase,

@@ -30,8 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.Alignment
@@ -39,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
@@ -63,7 +67,7 @@ import androidx.compose.material.icons.outlined.PointOfSale
 @Composable
 fun MachineSaleScreen(
     terminal: PaymentTerminalModel? = null,
-    onFinished: () -> Unit = {},
+    onFinish: () -> Unit = {},
     onShowMessage: (String) -> Unit = {},
     onOpenMachineHistory: (PaymentMachineHistoryArgs) -> Unit = {},
     viewModel: MachineSaleViewModel? = null,
@@ -71,17 +75,19 @@ fun MachineSaleScreen(
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
     val savedMessage = stringResource(R.string.terminal_form_saved)
+    val currentOnShowMessage by rememberUpdatedState(onShowMessage)
+    val currentOnFinish by rememberUpdatedState(onFinish)
 
     LaunchedEffect(resolvedViewModel, terminal) {
         resolvedViewModel.loadTerminal(terminal)
     }
 
     LaunchedEffect(resolvedViewModel, savedMessage) {
-        resolvedViewModel.saved.collect { onShowMessage(savedMessage) }
+        resolvedViewModel.saved.collect { currentOnShowMessage(savedMessage) }
     }
 
     LaunchedEffect(resolvedViewModel) {
-        resolvedViewModel.completions.collect { onFinished() }
+        resolvedViewModel.completions.collect { currentOnFinish() }
     }
 
     MachineSaleContent(
@@ -123,10 +129,12 @@ fun MachineSaleContent(
     onAddCreditInstallment: (String, Int) -> Unit,
     onTariffRateChange: (String, String) -> Unit,
     onTariffDateChange: (String, Long) -> Unit,
-    onOpenMachineHistory: (TariffEntryUi) -> Unit = {},
     onSave: (closeAfter: Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    onOpenMachineHistory: (TariffEntryUi) -> Unit = {},
 ) {
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (!state.isLoading) {
@@ -184,7 +192,7 @@ fun MachineSaleContent(
         }
         // Aba apenas navega entre as seÃ§Ãµes; habilitar/desabilitar o mÃ©todo Ã© feito pelo Switch
         // dentro da prÃ³pria seÃ§Ã£o, evitando que mais de uma aba pareÃ§a "selecionada" ao mesmo tempo.
-        var selectedTabIndex by remember { mutableStateOf(0) }
+        var selectedTabIndex by remember { mutableIntStateOf(0) }
         val (currentMethod, currentLabelResId) = methods[selectedTabIndex]
         val methodEnabled = state.selectedMethods.contains(currentMethod)
 
@@ -257,10 +265,15 @@ fun MachineSaleContent(
                             TerminalPaymentType.CASH -> {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = stringResource(R.string.terminal_form_cash_charges_tariff),
+                                        text = stringResource(
+                                            R.string.terminal_form_cash_charges_tariff
+                                        ),
                                         modifier = Modifier.weight(1f)
                                     )
-                                    AppSwitch(checked = state.cashChargesTariff, onCheckedChange = onCashChargesTariffToggle)
+                                    AppSwitch(
+                                        checked = state.cashChargesTariff,
+                                        onCheckedChange = onCashChargesTariffToggle
+                                    )
                                 }
                                 if (state.cashChargesTariff && cashEntry != null) {
                                     Spacer(modifier = Modifier.height(8.dp))
@@ -402,7 +415,9 @@ fun MachineSaleContent(
                                         ) {
                                             CreditInstallmentPicker(
                                                 brandId = brandId,
-                                                configured = state.creditInstallmentsByBrand[brandId].orEmpty(),
+                                                configured = state.creditInstallmentsByBrand[brandId]
+                                        .orEmpty()
+                                        .toImmutableList(),
                                                 onAdd = onAddCreditInstallment
                                             )
                                             state.creditInstallmentsByBrand[brandId].orEmpty().forEach { installment ->
@@ -528,11 +543,14 @@ private fun BrandChip(
 @Composable
 private fun CreditInstallmentPicker(
     brandId: String,
-    configured: List<Int>,
+    configured: ImmutableList<Int>,
     onAdd: (String, Int) -> Unit,
 ) {
     var showPicker by remember { mutableStateOf(false) }
-    val availableInstallments = (1..12).filter { it !in configured }.map { "${it}x" }
+    val availableInstallments = (1..MAX_INSTALLMENTS)
+        .filter { it !in configured }
+        .map { "${it}x" }
+        .toImmutableList()
 
     Column {
         if (configured.isNotEmpty()) {
@@ -546,7 +564,7 @@ private fun CreditInstallmentPicker(
             SpinnerContent(
                 selectedItem = null,
                 items = availableInstallments,
-                onItemSelected = { selected ->
+                onItemSelect = { selected ->
                     val installment = selected.removeSuffix("x").toIntOrNull()
                     if (installment != null) onAdd(brandId, installment)
                     showPicker = false
@@ -606,6 +624,7 @@ private fun TariffEntryFields(
 }
 
 private const val SAVE_AND_BACK_BUTTON_TAG = "save-and-back-machine-button"
+private const val MAX_INSTALLMENTS = 12
 
 @Preview(showBackground = true, name = "Form maquininha")
 @Composable
@@ -620,7 +639,12 @@ private fun MachineSaleContentPreview() {
                 creditInstallmentsByBrand = mapOf("Visa" to listOf(1, 2)),
                 tariffEntries = listOf(
                     TariffEntryUi(method = TerminalPaymentType.PIX),
-                    TariffEntryUi(method = TerminalPaymentType.CREDIT, brandId = "Visa", brandName = "Visa", installments = 1)
+                    TariffEntryUi(
+                        method = TerminalPaymentType.CREDIT,
+                        brandId = "Visa",
+                        brandName = "Visa",
+                        installments = 1
+                    )
                 )
             ),
             onNameChange = {},

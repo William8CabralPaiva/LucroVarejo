@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -51,19 +52,20 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 @Composable
 fun AddProductScreen(
     product: ProductModel? = null,
-    onFinished: () -> Unit = {},
+    onFinish: () -> Unit = {},
     viewModel: AddProductViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.product_create_success)
+    val currentOnFinish by rememberUpdatedState(onFinish)
 
     LaunchedEffect(viewModel, product) {
         viewModel.loadProduct(product)
     }
 
     LaunchedEffect(viewModel) {
-        viewModel.completions.collect { onFinished() }
+        viewModel.completions.collect { currentOnFinish() }
     }
 
     LaunchedEffect(viewModel, successMessage) {
@@ -96,6 +98,7 @@ fun AddProductContent(
     onCostChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onSave: () -> Unit,
+    modifier: Modifier = Modifier,
     onDelete: () -> Unit = {},
     onDeleteConfirm: () -> Unit = {},
     onDeleteDismiss: () -> Unit = {}
@@ -123,7 +126,7 @@ fun AddProductContent(
         )
     }
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -294,7 +297,7 @@ private fun DeleteProductDialogPreview() {
 
 @Preview(showBackground = true)
 @Composable
-fun AddProductScreenPreview() {
+private fun AddProductScreenPreview() {
     LucroVarejoTheme {
         AddProductContent(
             state = AddProductUiState(),

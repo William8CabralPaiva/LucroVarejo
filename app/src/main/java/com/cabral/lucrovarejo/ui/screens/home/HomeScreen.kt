@@ -21,6 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +40,11 @@ import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.LastSaleItem
 import com.cabral.lucrovarejo.ui.components.MonthYearSelector
 import com.cabral.lucrovarejo.ui.theme.DestructiveRed
+import com.cabral.lucrovarejo.ui.components.CENTS_PER_UNIT
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun HomeScreen(
@@ -48,10 +53,13 @@ fun HomeScreen(
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
     val state by resolvedViewModel.uiState.collectAsState()
+    val latestPurchases = remember(state.latestPurchases) {
+        state.latestPurchases.toImmutableList()
+    }
 
     HomeContent(
         state = state,
-        latestPurchases = state.latestPurchases,
+        latestPurchases = latestPurchases,
         isLatestSalesLoading = state.isLatestPurchasesLoading,
         hasLatestSalesError = state.hasLatestPurchasesError,
         onMonthYearChange = resolvedViewModel::onMonthYearChanged,
@@ -62,13 +70,15 @@ fun HomeScreen(
 @Composable
 fun HomeContent(
     state: HomeUiState,
-    latestPurchases: List<PurchaseModel> = emptyList(),
+    onMonthYearChange: (year: Int, month: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    latestPurchases: ImmutableList<PurchaseModel> = persistentListOf(),
     isLatestSalesLoading: Boolean = false,
     hasLatestSalesError: Boolean = false,
-    onMonthYearChange: (year: Int, month: Int) -> Unit,
     goToSalesScreen: () -> Unit = {},
 ) {
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     )
     { innerPadding ->
@@ -102,17 +112,19 @@ fun HomeContent(
                     productsSize = summary.productsSold.toInt(),
                     modifier = Modifier.fillMaxWidth()
                 )
-                AlertPurchase(
-                    price = summary.totalTariff.toCurrencyAmount(),
-                    productsSize = 0,
-                    titleRes = R.string.alert_tariff_title,
-                    icon = Icons.Outlined.PointOfSale,
-                    containerColor = DestructiveRed,
-                    contentColor = Color.White,
-                    showProductsInfo = false,
-                    showTrendIcon = false,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if(summary.totalTariff > 0) {
+                    AlertPurchase(
+                        price = summary.totalTariff.toCurrencyAmount(),
+                        productsSize = 0,
+                        titleRes = R.string.alert_tariff_title,
+                        icon = Icons.Outlined.PointOfSale,
+                        containerColor = DestructiveRed,
+                        contentColor = Color.White,
+                        showProductsInfo = false,
+                        showTrendIcon = false,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -142,7 +154,7 @@ fun HomeContent(
 
 @Composable
 private fun LatestSalesSection(
-    purchases: List<PurchaseModel>,
+    purchases: ImmutableList<PurchaseModel>,
     isLoading: Boolean,
     hasError: Boolean,
     onShowAll: () -> Unit,
@@ -191,7 +203,7 @@ private fun LatestSalesSection(
     }
 }
 
-private fun Long.toCurrencyAmount(): Double = toDouble() / 100.0
+private fun Long.toCurrencyAmount(): Double = toDouble() / CENTS_PER_UNIT
 
 @Preview(showBackground = true, name = "Home - resumo mensal")
 @Composable

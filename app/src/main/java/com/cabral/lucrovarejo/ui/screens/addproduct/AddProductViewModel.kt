@@ -76,11 +76,7 @@ class AddProductViewModel @Inject constructor(
         if (current.isLoading) return
 
         val nameError = if (current.name.isBlank()) R.string.product_name_required else null
-        val costError = when {
-            current.cost.isBlank() -> R.string.product_cost_required
-            parseProductCost(current.cost) == null -> R.string.product_cost_invalid
-            else -> null
-        }
+        val costError = validateCost(current.cost)
         if (nameError != null || costError != null) {
             _uiState.update {
                 it.copy(nameError = nameError, costError = costError, errorMessage = null)
@@ -100,25 +96,7 @@ class AddProductViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                if (product.key != null) {
-                    updateProduct(product)
-                    _uiState.update { it.copy(isLoading = false) }
-                    completionChannel.send(Unit)
-                    return@launch
-                }
-                createProduct(product)
-                _uiState.update {
-                    it.copy(
-                        name = "",
-                        cod = "",
-                        cost = "",
-                        description = "",
-                        nameError = null,
-                        costError = null,
-                        isLoading = false
-                    )
-                }
-                effectChannel.send(Unit)
+                persist(product)
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (failure: ProductFailure) {
@@ -133,6 +111,34 @@ class AddProductViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun validateCost(cost: String): Int? = when {
+        cost.isBlank() -> R.string.product_cost_required
+        parseProductCost(cost) == null -> R.string.product_cost_invalid
+        else -> null
+    }
+
+    private suspend fun persist(product: ProductModel) {
+        if (product.key != null) {
+            updateProduct(product)
+            _uiState.update { it.copy(isLoading = false) }
+            completionChannel.send(Unit)
+            return
+        }
+        createProduct(product)
+        _uiState.update {
+            it.copy(
+                name = "",
+                cod = "",
+                cost = "",
+                description = "",
+                nameError = null,
+                costError = null,
+                isLoading = false
+            )
+        }
+        effectChannel.send(Unit)
     }
 
     fun onDeleteRequested() {
