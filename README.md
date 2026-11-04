@@ -13,10 +13,10 @@ stores/{storeId}
   purchases/{purchaseId}
   paymentTerminals/{terminalId}
     tariffs/{tariffId}
-users/{uid}/stores/{storeId}
+users/{uid}/stores/{storeId}   (atalho opcional, ver abaixo)
 ```
 
-Uma conta (e-mail/senha) pode ter varias lojas. O acesso aos dados de `stores/{storeId}` exige que o UID seja o proprio `storeId` (lojas antigas e a primeira loja da conta) ou exista `stores/{storeId}/members/{uid}` (`role = OWNER`). `users/{uid}/stores/{storeId}` (`displayName`, `role`, `createdAt`) e so o atalho para listar as lojas do usuario; contas antigas ganham esse atalho no primeiro carregamento. A loja ativa fica salva localmente por UID (`ActiveStoreHolder`) e a troca/criacao esta em Configuracoes > Trocar loja. O "esqueci a senha" continua por conta (e-mail), nao por loja. Os demais IDs sao gerados pelo Firestore. Tudo fica em subcolecoes da loja, nao em colecoes globais.
+Uma conta (e-mail/senha) pode ter varias lojas. O acesso aos dados de `stores/{storeId}` exige que o UID seja o proprio `storeId` (lojas antigas e a primeira loja da conta) ou exista `stores/{storeId}/members/{uid}` (`role = OWNER`). `users/{uid}/stores/{storeId}` (`displayName`, `role`, `createdAt`) e so o atalho para listar as lojas do usuario: **facilita a leitura, mas nao e necessario** e nunca concede acesso (poderia ser substituido por uma collection group query em `members`); contas antigas ganham esse atalho no primeiro carregamento. Em debug as colecoes se chamam `stores_debug` e `users_debug` (`FirestoreCollections`). A loja ativa fica salva localmente por UID (`ActiveStoreHolder`) e a troca/criacao esta em Configuracoes > Trocar loja. O "esqueci a senha" continua por conta (e-mail), nao por loja. Os demais IDs sao gerados pelo Firestore. Tudo fica em subcolecoes da loja, nao em colecoes globais.
 
 > Atencao: no codigo atual, a colecao `purchases` guarda as **vendas** (tem preco e data de venda e forma de pagamento). No `INSTRUCTION.md`, "compra" e o lote de estoque, que ainda nao existe como colecao.
 

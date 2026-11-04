@@ -30,9 +30,11 @@ android {
         debug {
             enableUnitTestCoverage = true
             buildConfigField("String", "STORES_COLLECTION", "\"stores_debug\"")
+            buildConfigField("String", "USERS_COLLECTION", "\"users_debug\"")
         }
         release {
             buildConfigField("String", "STORES_COLLECTION", "\"stores\"")
+            buildConfigField("String", "USERS_COLLECTION", "\"users\"")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(

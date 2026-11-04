@@ -7,8 +7,9 @@ internal object FirestoreCollections {
     // "stores" na release e "stores_debug" no debug (ver buildConfigField em app/build.gradle.kts).
     const val STORES = BuildConfig.STORES_COLLECTION
 
-    // Atalho users/{uid}/stores: o nome nao muda entre debug e release.
-    const val USERS = "users"
+    // Atalho opcional para listar as lojas do usuario; nao concede acesso.
+    const val USERS = BuildConfig.USERS_COLLECTION
+    // Subcolecao de users/{uid}; nome igual em debug e release.
     const val USER_STORES = "stores"
 
     const val MEMBERS = "members"

@@ -16,6 +16,7 @@ Use como referencia de organizacao e estilo o projeto [Lucro de Receitas](https:
 - Usar Firebase Authentication com o provedor de e-mail e senha. Como esse provedor nao aceita nome de usuario nativamente, converter o nome de usuario normalizado em um identificador interno estavel (por exemplo, um e-mail tecnico reservado para o app); esse identificador nunca deve ser apresentado como requisito para o usuario.
 - Aplicar a mesma normalizacao no cadastro e no login, tratar nomes de usuario duplicados e apresentar mensagens de erro claras sem revelar se uma conta existe.
 - Nao salvar senha no Firestore, preferencias locais, logs ou codigo. Aplicar regras do Firestore para que os dados da loja so possam ser acessados por uma sessao autenticada autorizada.
+- Uma conta pode ter varias lojas. O acesso aos dados vem de `stores/{storeId}/members/{uid}` (ou `uid == storeId` nas lojas antigas e na primeira loja). `users/{uid}/stores/{storeId}` e apenas um atalho para listar as lojas do usuario: facilita a leitura, mas **nao e necessario** (pode ser substituido por uma collection group query em `members`) e nunca concede acesso. Em debug as colecoes se chamam `stores_debug` e `users_debug`; os nomes ficam em `data/firestore/FirestoreCollections.kt`.
 - Manter cadastro, login, sessao e saida implementados atraves de uma camada de autenticacao, sem acoplar chamadas do Firebase diretamente aos composables.
 
 ### Produtos, compras e estoque
