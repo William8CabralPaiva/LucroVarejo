@@ -35,6 +35,10 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun getStoreDisplayName(): String? =
         remoteDataSource.fetchDisplayName()?.trim()?.takeIf { it.isNotEmpty() }
 
+    override suspend fun updateStoreDisplayName(displayName: String) {
+        remoteDataSource.updateDisplayName(displayName.trim())
+    }
+
     override suspend fun signIn(email: String, password: String) {
         remoteDataSource.signIn(email = email.trim(), password = password)
     }

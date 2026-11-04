@@ -18,6 +18,9 @@ service cloud.firestore {
       allow get: if ownsStore();
       allow update: if ownsStore()
         && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
         && request.resource.data.email is string
         && request.resource.data.email.size() <= 254;
       allow list, delete: if false;

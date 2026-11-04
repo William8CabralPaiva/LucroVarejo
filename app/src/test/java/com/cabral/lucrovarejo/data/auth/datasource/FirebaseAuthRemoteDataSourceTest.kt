@@ -138,5 +138,7 @@ class FirebaseAuthRemoteDataSourceTest {
         }
 
         override suspend fun fetchDisplayName(): String? = null
+
+        override suspend fun updateDisplayName(displayName: String) = Unit
     }
 }

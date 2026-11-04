@@ -103,6 +103,8 @@ class ForgotPasswordViewModelTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
+        override suspend fun updateStoreDisplayName(displayName: String) = Unit
+
         override suspend fun requestPasswordReset(email: String) {
             failure?.let { throw it }
             resetEmail = email

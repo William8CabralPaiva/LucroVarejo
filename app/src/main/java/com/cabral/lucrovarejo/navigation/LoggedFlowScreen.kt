@@ -51,6 +51,7 @@ internal fun LoggedFlowScreen(
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
     storeName: String? = null,
+    onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) { LoggedNavigator(navController) }
@@ -110,7 +111,9 @@ internal fun LoggedFlowScreen(
                 onShowMessage = showMessage,
                 homeViewModel = homeViewModel,
                 salesViewModel = salesViewModel,
-                productViewModel = productViewModel
+                productViewModel = productViewModel,
+                storeName = storeName,
+                onUpdateStoreName = onUpdateStoreName
             )
         }
     }
@@ -127,6 +130,8 @@ private fun LoggedDestinationNavHost(
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
     productViewModel: ProductViewModel?,
+    storeName: String?,
+    onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit,
 ) {
     // O Home recebe novas vendas por Flow (listener do Firestore); por isso a navegacao nao
     // precisa sinalizar "salvou" nem pedir refresh ao voltar do cadastro.
@@ -196,7 +201,9 @@ private fun LoggedDestinationNavHost(
                 currentThemeMode = currentThemeMode,
                 onThemeModeChange = onThemeModeChange,
                 onLogout = onLogout,
-                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) }
+                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
+                storeName = storeName,
+                onUpdateStoreName = onUpdateStoreName
             )
         }
 

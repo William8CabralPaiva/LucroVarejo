@@ -32,6 +32,10 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
 
     override suspend fun fetchDisplayName(): String? = savedProfile?.displayName
 
+    override suspend fun updateDisplayName(displayName: String) {
+        savedProfile = savedProfile?.copy(displayName = displayName)
+    }
+
     override suspend fun requestPasswordReset(email: String) {
         resetEmail = email
     }

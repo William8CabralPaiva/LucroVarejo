@@ -53,6 +53,9 @@ fun AppNavGraph(
                 salesViewModel = salesViewModel,
                 productViewModel = productViewModel,
                 storeName = storeState?.displayName,
+                onUpdateStoreName = { name, onResult ->
+                    storeViewModel?.updateDisplayName(name, onResult) ?: onResult(false)
+                },
                 onLogout = {
                     storeViewModel?.clear()
                     onLogout()

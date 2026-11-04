@@ -6,6 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -62,6 +65,32 @@ class ConfigScreenUiTest {
     }
 
     @Test
+    fun storeNameItemOpensDialogAndSendsTrimmedName() {
+        var savedName: String? = null
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ConfigScreen(
+                    currentThemeMode = ThemeMode.LIGHT,
+                    onThemeModeChange = {},
+                    storeName = "Loja Antiga",
+                    onUpdateStoreName = { name, onResult ->
+                        savedName = name
+                        onResult(true)
+                    }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Loja Antiga").performClick()
+        composeRule.onNodeWithText("Alterar nome da loja").assertIsDisplayed()
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("Loja Nova")
+        composeRule.onNodeWithText("Salvar").performClick()
+
+        composeRule.runOnIdle { assertEquals("Loja Nova", savedName) }
+        composeRule.onAllNodesWithText("Alterar nome da loja").assertCountEquals(0)
+    }
+
+    @Test
     fun aboutItemDisplaysVersionAndOpensAboutDialog() {
         composeRule.setContent {
             LucroVarejoTheme {
@@ -74,7 +103,7 @@ class ConfigScreenUiTest {
         }
 
         val versionText = "Versão ${BuildConfig.VERSION_NAME}"
-        composeRule.onNodeWithText("Sobre o app").assertIsDisplayed().performClick()
+        composeRule.onNodeWithText("Sobre o app").performScrollTo().assertIsDisplayed().performClick()
         composeRule.onAllNodesWithText(versionText).assertCountEquals(2)
         composeRule.onNodeWithText("Fechar").performClick()
         composeRule.onAllNodesWithText(versionText).assertCountEquals(1)

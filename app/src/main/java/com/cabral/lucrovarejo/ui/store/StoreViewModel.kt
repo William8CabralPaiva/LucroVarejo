@@ -3,7 +3,9 @@ package com.cabral.lucrovarejo.ui.store
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.domain.auth.usecase.GetStoreDisplayNameUseCase
+import com.cabral.lucrovarejo.domain.auth.usecase.UpdateStoreDisplayNameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +18,8 @@ import javax.inject.Inject
 // Escopo da Activity: compartilhado por todo o app logado.
 @HiltViewModel
 class StoreViewModel @Inject constructor(
-    private val getStoreDisplayName: GetStoreDisplayNameUseCase
+    private val getStoreDisplayName: GetStoreDisplayNameUseCase,
+    private val updateStoreDisplayName: UpdateStoreDisplayNameUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(StoreUiState())
     val uiState: StateFlow<StoreUiState> = _uiState.asStateFlow()
@@ -38,6 +41,23 @@ class StoreViewModel @Inject constructor(
     fun clear() {
         loadJob?.cancel()
         _uiState.value = StoreUiState()
+    }
+
+    // O nome fica no estado compartilhado, entao a Home e as demais telas atualizam sozinhas.
+    fun updateDisplayName(name: String, onResult: (Boolean) -> Unit) {
+        val trimmed = name.trim()
+        viewModelScope.launch {
+            val success = try {
+                updateStoreDisplayName(trimmed)
+                true
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (_: Exception) {
+                false
+            }
+            if (success) _uiState.update { it.copy(displayName = trimmed) }
+            onResult(success)
+        }
     }
 
 }

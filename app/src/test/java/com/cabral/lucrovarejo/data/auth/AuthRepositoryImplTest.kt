@@ -39,6 +39,16 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun updateStoreDisplayNameTrimsBeforeSaving() = runTest {
+        val remote = FakeAuthRemoteDataSource()
+        val repository = AuthRepositoryImpl(remote)
+
+        repository.updateStoreDisplayName("  Loja Nova ")
+
+        assertEquals("Loja Nova", remote.displayName)
+    }
+
+    @Test
     fun loginTrimsEmail() = runTest {
         // Given: an auth repository backed by a fake remote source.
         val remote = FakeAuthRemoteDataSource()
@@ -108,6 +118,9 @@ class AuthRepositoryImplTest {
 
         override suspend fun fetchDisplayName(): String? = displayName
 
+        override suspend fun updateDisplayName(displayName: String) {
+            this.displayName = displayName
+        }
         override suspend fun createAccount(
             email: String,
             password: String,

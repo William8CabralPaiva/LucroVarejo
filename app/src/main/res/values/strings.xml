@@ -192,6 +192,10 @@
 
     <!-- Configurações: Maquininhas -->
     <string name="settings_terminals">Maquininhas</string>
+    <string name="settings_store_name">Nome da loja</string>
+    <string name="settings_store_name_subtitle">Altere o nome exibido na tela inicial.</string>
+    <string name="settings_store_name_dialog_title">Alterar nome da loja</string>
+    <string name="settings_store_name_error">Não foi possível salvar o nome da loja. Tente novamente.</string>
     <string name="settings_terminals_subtitle">Cadastre maquininhas, métodos aceitos e tarifas.</string>
 
     <string name="dialog_save">Salvar</string>

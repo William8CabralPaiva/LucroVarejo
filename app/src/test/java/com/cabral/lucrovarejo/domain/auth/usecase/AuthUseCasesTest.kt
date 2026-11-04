@@ -79,6 +79,8 @@ class AuthUseCasesTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
+        override suspend fun updateStoreDisplayName(displayName: String) = Unit
+
         override suspend fun         signIn(email: String, password: String) {
                     signedInStore = email
             signedInPassword = password

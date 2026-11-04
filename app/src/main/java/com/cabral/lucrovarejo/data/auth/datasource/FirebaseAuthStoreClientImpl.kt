@@ -51,6 +51,14 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
             .getString(FIELD_DISPLAY_NAME)
     }
 
+    override suspend fun updateDisplayName(displayName: String) {
+        val uid = auth.currentUser?.uid ?: error("No active session.")
+        firestore.collection(FIELD_STORES)
+            .document(uid)
+            .update(FIELD_DISPLAY_NAME, displayName)
+            .await()
+    }
+
     override suspend fun requestPasswordReset(email: String) {
         auth.sendPasswordResetEmail(email).await()
     }
