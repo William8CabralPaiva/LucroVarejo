@@ -93,7 +93,7 @@ internal fun LoginScreenContent(
             OutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChange,
-                label = { Text(stringResource(R.string.login_identifier_label)) },
+                label = { Text(stringResource(R.string.login_email_label)) },
                 singleLine = true,
                 enabled = !state.isLoading,
                 modifier = Modifier

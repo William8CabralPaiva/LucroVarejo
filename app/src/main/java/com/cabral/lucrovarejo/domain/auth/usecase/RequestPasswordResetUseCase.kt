@@ -6,7 +6,7 @@ import javax.inject.Inject
 class RequestPasswordResetUseCase @Inject constructor(
     private val repository: AuthRepository
 ) {
-    suspend operator fun invoke(identifier: String) {
-        repository.requestPasswordReset(identifier.trim())
+    suspend operator fun invoke(email: String) {
+        repository.requestPasswordReset(email.trim())
     }
 }

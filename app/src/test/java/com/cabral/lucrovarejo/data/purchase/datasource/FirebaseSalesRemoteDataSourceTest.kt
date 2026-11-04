@@ -130,7 +130,6 @@ class FirebaseSalesRemoteDataSourceTest {
             get() = storeKey != null
 
         override suspend fun registerStore(
-            storeName: String,
             email: String,
             password: String,
             displayName: String
@@ -138,9 +137,9 @@ class FirebaseSalesRemoteDataSourceTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun signIn(identifier: String, password: String) = Unit
+        override suspend fun signIn(email: String, password: String) = Unit
 
-        override suspend fun requestPasswordReset(identifier: String) = Unit
+        override suspend fun requestPasswordReset(email: String) = Unit
 
 
         override fun signOut() = Unit

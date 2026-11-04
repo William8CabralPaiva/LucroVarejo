@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ForgotPasswordUiState(
-    val identifier: String = "",
+    val email: String = "",
     @StringRes val errorMessage: Int? = null,
     val isLoading: Boolean = false,
     val isEmailSent: Boolean = false
@@ -27,10 +27,10 @@ class ForgotPasswordViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ForgotPasswordUiState())
     val uiState: StateFlow<ForgotPasswordUiState> = _uiState.asStateFlow()
 
-    fun onIdentifierChanged(value: String) {
+    fun onEmailChanged(value: String) {
         _uiState.update {
             it.copy(
-                identifier = value.trim(),
+                email = value.trim(),
                 errorMessage = null,
                 isEmailSent = false
             )
@@ -38,8 +38,8 @@ class ForgotPasswordViewModel @Inject constructor(
     }
 
     fun submit() {
-        val identifier = _uiState.value.identifier
-        if (identifier.isBlank()) {
+        val email = _uiState.value.email
+        if (email.isBlank()) {
             _uiState.update { it.copy(errorMessage = R.string.forgot_password_required) }
             return
         }
@@ -47,7 +47,7 @@ class ForgotPasswordViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true, errorMessage = null, isEmailSent = false) }
         viewModelScope.launch {
             try {
-                requestPasswordReset(identifier)
+                requestPasswordReset(email)
                 _uiState.update { it.copy(isLoading = false, isEmailSent = true) }
             } catch (_: Exception) {
                 _uiState.update {

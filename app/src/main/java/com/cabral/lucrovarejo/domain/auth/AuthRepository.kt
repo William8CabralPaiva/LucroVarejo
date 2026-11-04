@@ -5,17 +5,16 @@ interface AuthRepository {
     val storeKey: String?
 
     suspend fun registerStore(
-        storeName: String,
         email: String,
         password: String,
         displayName: String
     )
 
-    suspend fun signIn(identifier: String, password: String)
+    suspend fun signIn(email: String, password: String)
 
     suspend fun getStoreDisplayName(): String?
 
-    suspend fun requestPasswordReset(identifier: String)
+    suspend fun requestPasswordReset(email: String)
 
     fun signOut()
 }

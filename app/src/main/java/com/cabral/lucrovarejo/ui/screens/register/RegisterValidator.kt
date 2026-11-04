@@ -2,23 +2,8 @@ package com.cabral.lucrovarejo.ui.screens.register
 
 import androidx.annotation.StringRes
 import com.cabral.lucrovarejo.R
-import java.util.Locale
 
-private const val MIN_STORE_NAME_LENGTH = 3
-private const val MAX_STORE_NAME_LENGTH = 30
 private const val MIN_PASSWORD_LENGTH = 6
-
-object StoreNameValidator {
-    fun normalize(value: String): String = value.lowercase(Locale.ROOT)
-
-    @StringRes fun validate(value: String): Int? = when {
-        value.isBlank() -> R.string.register_store_required
-        value.length !in MIN_STORE_NAME_LENGTH..MAX_STORE_NAME_LENGTH -> R.string.register_store_length
-        !value.matches(Regex("[a-zA-Z0-9][a-zA-Z0-9._-]{1,28}[a-zA-Z0-9]")) ->
-            R.string.register_store_invalid
-        else -> null
-    }
-}
 
 internal object RegisterValidator {
     @StringRes fun validateDisplayName(value: String): Int? =

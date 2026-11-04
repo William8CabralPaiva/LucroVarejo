@@ -18,7 +18,7 @@ stores/{storeId}
 
 | Campo | Tipo | Descricao |
 |---|---|---|
-| `storeName` | string | Nome de usuario normalizado da loja |
+| `displayName` | string | Nome de exibicao da loja |
 | `email` | string | E-mail de contato informado no cadastro |
 | `createdAt` | timestamp | Data de criacao, definida pelo servidor |
 

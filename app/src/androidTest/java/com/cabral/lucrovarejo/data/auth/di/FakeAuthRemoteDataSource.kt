@@ -14,7 +14,6 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
     var savedProfile: StoreProfile? = null
     var signedInTechnicalEmail: String? = null
     var resetEmail: String? = null
-    val emailsByStore = mutableMapOf<String, String>()
 
     override suspend fun createAccount(
         email: String,
@@ -32,9 +31,6 @@ class FakeAuthRemoteDataSource @Inject constructor() : AuthRemoteDataSource {
     }
 
     override suspend fun fetchDisplayName(): String? = savedProfile?.displayName
-
-    override suspend fun findEmailByStoreName(storeName: String): String? =
-        emailsByStore[storeName]
 
     override suspend fun requestPasswordReset(email: String) {
         resetEmail = email

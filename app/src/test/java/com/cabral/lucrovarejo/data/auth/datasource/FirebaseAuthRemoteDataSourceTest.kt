@@ -13,7 +13,7 @@ class FirebaseAuthRemoteDataSourceTest {
         // Given: a fake Firebase client and a store profile.
         val client = FakeFirebaseAuthStoreClient()
         val dataSource = FirebaseAuthRemoteDataSourceImpl(client)
-        val profile = StoreProfile("loja-1", "owner@example.com", "Loja 1")
+        val profile = StoreProfile("owner@example.com", "Loja 1")
 
         // When: the data source creates the account.
         dataSource.createAccount("loja-1@exemplo.com", "secret1", profile)
@@ -39,7 +39,7 @@ class FirebaseAuthRemoteDataSourceTest {
             dataSource.createAccount(
                 "loja-1@exemplo.com",
                 "secret1",
-                StoreProfile("loja-1", "owner@example.com", "Loja 1")
+                StoreProfile("owner@example.com", "Loja 1")
             )
         }
             .exceptionOrNull()
@@ -91,18 +91,6 @@ class FirebaseAuthRemoteDataSourceTest {
         assertTrue(failure is AuthFailure)
     }
 
-    @Test
-    fun storeLookupDelegatesToClientAndMapsFailures() = runTest {
-        val client = FakeFirebaseAuthStoreClient()
-        val dataSource = FirebaseAuthRemoteDataSourceImpl(client)
-
-        assertEquals("found-loja@exemplo.com", dataSource.findEmailByStoreName("loja"))
-
-        client.lookupFailure = IllegalStateException("offline")
-        val failure = runCatching { dataSource.findEmailByStoreName("loja") }.exceptionOrNull()
-        assertTrue(failure is AuthFailure)
-    }
-
     private class FakeFirebaseAuthStoreClient : FirebaseAuthStoreClient {
         override var hasSession: Boolean = false
         override var storeKey: String? = null
@@ -117,7 +105,6 @@ class FirebaseAuthRemoteDataSourceTest {
         var signedInPassword: String? = null
         var resetEmail: String? = null
         var resetFailure: Exception? = null
-        var lookupFailure: Exception? = null
 
         override suspend fun createUser(email: String, password: String): String {
             createdEmail = email
@@ -139,11 +126,6 @@ class FirebaseAuthRemoteDataSourceTest {
             signedInEmail = email
             signedInPassword = password
             storeKey = "firebase-uid-123"
-        }
-
-        override suspend fun findEmailByStoreName(storeName: String): String? {
-            lookupFailure?.let { throw it }
-            return "found-$storeName@exemplo.com"
         }
 
         override suspend fun requestPasswordReset(email: String) {

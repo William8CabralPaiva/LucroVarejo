@@ -31,9 +31,9 @@ class ForgotPasswordScreenInstrumentedTest {
                 val state = remember { mutableStateOf(ForgotPasswordUiState()) }
                 ForgotPasswordScreenContent(
                     state = state.value,
-                    onIdentifierChange = { state.value = state.value.copy(identifier = it) },
+                    onEmailChange = { state.value = state.value.copy(email = it) },
                     onSubmit = {
-                        submittedEmail = state.value.identifier
+                        submittedEmail = state.value.email
                         state.value = state.value.copy(isEmailSent = true)
                     },
                     onBack = {}
@@ -41,7 +41,7 @@ class ForgotPasswordScreenInstrumentedTest {
             }
         }
 
-        composeRule.onNodeWithTag(FORGOT_PASSWORD_IDENTIFIER_FIELD_TAG)
+        composeRule.onNodeWithTag(FORGOT_PASSWORD_EMAIL_FIELD_TAG)
             .performTextInput("owner@example.com")
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performClick()
 
@@ -56,7 +56,7 @@ class ForgotPasswordScreenInstrumentedTest {
             LucroVarejoTheme {
                 ForgotPasswordScreenContent(
                     state = ForgotPasswordUiState(),
-                    onIdentifierChange = {},
+                    onEmailChange = {},
                     onSubmit = {},
                     onBack = { backCount++ }
                 )

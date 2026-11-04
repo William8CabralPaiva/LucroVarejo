@@ -40,7 +40,7 @@ class LoginViewModel @Inject constructor(
         val current = _uiState.value
         if (current.email.isBlank() || current.password.isBlank()) {
             _uiState.update {
-                it.copy(errorMessage = "Informe o e-mail ou usuário e a senha.")
+                it.copy(errorMessage = "Informe o e-mail e a senha.")
             }
             return
         }

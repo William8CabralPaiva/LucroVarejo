@@ -20,7 +20,6 @@ import com.cabral.lucrovarejo.ui.screens.register.REGISTER_CONFIRM_PASSWORD_FIEL
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_EMAIL_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_PASSWORD_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_DISPLAY_NAME_FIELD_TAG
-import com.cabral.lucrovarejo.ui.screens.register.REGISTER_STORE_NAME_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_TITLE_TAG
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreenContent
 import com.cabral.lucrovarejo.ui.screens.register.RegisterUiState
@@ -45,7 +44,6 @@ class RegisterScreenUiTest {
                 RegisterScreenContent(
                     state = RegisterUiState(),
                     onDisplayNameChange = {},
-                    onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -57,7 +55,6 @@ class RegisterScreenUiTest {
 
         composeRule.onNodeWithTag(REGISTER_TITLE_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_DISPLAY_NAME_FIELD_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).performScrollTo().assertIsDisplayed()
@@ -68,7 +65,6 @@ class RegisterScreenUiTest {
 
     @Test
     fun inputChangesAreForwardedAndValidFormCanBeSubmitted() {
-        var storeName = ""
         var email = ""
         var submitCount = 0
         var backCount = 0
@@ -86,10 +82,6 @@ class RegisterScreenUiTest {
                 RegisterScreenContent(
                     state = formState,
                     onDisplayNameChange = {},
-                    onStoreNameChange = {
-                        storeName = it
-                        formState = formState.copy(storeName = it)
-                    },
                     onEmailChange = {
                         email = it
                         formState = formState.copy(email = it)
@@ -102,13 +94,11 @@ class RegisterScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).performTextInput("minhaloja")
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).performTextInput("loja@example.com")
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performScrollTo().performClick()
         composeRule.onNodeWithTag(REGISTER_BACK_BUTTON_TAG).performScrollTo().performClick()
 
         composeRule.runOnIdle {
-            assertEquals("minhaloja", storeName)
             assertEquals("loja@example.com", email)
             assertEquals(1, submitCount)
             assertEquals(1, backCount)
@@ -122,14 +112,12 @@ class RegisterScreenUiTest {
                 RegisterScreenContent(
                     state = RegisterUiState(
                         displayName = "Minha Loja",
-                        storeName = "minhaloja",
                         email = "loja@example.com",
                         password = "senha123",
                         confirmPassword = "senha123",
                         isLoading = true
                     ),
                     onDisplayNameChange = {},
-                    onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -140,7 +128,6 @@ class RegisterScreenUiTest {
         }
 
         composeRule.onNodeWithTag(LOADING_INDICATOR_TAG).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).assertIsNotEnabled()
@@ -154,7 +141,6 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(
-                        storeNameError = com.cabral.lucrovarejo.R.string.register_store_required,
                         displayNameError = com.cabral.lucrovarejo.R.string.register_display_name_required,
                         emailError = com.cabral.lucrovarejo.R.string.register_email_invalid,
                         passwordError = com.cabral.lucrovarejo.R.string.register_password_too_short,
@@ -162,7 +148,6 @@ class RegisterScreenUiTest {
                         errorMessage = com.cabral.lucrovarejo.R.string.register_error_network
                     ),
                     onDisplayNameChange = {},
-                    onStoreNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -173,7 +158,6 @@ class RegisterScreenUiTest {
         }
 
         listOf(
-            "Informe o usuário.",
             "Informe o nome da loja.",
             "Informe um e-mail válido.",
             "A senha deve ter pelo menos 6 caracteres.",

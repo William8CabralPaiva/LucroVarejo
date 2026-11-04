@@ -9,16 +9,12 @@ import org.junit.Test
 
 class AuthUseCasesTest {
     @Test
-    fun registerNormalizesStoreNameAndTrimsEmail() = runTest {
-        // Given: a use case backed by a fake auth repository.
-        val repository = FakeAuthRepository()
+    fun     registerTrimsEmailAndDisplayName() = runTest {
+            val repository = FakeAuthRepository()
 
-        // When: registering with mixed-case store name and padded email.
-        RegisterStoreUseCase(repository)(" My-Store.1 ", " owner@example.com ", "secret1", " Minha Loja ")
+            RegisterStoreUseCase(repository)(" owner@example.com ", "secret1", " Minha Loja ")
 
-        // Then: normalized values are sent to the repository.
-        assertEquals("my-store.1", repository.registeredStore)
-        assertEquals("owner@example.com", repository.registeredEmail)
+            assertEquals("owner@example.com", repository.registeredEmail)
         assertEquals("secret1", repository.registeredPassword)
         assertEquals("Minha Loja", repository.registeredDisplayName)
     }
@@ -63,7 +59,6 @@ class AuthUseCasesTest {
     private class FakeAuthRepository : AuthRepository {
         override var hasSession: Boolean = false
         override var storeKey: String? = null
-        var registeredStore: String? = null
         var registeredEmail: String? = null
         var registeredPassword: String? = null
         var registeredDisplayName: String? = null
@@ -73,12 +68,10 @@ class AuthUseCasesTest {
         var resetEmail: String? = null
 
         override suspend fun registerStore(
-            storeName: String,
             email: String,
             password: String,
             displayName: String
         ) {
-            registeredStore = storeName
             registeredEmail = email
             registeredPassword = password
             registeredDisplayName = displayName
@@ -86,13 +79,13 @@ class AuthUseCasesTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun signIn(identifier: String, password: String) {
-            signedInStore = identifier
+        override suspend fun         signIn(email: String, password: String) {
+                    signedInStore = email
             signedInPassword = password
         }
 
-        override suspend fun requestPasswordReset(identifier: String) {
-            resetEmail = identifier
+        override suspend fun         requestPasswordReset(email: String) {
+                    resetEmail = email
         }
 
         override fun signOut() {

@@ -48,7 +48,7 @@ class ForgotPasswordViewModelTest {
 
     @Test
     fun successMarksEmailAsSentAndSendsTrimmedEmail() = runTest(dispatcher) {
-        viewModel.onIdentifierChanged(" owner@example.com ")
+        viewModel.onEmailChanged(" owner@example.com ")
 
         viewModel.submit()
         assertTrue(viewModel.uiState.value.isLoading)
@@ -64,7 +64,7 @@ class ForgotPasswordViewModelTest {
     @Test
     fun failureShowsErrorAndDoesNotMarkEmailAsSent() = runTest(dispatcher) {
         repository.failure = IllegalStateException("offline")
-        viewModel.onIdentifierChanged("owner@example.com")
+        viewModel.onEmailChanged("owner@example.com")
 
         viewModel.submit()
         advanceUntilIdle()
@@ -77,11 +77,11 @@ class ForgotPasswordViewModelTest {
 
     @Test
     fun editingEmailClearsFeedback() = runTest(dispatcher) {
-        viewModel.onIdentifierChanged("owner@example.com")
+        viewModel.onEmailChanged("owner@example.com")
         viewModel.submit()
         advanceUntilIdle()
 
-        viewModel.onIdentifierChanged("other@example.com")
+        viewModel.onEmailChanged("other@example.com")
 
         assertFalse(viewModel.uiState.value.isEmailSent)
         assertNull(viewModel.uiState.value.errorMessage)
@@ -94,19 +94,18 @@ class ForgotPasswordViewModelTest {
         var failure: Exception? = null
 
         override suspend fun registerStore(
-            storeName: String,
             email: String,
             password: String,
             displayName: String
         ) = Unit
 
-        override suspend fun signIn(identifier: String, password: String) = Unit
+        override suspend fun signIn(email: String, password: String) = Unit
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun requestPasswordReset(identifier: String) {
+        override suspend fun requestPasswordReset(email: String) {
             failure?.let { throw it }
-            resetEmail = identifier
+            resetEmail = email
         }
 
         override fun signOut() = Unit

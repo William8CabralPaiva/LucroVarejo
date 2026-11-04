@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 
@@ -24,18 +23,6 @@ class RegisterViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
-
-    fun onStoreNameChanged(value: String) {
-        val normalized = StoreNameValidator.normalize(value)
-        _uiState.update {
-            it.copy(
-                storeName = normalized,
-                storeNameError = StoreNameValidator.validate(normalized),
-                errorMessage = null,
-                isRegistered = false
-            )
-        }
-    }
 
     fun onDisplayNameChanged(value: String) {
         _uiState.update {
@@ -93,7 +80,6 @@ class RegisterViewModel @Inject constructor(
 
     fun register() {
         val current = _uiState.value
-        val storeError = StoreNameValidator.validate(current.storeName)
         val displayNameError = RegisterValidator.validateDisplayName(current.displayName)
         val emailError = RegisterValidator.validateEmail(current.email)
         val passwordError = RegisterValidator.validatePassword(current.password)
@@ -102,7 +88,6 @@ class RegisterViewModel @Inject constructor(
             current.confirmPassword
         )
         val errors = listOfNotNull(
-            storeError,
             displayNameError,
             emailError,
             passwordError,
@@ -111,7 +96,6 @@ class RegisterViewModel @Inject constructor(
         if (errors.isNotEmpty()) {
             _uiState.update {
                 it.copy(
-                    storeNameError = storeError,
                     displayNameError = displayNameError,
                     emailError = emailError,
                     passwordError = passwordError,
@@ -125,7 +109,6 @@ class RegisterViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 registerStore(
-                    storeName = current.storeName.lowercase(Locale.ROOT),
                     email = current.email,
                     password = current.password,
                     displayName = current.displayName

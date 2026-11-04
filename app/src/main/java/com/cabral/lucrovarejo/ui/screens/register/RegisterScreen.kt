@@ -52,7 +52,6 @@ fun RegisterScreen(
     RegisterScreenContent(
         state = state,
         onDisplayNameChange = viewModel::onDisplayNameChanged,
-        onStoreNameChange = viewModel::onStoreNameChanged,
         onEmailChange = viewModel::onEmailChanged,
         onPasswordChange = viewModel::onPasswordChanged,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChanged,
@@ -65,7 +64,6 @@ fun RegisterScreen(
 internal fun RegisterScreenContent(
     state: RegisterUiState,
     onDisplayNameChange: (String) -> Unit,
-    onStoreNameChange: (String) -> Unit,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onConfirmPasswordChange: (String) -> Unit,
@@ -107,26 +105,6 @@ internal fun RegisterScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(REGISTER_DISPLAY_NAME_FIELD_TAG)
-            )
-
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
-
-            OutlinedTextField(
-                value = state.storeName,
-                onValueChange = onStoreNameChange,
-                label = { Text(stringResource(R.string.register_store_label)) },
-                supportingText = {
-                    Text(
-                        state.storeNameError?.let { stringResource(it) }
-                            ?: stringResource(R.string.register_store_hint)
-                    )
-                },
-                isError = state.storeNameError != null,
-                singleLine = true,
-                enabled = !state.isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(REGISTER_STORE_NAME_FIELD_TAG)
             )
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
@@ -213,7 +191,6 @@ internal fun RegisterScreenContent(
 
 internal const val REGISTER_TITLE_TAG = "register-title"
 internal const val REGISTER_DISPLAY_NAME_FIELD_TAG = "register-display-name-field"
-internal const val REGISTER_STORE_NAME_FIELD_TAG = "register-store-name-field"
 internal const val REGISTER_EMAIL_FIELD_TAG = "register-email-field"
 internal const val REGISTER_PASSWORD_FIELD_TAG = "register-password-field"
 internal const val REGISTER_CONFIRM_PASSWORD_FIELD_TAG = "register-confirm-password-field"
@@ -226,13 +203,11 @@ private fun RegisterScreenPreview() {
         RegisterScreenContent(
             state = RegisterUiState(
                 displayName = "Loja Exemplo",
-                storeName = "lojaexemplo",
                 email = "contato@exemplo.com",
                 password = "segura123",
                 confirmPassword = "segura123"
             ),
             onDisplayNameChange = {},
-            onStoreNameChange = {},
             onEmailChange = {},
             onPasswordChange = {},
             onConfirmPasswordChange = {},
