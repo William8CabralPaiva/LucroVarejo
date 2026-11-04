@@ -20,6 +20,8 @@ interface AuthRemoteDataSource {
 
     suspend fun fetchDisplayName(): String?
 
+    suspend fun findEmailByStoreName(storeName: String): String?
+
     suspend fun requestPasswordReset(email: String)
 
     fun signOut()
@@ -38,6 +40,8 @@ interface FirebaseAuthStoreClient {
     suspend fun signIn(email: String, password: String)
 
     suspend fun fetchDisplayName(): String?
+
+    suspend fun findEmailByStoreName(storeName: String): String?
 
     suspend fun requestPasswordReset(email: String)
 

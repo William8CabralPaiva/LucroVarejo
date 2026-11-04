@@ -35,20 +35,20 @@ class ForgotPasswordScreenUiTest {
             LucroVarejoTheme {
                 ForgotPasswordScreenContent(
                     state = ForgotPasswordUiState(),
-                    onEmailChange = {},
+                    onIdentifierChange = {},
                     onSubmit = {},
                     onBack = {}
                 )
             }
         }
 
-        composeRule.onNodeWithTag(FORGOT_PASSWORD_EMAIL_FIELD_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(FORGOT_PASSWORD_IDENTIFIER_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
     }
 
     @Test
     fun forwardsInputSubmitAndBack() {
-        var email = ""
+        var identifier = ""
         var submitCount = 0
         var backCount = 0
         composeRule.setContent {
@@ -56,9 +56,9 @@ class ForgotPasswordScreenUiTest {
                 var state by remember { mutableStateOf(ForgotPasswordUiState()) }
                 ForgotPasswordScreenContent(
                     state = state,
-                    onEmailChange = {
-                        email = it
-                        state = state.copy(email = it)
+                    onIdentifierChange = {
+                        identifier = it
+                        state = state.copy(identifier = it)
                     },
                     onSubmit = { submitCount++ },
                     onBack = { backCount++ }
@@ -66,13 +66,13 @@ class ForgotPasswordScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(FORGOT_PASSWORD_EMAIL_FIELD_TAG)
+        composeRule.onNodeWithTag(FORGOT_PASSWORD_IDENTIFIER_FIELD_TAG)
             .performTextInput("owner@example.com")
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performClick()
         composeRule.onNodeWithText("Voltar").performClick()
 
         composeRule.runOnIdle {
-            assertEquals("owner@example.com", email)
+            assertEquals("owner@example.com", identifier)
             assertEquals(1, submitCount)
             assertEquals(1, backCount)
         }
@@ -84,11 +84,11 @@ class ForgotPasswordScreenUiTest {
             LucroVarejoTheme {
                 ForgotPasswordScreenContent(
                     state = ForgotPasswordUiState(
-                        email = "owner@example.com",
+                        identifier = "owner@example.com",
                         isEmailSent = true,
                         errorMessage = R.string.forgot_password_error
                     ),
-                    onEmailChange = {},
+                    onIdentifierChange = {},
                     onSubmit = {},
                     onBack = {}
                 )

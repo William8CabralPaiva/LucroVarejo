@@ -62,6 +62,12 @@ class FirebaseAuthRemoteDataSourceImpl @Inject constructor(
         throw mapFailure(exception)
     }
 
+    override suspend fun findEmailByStoreName(storeName: String): String? = try {
+        firebaseClient.findEmailByStoreName(storeName)
+    } catch (exception: Exception) {
+        throw mapFailure(exception)
+    }
+
     override suspend fun requestPasswordReset(email: String) {
         try {
             firebaseClient.requestPasswordReset(email)

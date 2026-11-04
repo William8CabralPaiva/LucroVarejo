@@ -4,9 +4,10 @@
     <string name="login_identifier_label">E-mail ou usuário</string>
     <string name="login_forgot_password">Esqueci a senha</string>
     <string name="forgot_password_title">Esqueci a senha</string>
-    <string name="forgot_password_description">Informe seu e-mail. Enviaremos um link para redefinir a senha.</string>
+    <string name="forgot_password_description">Informe seu e-mail ou usuário. Enviaremos um link para redefinir a senha.</string>
     <string name="forgot_password_submit">Enviar e-mail</string>
-    <string name="forgot_password_success">Se o e-mail estiver cadastrado, enviamos o link para redefinir a senha.</string>
+    <string name="forgot_password_success">Se o e-mail ou usuário estiver cadastrado, enviamos o link para redefinir a senha.</string>
+    <string name="forgot_password_required">Informe o e-mail ou usuário.</string>
     <string name="forgot_password_error">Não foi possível enviar o e-mail. Tente novamente.</string>
     <string name="register_title">Cadastro da loja</string>
     <string name="register_display_name_label">Nome da loja</string>

@@ -22,9 +22,10 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
             ?: error("Firebase Auth did not return a user.")
 
     override suspend fun saveStoreProfile(uid: String, profile: StoreProfile) {
-        firestore.collection(FIELD_STORES)
-            .document(uid)
+        // Escrita atômica: o doc de usuário só pode ser criado uma vez, garantindo nome único.
+        firestore.batch()
             .set(
+                firestore.collection(FIELD_STORES).document(uid),
                 mapOf(
                     FIELD_STORE_NAME to profile.storeName,
                     FIELD_EMAIL to profile.contactEmail,
@@ -32,6 +33,15 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
                     FIELD_CREATED_AT to FieldValue.serverTimestamp()
                 )
             )
+            .set(
+                firestore.collection(COLLECTION_USERNAMES).document(profile.storeName),
+                mapOf(
+                    FIELD_EMAIL to profile.contactEmail,
+                    FIELD_UID to uid,
+                    FIELD_CREATED_AT to FieldValue.serverTimestamp()
+                )
+            )
+            .commit()
             .await()
     }
 
@@ -52,6 +62,21 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
             .getString(FIELD_DISPLAY_NAME)
     }
 
+    override suspend fun findEmailByStoreName(storeName: String): String? =
+        firestore.collection(COLLECTION_USERNAMES)
+            .document(storeName)
+            .get()
+            .await()
+            .getString(FIELD_EMAIL)
+            ?: firestore.collection(FIELD_STORES)
+                .whereEqualTo(FIELD_STORE_NAME, storeName)
+                .limit(1)
+                .get()
+                .await()
+                .documents
+                .firstOrNull()
+                ?.getString(FIELD_EMAIL)
+
     override suspend fun requestPasswordReset(email: String) {
         auth.sendPasswordResetEmail(email).await()
     }
@@ -62,6 +87,8 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
 
     private companion object {
         const val FIELD_STORES = "stores"
+        const val COLLECTION_USERNAMES = "usernames"
+        const val FIELD_UID = "uid"
         const val FIELD_STORE_NAME = "storeName"
         const val FIELD_EMAIL = "email"
         const val FIELD_DISPLAY_NAME = "displayName"

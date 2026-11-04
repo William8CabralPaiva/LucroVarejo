@@ -91,8 +91,8 @@ class AuthUseCasesTest {
             signedInPassword = password
         }
 
-        override suspend fun requestPasswordReset(email: String) {
-            resetEmail = email
+        override suspend fun requestPasswordReset(identifier: String) {
+            resetEmail = identifier
         }
 
         override fun signOut() {

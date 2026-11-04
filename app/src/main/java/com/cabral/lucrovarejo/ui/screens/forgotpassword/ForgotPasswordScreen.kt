@@ -37,7 +37,7 @@ fun ForgotPasswordScreen(
     val state by viewModel.uiState.collectAsState()
     ForgotPasswordScreenContent(
         state = state,
-        onEmailChange = viewModel::onEmailChanged,
+        onIdentifierChange = viewModel::onIdentifierChanged,
         onSubmit = viewModel::submit,
         onBack = onBack
     )
@@ -46,7 +46,7 @@ fun ForgotPasswordScreen(
 @Composable
 internal fun ForgotPasswordScreenContent(
     state: ForgotPasswordUiState,
-    onEmailChange: (String) -> Unit,
+    onIdentifierChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -77,14 +77,14 @@ internal fun ForgotPasswordScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = state.email,
-                onValueChange = onEmailChange,
-                label = { Text(stringResource(R.string.register_email_label)) },
+                value = state.identifier,
+                onValueChange = onIdentifierChange,
+                label = { Text(stringResource(R.string.login_identifier_label)) },
                 singleLine = true,
                 enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag(FORGOT_PASSWORD_EMAIL_FIELD_TAG)
+                    .testTag(FORGOT_PASSWORD_IDENTIFIER_FIELD_TAG)
             )
 
             state.errorMessage?.let {
@@ -104,7 +104,7 @@ internal fun ForgotPasswordScreenContent(
 
             LoadingButton(
                 onClick = onSubmit,
-                enabled = state.email.isNotBlank(),
+                enabled = state.identifier.isNotBlank(),
                 isLoading = state.isLoading,
                 textId = R.string.forgot_password_submit,
                 modifier = Modifier.fillMaxWidth()
@@ -119,7 +119,7 @@ internal fun ForgotPasswordScreenContent(
     }
 }
 
-internal const val FORGOT_PASSWORD_EMAIL_FIELD_TAG = "forgot-password-email-field"
+internal const val FORGOT_PASSWORD_IDENTIFIER_FIELD_TAG = "forgot-password-identifier-field"
 internal const val FORGOT_PASSWORD_SUCCESS_TAG = "forgot-password-success"
 
 @Preview(showBackground = true, name = "Esqueci a senha")
@@ -127,8 +127,8 @@ internal const val FORGOT_PASSWORD_SUCCESS_TAG = "forgot-password-success"
 private fun ForgotPasswordScreenPreview() {
     LucroVarejoTheme {
         ForgotPasswordScreenContent(
-            state = ForgotPasswordUiState(email = "contato@exemplo.com", isEmailSent = true),
-            onEmailChange = {},
+            state = ForgotPasswordUiState(identifier = "contato@exemplo.com", isEmailSent = true),
+            onIdentifierChange = {},
             onSubmit = {},
             onBack = {}
         )

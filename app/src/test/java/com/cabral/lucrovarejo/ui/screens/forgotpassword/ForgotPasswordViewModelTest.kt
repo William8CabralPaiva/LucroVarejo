@@ -48,7 +48,7 @@ class ForgotPasswordViewModelTest {
 
     @Test
     fun successMarksEmailAsSentAndSendsTrimmedEmail() = runTest(dispatcher) {
-        viewModel.onEmailChanged(" owner@example.com ")
+        viewModel.onIdentifierChanged(" owner@example.com ")
 
         viewModel.submit()
         assertTrue(viewModel.uiState.value.isLoading)
@@ -64,7 +64,7 @@ class ForgotPasswordViewModelTest {
     @Test
     fun failureShowsErrorAndDoesNotMarkEmailAsSent() = runTest(dispatcher) {
         repository.failure = IllegalStateException("offline")
-        viewModel.onEmailChanged("owner@example.com")
+        viewModel.onIdentifierChanged("owner@example.com")
 
         viewModel.submit()
         advanceUntilIdle()
@@ -77,11 +77,11 @@ class ForgotPasswordViewModelTest {
 
     @Test
     fun editingEmailClearsFeedback() = runTest(dispatcher) {
-        viewModel.onEmailChanged("owner@example.com")
+        viewModel.onIdentifierChanged("owner@example.com")
         viewModel.submit()
         advanceUntilIdle()
 
-        viewModel.onEmailChanged("other@example.com")
+        viewModel.onIdentifierChanged("other@example.com")
 
         assertFalse(viewModel.uiState.value.isEmailSent)
         assertNull(viewModel.uiState.value.errorMessage)
@@ -104,9 +104,9 @@ class ForgotPasswordViewModelTest {
 
         override suspend fun getStoreDisplayName(): String? = null
 
-        override suspend fun requestPasswordReset(email: String) {
+        override suspend fun requestPasswordReset(identifier: String) {
             failure?.let { throw it }
-            resetEmail = email
+            resetEmail = identifier
         }
 
         override fun signOut() = Unit

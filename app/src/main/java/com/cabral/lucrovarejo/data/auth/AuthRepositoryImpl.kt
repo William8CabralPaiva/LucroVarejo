@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.data.auth
 
 import com.cabral.lucrovarejo.data.auth.datasource.AuthRemoteDataSource
 import com.cabral.lucrovarejo.data.auth.datasource.StoreProfile
+import com.cabral.lucrovarejo.domain.auth.AuthFailure
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import javax.inject.Singleton
 import javax.inject.Inject
@@ -39,21 +40,35 @@ class AuthRepositoryImpl @Inject constructor(
         remoteDataSource.fetchDisplayName()?.trim()?.takeIf { it.isNotEmpty() }
 
     override suspend fun signIn(identifier: String, password: String) {
-        remoteDataSource.signIn(email = authEmail(identifier), password = password)
+        val value = identifier.trim()
+        val email = if (value.contains('@')) {
+            value
+        } else {
+            val storeName = value.lowercase(Locale.ROOT)
+            // Contas novas têm e-mail real no Auth; sem registro, é conta antiga com e-mail técnico.
+            val registered = try {
+                remoteDataSource.findEmailByStoreName(storeName)
+            } catch (exception: AuthFailure) {
+                null
+            }
+            registered ?: "$storeName@$LEGACY_AUTH_DOMAIN"
+        }
+        remoteDataSource.signIn(email = email, password = password)
     }
 
-    override suspend fun requestPasswordReset(email: String) {
-        remoteDataSource.requestPasswordReset(email.trim())
+    override suspend fun requestPasswordReset(identifier: String) {
+        val value = identifier.trim()
+        val email = if (value.contains('@')) {
+            value
+        } else {
+            remoteDataSource.findEmailByStoreName(value.lowercase(Locale.ROOT))
+        }
+        // Usuário inexistente também conclui sem erro, para não revelar quais lojas existem.
+        if (email != null) remoteDataSource.requestPasswordReset(email)
     }
 
     override fun signOut() {
         remoteDataSource.signOut()
-    }
-
-    // Contas antigas foram criadas com e-mail técnico derivado do usuário.
-    private fun authEmail(identifier: String): String {
-        val value = identifier.trim()
-        return if (value.contains('@')) value else "${value.lowercase(Locale.ROOT)}@$LEGACY_AUTH_DOMAIN"
     }
 
     private companion object {

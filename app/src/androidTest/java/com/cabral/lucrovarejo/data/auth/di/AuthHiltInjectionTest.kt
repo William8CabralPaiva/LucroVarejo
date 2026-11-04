@@ -64,4 +64,13 @@ class AuthHiltInjectionTest {
 
         assertEquals("contato@exemplo.com", fakeRemoteDataSource.resetEmail)
     }
+
+    @Test
+    fun passwordResetWithStoreNameUsesRegisteredEmail() = runTest {
+        fakeRemoteDataSource.emailsByStore["mi-loja.1"] = "contato@exemplo.com"
+
+        repository.requestPasswordReset(" Mi-Loja.1 ")
+
+        assertEquals("contato@exemplo.com", fakeRemoteDataSource.resetEmail)
+    }
 }

@@ -15,7 +15,7 @@ interface AuthRepository {
 
     suspend fun getStoreDisplayName(): String?
 
-    suspend fun requestPasswordReset(email: String)
+    suspend fun requestPasswordReset(identifier: String)
 
     fun signOut()
 }
