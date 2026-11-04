@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.product.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
 import com.cabral.lucrovarejo.data.product.model.ProductRecord
 import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
@@ -21,9 +22,9 @@ class FirebaseProductRemoteDataSource @Inject constructor(
     override suspend fun createProduct(request: ProductRequest): String {
         val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
-        val productDocument = firestore.collection(COLLECTION_STORES)
+        val productDocument = firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
-            .collection(COLLECTION_PRODUCTS)
+            .collection(FirestoreCollections.PRODUCTS)
             .document()
 
         productDocument.set(request.toFirestoreFields()).await()
@@ -41,9 +42,9 @@ class FirebaseProductRemoteDataSource @Inject constructor(
     private fun productDocument(key: String): DocumentReference {
         val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
-        return firestore.collection(COLLECTION_STORES)
+        return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
-            .collection(COLLECTION_PRODUCTS)
+            .collection(FirestoreCollections.PRODUCTS)
             .document(key)
     }
 
@@ -51,9 +52,9 @@ class FirebaseProductRemoteDataSource @Inject constructor(
         val storeKey = activeStore.currentStoreKey()
             ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
 
-        return firestore.collection(COLLECTION_STORES)
+        return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
-            .collection(COLLECTION_PRODUCTS)
+            .collection(FirestoreCollections.PRODUCTS)
             .snapshotFlow { snapshot ->
                 snapshot.documents
                     .map { document -> document.toProductRecord() }
@@ -102,8 +103,6 @@ class FirebaseProductRemoteDataSource @Inject constructor(
     }
 
     private companion object {
-        const val COLLECTION_STORES = "stores"
-        const val COLLECTION_PRODUCTS = "products"
         const val FIELD_COD = "cod"
         const val FIELD_NAME = "name"
         const val FIELD_COST = "cost"

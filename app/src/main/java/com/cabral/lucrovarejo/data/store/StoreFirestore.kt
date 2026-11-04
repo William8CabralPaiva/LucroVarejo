@@ -1,13 +1,11 @@
 package com.cabral.lucrovarejo.data.store
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.WriteBatch
 
 internal object StoreFirestore {
-    const val COLLECTION_STORES = "stores"
-    const val COLLECTION_MEMBERS = "members"
-    const val COLLECTION_USERS = "users"
     const val FIELD_EMAIL = "email"
     const val FIELD_DISPLAY_NAME = "displayName"
     const val FIELD_CREATED_AT = "createdAt"
@@ -15,7 +13,7 @@ internal object StoreFirestore {
     const val ROLE_OWNER = "OWNER"
 
     fun userStores(firestore: FirebaseFirestore, uid: String) =
-        firestore.collection(COLLECTION_USERS).document(uid).collection(COLLECTION_STORES)
+        firestore.collection(FirestoreCollections.USERS).document(uid).collection(FirestoreCollections.USER_STORES)
 
     // Loja + membro dono + atalho na lista de lojas do usuario, gravados de forma atomica.
     fun newStoreBatch(
@@ -25,7 +23,7 @@ internal object StoreFirestore {
         email: String,
         displayName: String
     ): WriteBatch {
-        val store = firestore.collection(COLLECTION_STORES).document(storeId)
+        val store = firestore.collection(FirestoreCollections.STORES).document(storeId)
         return firestore.batch()
             .set(
                 store,
@@ -36,7 +34,7 @@ internal object StoreFirestore {
                 )
             )
             .set(
-                store.collection(COLLECTION_MEMBERS).document(uid),
+                store.collection(FirestoreCollections.MEMBERS).document(uid),
                 mapOf(
                     FIELD_ROLE to ROLE_OWNER,
                     FIELD_CREATED_AT to FieldValue.serverTimestamp()

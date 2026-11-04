@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.store
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.domain.store.StoreRepository
 import com.cabral.lucrovarejo.domain.store.StoreSelection
 import com.cabral.lucrovarejo.domain.store.StoreSummary
@@ -41,7 +42,7 @@ class StoreRepositoryImpl @Inject constructor(
     override suspend fun createStore(displayName: String): StoreSummary {
         val user = auth.currentUser ?: error("No active session.")
         val name = displayName.trim()
-        val storeId = firestore.collection(StoreFirestore.COLLECTION_STORES).document().id
+        val storeId = firestore.collection(FirestoreCollections.STORES).document().id
         StoreFirestore.newStoreBatch(
             firestore = firestore,
             storeId = storeId,
@@ -57,7 +58,7 @@ class StoreRepositoryImpl @Inject constructor(
     }
 
     private suspend fun legacyStore(uid: String): StoreSummary? {
-        val snapshot = firestore.collection(StoreFirestore.COLLECTION_STORES)
+        val snapshot = firestore.collection(FirestoreCollections.STORES)
             .document(uid)
             .get()
             .await()

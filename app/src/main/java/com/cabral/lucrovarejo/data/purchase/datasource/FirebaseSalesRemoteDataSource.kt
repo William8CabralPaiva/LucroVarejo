@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.purchase.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
@@ -60,13 +61,11 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
         }
     }
 
-    private fun salesQuery(storeKey: String): Query = firestore.collection(COLLECTION_STORES)
+    private fun salesQuery(storeKey: String): Query = firestore.collection(FirestoreCollections.STORES)
         .document(storeKey)
-        .collection(COLLECTION_PURCHASES)
+        .collection(FirestoreCollections.PURCHASES)
 
     private companion object {
-        const val COLLECTION_STORES = "stores"
-        const val COLLECTION_PURCHASES = "purchases"
         const val FIELD_SALE_DATE = "sale_date"
     }
 }

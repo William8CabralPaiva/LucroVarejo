@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.payment.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRecord
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRequest
 import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
@@ -40,11 +41,11 @@ class FirebasePaymentMachineRemoteDataSource @Inject constructor(
     private fun tariffsCollection(terminalId: String): CollectionReference {
         val storeKey = activeStore.currentStoreKey()
             ?: throw PaymentFailure(PaymentFailure.Reason.UNAUTHENTICATED)
-        return firestore.collection(COLLECTION_STORES)
+        return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
-            .collection(COLLECTION_PAYMENT_TERMINALS)
+            .collection(FirestoreCollections.PAYMENT_TERMINALS)
             .document(terminalId)
-            .collection(COLLECTION_TARIFFS)
+            .collection(FirestoreCollections.TARIFFS)
     }
 
     private fun Query.snapshotFlow(
@@ -89,9 +90,4 @@ class FirebasePaymentMachineRemoteDataSource @Inject constructor(
         )
     }
 
-    private companion object {
-        const val COLLECTION_STORES = "stores"
-        const val COLLECTION_PAYMENT_TERMINALS = "paymentTerminals"
-        const val COLLECTION_TARIFFS = "tariffs"
-    }
 }

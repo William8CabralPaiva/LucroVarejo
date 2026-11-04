@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.auth.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
 import com.cabral.lucrovarejo.data.store.StoreFirestore
 import com.google.firebase.auth.FirebaseAuth
@@ -45,7 +46,7 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
 
     override suspend fun fetchDisplayName(): String? {
         val storeKey = activeStore.currentStoreKey() ?: return null
-        return firestore.collection(FIELD_STORES)
+        return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
             .get()
             .await()
@@ -55,7 +56,7 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
     override suspend fun updateDisplayName(displayName: String) {
         val uid = auth.currentUser?.uid ?: error("No active session.")
         val storeKey = activeStore.currentStoreKey() ?: error("No active session.")
-        firestore.collection(FIELD_STORES)
+        firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
             .update(FIELD_DISPLAY_NAME, displayName)
             .await()
@@ -80,7 +81,6 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
     }
 
     private companion object {
-        const val FIELD_STORES = "stores"
         const val FIELD_DISPLAY_NAME = "displayName"
     }
 }

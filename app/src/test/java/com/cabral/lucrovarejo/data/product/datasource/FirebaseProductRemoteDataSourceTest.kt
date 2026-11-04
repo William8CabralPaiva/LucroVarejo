@@ -94,7 +94,7 @@ class FirebaseProductRemoteDataSourceTest {
 
         `when`(auth.currentUser).thenReturn(user)
         `when`(user.uid).thenReturn("store-uid")
-        `when`(firestore.collection("stores")).thenReturn(stores)
+        `when`(firestore.collection(com.cabral.lucrovarejo.BuildConfig.STORES_COLLECTION)).thenReturn(stores)
         `when`(stores.document("store-uid")).thenReturn(store)
         `when`(store.collection("products")).thenReturn(products)
         `when`(products.document()).thenReturn(newDocument)

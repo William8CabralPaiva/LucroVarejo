@@ -23,18 +23,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /stores/{storeId} {
+    // stores_debug e usada pelas builds de debug, separada dos dados reais.
+    match /{storesCollection}/{storeId} {
+      function isStoresCollection() {
+        return storesCollection in ['stores', 'stores_debug'];
+      }
       // Lojas antigas usam o UID como id; as demais exigem o documento em members.
       function isMember() {
-        return request.auth != null
+        return isStoresCollection() && request.auth != null
           && (request.auth.uid == storeId
-            || exists(/databases/$(database)/documents/stores/$(storeId)/members/$(request.auth.uid)));
+            || exists(/databases/$(database)/documents/$(storesCollection)/$(storeId)/members/$(request.auth.uid)));
       }
       // Na criacao da loja, o membro dono e gravado no mesmo lote.
       function isCreatingOwnStore() {
-        return request.auth != null
+        return isStoresCollection() && request.auth != null
           && (request.auth.uid == storeId
-            || existsAfter(/databases/$(database)/documents/stores/$(storeId)/members/$(request.auth.uid)));
+            || existsAfter(/databases/$(database)/documents/$(storesCollection)/$(storeId)/members/$(request.auth.uid)));
       }
 
       allow create: if isCreatingOwnStore()
@@ -57,14 +61,15 @@ service cloud.firestore {
       allow list, delete: if false;
 
       match /members/{memberUid} {
-        allow get: if request.auth != null && request.auth.uid == memberUid;
+        allow get: if isStoresCollection() && request.auth != null && request.auth.uid == memberUid;
         // So o criador pode se registrar como dono, e apenas se a loja ainda nao existia.
-        allow create: if request.auth != null
+        allow create: if isStoresCollection()
+          && request.auth != null
           && request.auth.uid == memberUid
           && request.resource.data.keys().hasOnly(['role', 'createdAt'])
           && request.resource.data.role == 'OWNER'
-          && !exists(/databases/$(database)/documents/stores/$(storeId))
-          && existsAfter(/databases/$(database)/documents/stores/$(storeId));
+          && !exists(/databases/$(database)/documents/$(storesCollection)/$(storeId))
+          && existsAfter(/databases/$(database)/documents/$(storesCollection)/$(storeId));
         allow list, update, delete: if false;
       }
 
