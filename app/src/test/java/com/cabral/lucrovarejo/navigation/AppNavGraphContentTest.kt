@@ -59,6 +59,52 @@ class AppNavGraphContentTest {
         composeRule.onNodeWithText("Test home").assertIsDisplayed()
     }
 
+    @Test
+    fun forgotPasswordRouteOpensAndGoesBack() {
+        composeRule.setContent {
+            AppNavGraphContent(
+                navController = rememberNavController(),
+                startDestination = NotLoggedRoutes.LOGIN,
+                isUserAuthenticated = false,
+                onSignOut = {},
+                splashScreen = {},
+                loginScreen = { _, _, goToForgotPassword ->
+                    TestAction("Test login", goToForgotPassword)
+                },
+                registerScreen = { _, _ -> },
+                loggedFlowScreen = {},
+                forgotPasswordScreen = { onBack -> TestAction("Test forgot", onBack) }
+            )
+        }
+
+        composeRule.onNodeWithText("Test login").performClick()
+        composeRule.onNodeWithText("Test forgot").assertIsDisplayed()
+
+        composeRule.onNodeWithText("Test forgot").performClick()
+        composeRule.onNodeWithText("Test login").assertIsDisplayed()
+    }
+
+    @Test
+    fun registrationBackReturnsToLogin() {
+        composeRule.setContent {
+            AppNavGraphContent(
+                navController = rememberNavController(),
+                startDestination = NotLoggedRoutes.LOGIN,
+                isUserAuthenticated = false,
+                onSignOut = {},
+                splashScreen = {},
+                loginScreen = { goToRegister, _, _ -> TestAction("Test login", goToRegister) },
+                registerScreen = { goBack, _ -> TestAction("Go back to login", goBack) },
+                loggedFlowScreen = {}
+            )
+        }
+
+        composeRule.onNodeWithText("Test login").performClick()
+        composeRule.onNodeWithText("Go back to login").performClick()
+
+        composeRule.onNodeWithText("Test login").assertIsDisplayed()
+    }
+
     private fun setTestGraph(
         isUserAuthenticated: Boolean,
         onSignOut: () -> Unit = {},
