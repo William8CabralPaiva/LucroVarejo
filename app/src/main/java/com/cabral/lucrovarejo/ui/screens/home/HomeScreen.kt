@@ -87,7 +87,7 @@ fun HomeContent(
 ) {
     Scaffold(
         modifier = modifier,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     )
     { innerPadding ->
         Column(

@@ -71,6 +71,7 @@ fun MachineListContent(
     Scaffold(
         modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddTerminal,
