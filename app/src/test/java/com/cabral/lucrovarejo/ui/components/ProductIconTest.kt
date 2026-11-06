@@ -36,6 +36,12 @@ class ProductIconTest {
     }
 
     @Test
+    fun umbrellaKeywordsUseUmbrella() {
+        listOf("Guarda chuva", "Guarda-chuva", "Guardachuva", "GUARDA-CHUVA grande", "Sombrinha", "Pontaria")
+            .forEach { assertSame(it, UmbrellaIcon, productIconFor(it)) }
+    }
+
+    @Test
     fun matchingIgnoresCase() {
         assertSame(Icons.Outlined.ShoppingBag, productIconFor("BOLSA"))
         assertSame(SockIcon, productIconFor("MEIAS"))
