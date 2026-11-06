@@ -1,5 +1,10 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -34,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import com.cabral.lucrovarejo.R
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -42,10 +46,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.store.StoreSummary
+import com.cabral.lucrovarejo.ui.components.COIN_SWAP_MS
+import com.cabral.lucrovarejo.ui.components.CoinTransition
 import com.cabral.lucrovarejo.ui.components.StoreNameDialog
 import com.cabral.lucrovarejo.ui.components.SwitchStoreDialog
 import com.cabral.lucrovarejo.ui.screens.addpurchase.AddPurchaseScreen
@@ -85,7 +92,10 @@ internal fun LoggedFlow(
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
 ) {
     val navController = rememberNavController()
-    val navigator = remember(navController) { LoggedNavigator(navController) }
+    val navigator = remember(navController) {
+        LoggedNavigator(navController)
+    }
+
     val currentRoute = navController.currentBackStackEntryAsState()
         .value
         ?.destination
@@ -93,22 +103,31 @@ internal fun LoggedFlow(
         ?: LoggedRoutes.HOME
 
     val isDark = LocalIsDarkTheme.current
-    val scaffoldContainerColor = if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
+    val scaffoldContainerColor =
+        if (isDark) ForestGreenHeader else MaterialTheme.colorScheme.primary
+
     var machineTourActive by remember { mutableStateOf(false) }
     var showSwitchStoreDialog by remember { mutableStateOf(false) }
     var showCreateStoreDialog by remember { mutableStateOf(false) }
     // Sair do formulario por outro caminho (ex.: seta de voltar) encerra o tour.
     LaunchedEffect(currentRoute) {
-        if (currentRoute != LoggedRoutes.ADD_MACHINE) machineTourActive = false
+        if (currentRoute != LoggedRoutes.ADD_MACHINE) {
+            machineTourActive = false
+        }
     }
+
     val startMachineTour = {
         machineTourActive = true
         navigator.navigateTo(LoggedRoutes.ADD_MACHINE)
     }
+
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
     val showMessage: (String) -> Unit = { message ->
-        scope.launch { snackBarHostState.showSnackbar(message) }
+        scope.launch {
+            snackBarHostState.showSnackbar(message)
+        }
     }
 
     Scaffold(
@@ -126,7 +145,9 @@ internal fun LoggedFlow(
             LoggedRouteTopBar(
                 route = currentRoute,
                 homeTitle = storeName,
-                onSwitchStore = { showSwitchStoreDialog = true },
+                onSwitchStore = {
+                    showSwitchStoreDialog = true
+                },
                 onBackPress = navigator::navigateBack
             )
         },
@@ -136,10 +157,16 @@ internal fun LoggedFlow(
         // está saindo na animação não muda de tamanho.
         val density = LocalDensity.current
         var barHeight by remember { mutableStateOf(0.dp) }
-        val tabBottomPadding = (barHeight - WindowInsets.navigationBars.asPaddingValues()
-            .calculateBottomPadding()).coerceAtLeast(0.dp)
+
+        val tabBottomPadding = (
+                barHeight - WindowInsets.navigationBars
+                    .asPaddingValues()
+                    .calculateBottomPadding()
+                ).coerceAtLeast(0.dp)
+
         Box(modifier = Modifier.fillMaxSize()) {
-            // Faixa verde só atrás dos cantos arredondados; o resto do fundo é surface, sem flash verde.
+
+            // Faixa verde atrás dos cantos arredondados.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -147,14 +174,17 @@ internal fun LoggedFlow(
                     .height(20.dp)
                     .background(scaffoldContainerColor)
             )
+
             Surface(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    //keyboard screen
                     .consumeWindowInsets(innerPadding)
                     .imePadding(),
-                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                shape = RoundedCornerShape(
+                    topStart = 20.dp,
+                    topEnd = 20.dp
+                ),
                 color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 4.dp
             ) {
@@ -170,7 +200,9 @@ internal fun LoggedFlow(
                     salesViewModel = salesViewModel,
                     productViewModel = productViewModel,
                     storeName = storeName,
-                    onOpenSwitchStore = { showSwitchStoreDialog = true },
+                    onOpenSwitchStore = {
+                        showSwitchStoreDialog = true
+                    },
                     onShowTips = startMachineTour,
                     machineTourActive = machineTourActive,
                     onMachineTourFinish = {
@@ -180,12 +212,23 @@ internal fun LoggedFlow(
                     onUpdateStoreName = onUpdateStoreName
                 )
             }
+
+            // Animação exclusiva do cadastro de venda.
+            CoinTransition(
+                trigger = currentRoute,
+                enabled = currentRoute == LoggedRoutes.ADD_PURCHASE
+            )
+
             Box(modifier = Modifier.align(Alignment.BottomCenter)) {
                 BottomNavBar(
                     currentRoute = currentRoute,
                     onNavigate = navigator::navigateToTab,
                     modifier = Modifier.onSizeChanged { size ->
-                        if (size.height > 0) barHeight = with(density) { size.height.toDp() }
+                        if (size.height > 0) {
+                            barHeight = with(density) {
+                                size.height.toDp()
+                            }
+                        }
                     }
                 )
             }
@@ -204,7 +247,9 @@ internal fun LoggedFlow(
                 showSwitchStoreDialog = false
                 showCreateStoreDialog = true
             },
-            onDismiss = { showSwitchStoreDialog = false }
+            onDismiss = {
+                showSwitchStoreDialog = false
+            }
         )
     }
 
@@ -214,19 +259,30 @@ internal fun LoggedFlow(
             title = R.string.settings_create_store_dialog_title,
             errorMessage = R.string.settings_create_store_error,
             onSave = onCreateStore,
-            onDismiss = { showCreateStoreDialog = false }
+            onDismiss = {
+                showCreateStoreDialog = false
+            }
         )
     }
+
     if (showTips) {
         AlertDialog(
             onDismissRequest = onDismissTips,
-            title = { Text(stringResource(R.string.coach_tour_prompt_title)) },
-            text = { Text(stringResource(R.string.coach_tour_prompt_text)) },
+            title = {
+                Text(stringResource(R.string.coach_tour_prompt_title))
+            },
+            text = {
+                Text(stringResource(R.string.coach_tour_prompt_text))
+            },
             confirmButton = {
-                TextButton(onClick = {
-                    onDismissTips()
-                    startMachineTour()
-                }) { Text(stringResource(R.string.coach_tour_prompt_confirm)) }
+                TextButton(
+                    onClick = {
+                        onDismissTips()
+                        startMachineTour()
+                    }
+                ) {
+                    Text(stringResource(R.string.coach_tour_prompt_confirm))
+                }
             },
             dismissButton = {
                 TextButton(onClick = onDismissTips) {
@@ -236,6 +292,7 @@ internal fun LoggedFlow(
         )
     }
 }
+
 
 @Composable
 private fun LoggedDestinationNavHost(
@@ -256,13 +313,45 @@ private fun LoggedDestinationNavHost(
     onMachineTourFinish: () -> Unit,
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit,
 ) {
-    // O Home recebe novas vendas por Flow (listener do Firestore); por isso a navegacao nao
-    // precisa sinalizar "salvou" nem pedir refresh ao voltar do cadastro.
+    // O Home recebe novas vendas por Flow do Firestore.
     NavHost(
         navController = navController,
         startDestination = LoggedRoutes.HOME,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+
+        enterTransition = {
+            if (targetState.destination.route == LoggedRoutes.ADD_PURCHASE) {
+                fadeIn(tween(1, delayMillis = COIN_SWAP_MS))
+            } else {
+                EnterTransition.None
+            }
+        },
+
+        exitTransition = {
+            if (targetState.destination.route == LoggedRoutes.ADD_PURCHASE) {
+                fadeOut(tween(1, delayMillis = COIN_SWAP_MS))
+            } else {
+                ExitTransition.None
+            }
+        },
+
+        popEnterTransition = {
+            if (targetState.destination.route == LoggedRoutes.ADD_PURCHASE) {
+                fadeIn(tween(1, delayMillis = COIN_SWAP_MS))
+            } else {
+                EnterTransition.None
+            }
+        },
+
+        popExitTransition = {
+            if (targetState.destination.route == LoggedRoutes.ADD_PURCHASE) {
+                fadeOut(tween(1, delayMillis = COIN_SWAP_MS))
+            } else {
+                ExitTransition.None
+            }
+        }
     ) {
+
         composable(LoggedRoutes.HOME) {
             Box(Modifier.padding(bottom = tabBottomPadding)) {
                 HomeScreen(
@@ -291,7 +380,9 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.PRODUCTS) {
             Box(Modifier.padding(bottom = tabBottomPadding)) {
                 ProductScreen(
-                    onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                    onAddProduct = {
+                        navigator.navigateTo(LoggedRoutes.ADD_PRODUCT)
+                    },
                     onEditProduct = navigator::navigateToEditProduct,
                     viewModel = productViewModel
                 )
@@ -305,8 +396,12 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.SALES) {
             Box(Modifier.padding(bottom = tabBottomPadding)) {
                 SalesScreen(
-                    onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
-                    onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                    onAddPurchase = {
+                        navigator.navigateTo(LoggedRoutes.ADD_PURCHASE)
+                    },
+                    onAddProduct = {
+                        navigator.navigateTo(LoggedRoutes.ADD_PRODUCT)
+                    },
                     onEditPurchase = navigator::navigateToEditPurchase,
                     viewModel = salesViewModel
                 )
@@ -322,10 +417,10 @@ private fun LoggedDestinationNavHost(
             )
         }
 
-        //NÃ£o descomentar
-//        composable(LoggedRoutes.SUMMARY) {
-//            SummaryScreen()
-//        }
+        // Não descomentar.
+        // composable(LoggedRoutes.SUMMARY) {
+        //     SummaryScreen()
+        // }
 
         composable(LoggedRoutes.CONFIG) {
             Box(Modifier.padding(bottom = tabBottomPadding)) {
@@ -333,7 +428,9 @@ private fun LoggedDestinationNavHost(
                     currentThemeMode = currentThemeMode,
                     onThemeModeChange = onThemeModeChange,
                     onLogout = onLogout,
-                    onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
+                    onNavigateToTerminals = {
+                        navigator.navigateTo(LoggedRoutes.MACHINE_LIST)
+                    },
                     storeName = storeName,
                     onOpenSwitchStore = onOpenSwitchStore,
                     onShowTips = onShowTips,
@@ -344,7 +441,9 @@ private fun LoggedDestinationNavHost(
 
         composable(LoggedRoutes.MACHINE_LIST) {
             MachineListScreen(
-                onAddTerminal = { navigator.navigateTo(LoggedRoutes.ADD_MACHINE) },
+                onAddTerminal = {
+                    navigator.navigateTo(LoggedRoutes.ADD_MACHINE)
+                },
                 onEditTerminal = navigator::navigateToEditTerminal
             )
         }
@@ -374,6 +473,7 @@ private fun LoggedDestinationNavHost(
             val slot = navController.previousBackStackEntry
                 ?.savedStateHandle
                 ?.get<PaymentMachineHistoryArgs>(LoggedNavigator.TARIFF_SLOT_KEY)
+
             if (slot != null) {
                 MachineHistoryScreen(slot = slot)
             }
@@ -381,10 +481,11 @@ private fun LoggedDestinationNavHost(
     }
 }
 
+
 private class LoggedNavigator(
     private val navController: NavHostController,
 ) {
-    // Abas da bottom navigation: nunca empilham uma sobre a outra, apenas trocam de aba.
+    // Abas da bottom navigation: não empilham uma sobre a outra.
     fun navigateToTab(route: String) {
         navController.navigate(route) {
             launchSingleTop = true
@@ -395,29 +496,42 @@ private class LoggedNavigator(
         }
     }
 
-    // Telas fora da bottom navigation: abrem por cima da atual e o voltar retorna a ela.
+    // Telas fora da bottom navigation.
     fun navigateTo(route: String) {
-        navController.navigate(route) { launchSingleTop = true }
+        navController.navigate(route) {
+            launchSingleTop = true
+        }
     }
 
-    // O produto vai no SavedStateHandle da tela atual e a tela de edicao le pelo previousBackStackEntry.
     fun navigateToEditProduct(product: ProductModel) {
-        navController.currentBackStackEntry?.savedStateHandle?.set(PRODUCT_TO_EDIT_KEY, product)
+        navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.set(PRODUCT_TO_EDIT_KEY, product)
+
         navigateTo(LoggedRoutes.EDIT_PRODUCT)
     }
 
     fun navigateToEditPurchase(purchase: PurchaseModel) {
-        navController.currentBackStackEntry?.savedStateHandle?.set(PURCHASE_TO_EDIT_KEY, purchase)
+        navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.set(PURCHASE_TO_EDIT_KEY, purchase)
+
         navigateTo(LoggedRoutes.EDIT_SALES)
     }
 
     fun navigateToEditTerminal(terminal: PaymentTerminalModel) {
-        navController.currentBackStackEntry?.savedStateHandle?.set(TERMINAL_TO_EDIT_KEY, terminal)
+        navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.set(TERMINAL_TO_EDIT_KEY, terminal)
+
         navigateTo(LoggedRoutes.EDIT_MACHINE)
     }
 
     fun navigateToMachineHistory(slot: PaymentMachineHistoryArgs) {
-        navController.currentBackStackEntry?.savedStateHandle?.set(TARIFF_SLOT_KEY, slot)
+        navController.currentBackStackEntry
+            ?.savedStateHandle
+            ?.set(TARIFF_SLOT_KEY, slot)
+
         navigateTo(LoggedRoutes.MACHINE_HISTORY)
     }
 
@@ -425,7 +539,7 @@ private class LoggedNavigator(
         navController.popBackStack()
     }
 
-    // Volta direto para Configuracoes, descartando a lista de maquininhas e o formulario.
+    // Volta diretamente para Configurações.
     fun navigateBackToConfig() {
         if (!navController.popBackStack(LoggedRoutes.CONFIG, inclusive = false)) {
             navController.popBackStack()
