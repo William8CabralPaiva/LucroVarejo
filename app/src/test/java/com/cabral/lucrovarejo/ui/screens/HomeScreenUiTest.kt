@@ -53,7 +53,7 @@ class HomeScreenUiTest {
         composeRule.onNodeWithText("R$ 8.450,00").assertIsDisplayed()
         composeRule.onNodeWithText("32 produtos vendidos").assertIsDisplayed()
         composeRule.onNodeWithText("Custo mensal").assertIsDisplayed()
-        composeRule.onNodeWithText("R$ 5.200,00").assertIsDisplayed()
+        composeRule.onNodeWithText("R$ 5.200,00").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Tarifas da Maquininha").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 125,00").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Lucro mensal").assertIsDisplayed()

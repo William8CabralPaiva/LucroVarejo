@@ -1,5 +1,8 @@
 package com.cabral.lucrovarejo.ui.screens.home
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +17,9 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.PointOfSale
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -90,55 +95,46 @@ fun HomeContent(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            MonthYearSelector(
-                year = state.year,
-                month = state.month,
-                onMonthYearChange = onMonthYearChange
-            )
-
-            state.errorMessage?.let { error ->
-                Text(
-                    text = stringResource(error),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-            } else if (state.errorMessage == null) {
-                val summary = state.summary
-                AlertPurchase(
-                    price = summary.totalSales.toCurrencyAmount(),
-                    productsSize = summary.productsSold.toInt(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if(summary.totalTariff > 0) {
-                    AlertPurchase(
-                        price = summary.totalTariff.toCurrencyAmount(),
-                        productsSize = 0,
-                        titleRes = R.string.alert_tariff_title,
-                        icon = Icons.Outlined.PointOfSale,
-                        containerColor = DestructiveRed,
-                        contentColor = Color.White,
-                        showProductsInfo = false,
-                        showTrendIcon = false,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // A borda agrupa o que muda com o mês; as últimas vendas ficam fora, sem filtro.
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    AlertPrice(
-                        price = summary.totalCost.toCurrencyAmount(),
-                        state = AlertPriceState.PURCHASE,
-                        modifier = Modifier.weight(1f)
+                    MonthYearSelector(
+                        year = state.year,
+                        month = state.month,
+                        onMonthYearChange = onMonthYearChange
                     )
-                    AlertPrice(
-                        price = summary.totalProfit.toCurrencyAmount(),
-                        state = AlertPriceState.PROFIT,
-                        modifier = Modifier.weight(1f)
-                    )
+
+                    state.errorMessage?.let { error ->
+                        Text(
+                            text = stringResource(error),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    if (state.isLoading && state.summary == MonthlyPurchaseSummary()) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    } else if (state.errorMessage == null) {
+                        // Mantém o resumo anterior durante a troca de mês e faz a transição dos valores.
+                        Crossfade(
+                            targetState = state.summary,
+                            animationSpec = tween(durationMillis = 300),
+                            label = "monthly-summary"
+                        ) { summary ->
+                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                MonthlySummaryContent(summary)
+                            }
+                        }
+                        if (state.isLoading) {
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                        }
+                    }
                 }
             }
 
@@ -149,6 +145,43 @@ fun HomeContent(
                 onShowAll = goToSalesScreen,
             )
         }
+    }
+}
+
+@Composable
+private fun MonthlySummaryContent(summary: MonthlyPurchaseSummary) {
+    AlertPurchase(
+        price = summary.totalSales.toCurrencyAmount(),
+        productsSize = summary.productsSold.toInt(),
+        modifier = Modifier.fillMaxWidth()
+    )
+    if (summary.totalTariff > 0) {
+        AlertPurchase(
+            price = summary.totalTariff.toCurrencyAmount(),
+            productsSize = 0,
+            titleRes = R.string.alert_tariff_title,
+            icon = Icons.Outlined.PointOfSale,
+            containerColor = DestructiveRed,
+            contentColor = Color.White,
+            showProductsInfo = false,
+            showTrendIcon = false,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        AlertPrice(
+            price = summary.totalCost.toCurrencyAmount(),
+            state = AlertPriceState.PURCHASE,
+            modifier = Modifier.weight(1f)
+        )
+        AlertPrice(
+            price = summary.totalProfit.toCurrencyAmount(),
+            state = AlertPriceState.PROFIT,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
