@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.data.product
 import com.cabral.lucrovarejo.data.product.datasource.ProductRemoteDataSource
 import com.cabral.lucrovarejo.data.product.model.ProductRecord
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import java.math.BigDecimal
 import kotlinx.coroutines.flow.Flow
@@ -66,8 +66,8 @@ class ProductRepositoryImplTest {
         dataSource.failure = IllegalStateException("unavailable")
         val failure = runCatching { repository.observeProducts().first() }.exceptionOrNull()
 
-        assertTrue(failure is ProductFailure)
-        assertEquals(ProductFailure.Reason.UNKNOWN, (failure as ProductFailure).reason)
+        assertTrue(failure is DataFailure)
+        assertEquals(DataFailure.Reason.UNKNOWN, (failure as DataFailure).reason)
     }
 
     private fun product(key: String? = null) = ProductModel(

@@ -9,30 +9,36 @@ import org.junit.Test
 
 class AuthUseCasesTest {
     @Test
-    fun registerNormalizesStoreNameAndTrimsEmail() = runTest {
-        // Given: a use case backed by a fake auth repository.
-        val repository = FakeAuthRepository()
+    fun     registerTrimsEmailAndDisplayName() = runTest {
+            val repository = FakeAuthRepository()
 
-        // When: registering with mixed-case store name and padded email.
-        RegisterStoreUseCase(repository)(" My-Store.1 ", " owner@example.com ", "secret1")
+            RegisterStoreUseCase(repository)(" owner@example.com ", "secret1", " Minha Loja ")
 
-        // Then: normalized values are sent to the repository.
-        assertEquals("my-store.1", repository.registeredStore)
-        assertEquals("owner@example.com", repository.registeredEmail)
+            assertEquals("owner@example.com", repository.registeredEmail)
         assertEquals("secret1", repository.registeredPassword)
+        assertEquals("Minha Loja", repository.registeredDisplayName)
     }
 
     @Test
-    fun signInNormalizesStoreNameButKeepsPassword() = runTest {
+    fun signInTrimsEmailButKeepsPassword() = runTest {
         // Given: a sign-in use case backed by a fake repository.
         val repository = FakeAuthRepository()
 
         // When: signing in with a mixed-case store name.
-        SignInUseCase(repository)(" My-Store.1 ", "secret1")
+        SignInUseCase(repository)(" owner@example.com ", "secret1")
 
         // Then: only the store name is normalized.
-        assertEquals("my-store.1", repository.signedInStore)
+        assertEquals("owner@example.com", repository.signedInStore)
         assertEquals("secret1", repository.signedInPassword)
+    }
+
+    @Test
+    fun requestPasswordResetTrimsEmail() = runTest {
+        val repository = FakeAuthRepository()
+
+        RequestPasswordResetUseCase(repository)(" owner@example.com ")
+
+        assertEquals("owner@example.com", repository.resetEmail)
     }
 
     @Test
@@ -53,22 +59,35 @@ class AuthUseCasesTest {
     private class FakeAuthRepository : AuthRepository {
         override var hasSession: Boolean = false
         override var storeKey: String? = null
-        var registeredStore: String? = null
         var registeredEmail: String? = null
         var registeredPassword: String? = null
+        var registeredDisplayName: String? = null
         var signedInStore: String? = null
         var signedInPassword: String? = null
         var signedOut = false
+        var resetEmail: String? = null
 
-        override suspend fun registerStore(storeName: String, email: String, password: String) {
-            registeredStore = storeName
+        override suspend fun registerStore(
+            email: String,
+            password: String,
+            displayName: String
+        ) {
             registeredEmail = email
             registeredPassword = password
+            registeredDisplayName = displayName
         }
 
-        override suspend fun signIn(storeName: String, password: String) {
-            signedInStore = storeName
+        override suspend fun getStoreDisplayName(): String? = null
+
+        override suspend fun updateStoreDisplayName(displayName: String) = Unit
+
+        override suspend fun         signIn(email: String, password: String) {
+                    signedInStore = email
             signedInPassword = password
+        }
+
+        override suspend fun         requestPasswordReset(email: String) {
+                    resetEmail = email
         }
 
         override fun signOut() {

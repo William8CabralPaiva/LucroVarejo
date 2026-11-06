@@ -7,6 +7,8 @@ import com.cabral.lucrovarejo.navigation.LoggedRoutes
 import com.cabral.lucrovarejo.navigation.NotLoggedRoutes
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import com.cabral.lucrovarejo.ui.store.StoreViewModel
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -31,6 +33,8 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var signOut: SignOutUseCase
+
+    private val storeViewModel: StoreViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -63,9 +67,10 @@ class MainActivity : ComponentActivity() {
                             NotLoggedRoutes.LOGIN
                         },
                         isUserAuthenticated = isUserAuthenticated,
+                        storeViewModel = storeViewModel,
                         onSignOut = { signOut() },
                         currentThemeMode = themeMode,
-                        onThemeModeChanged = { newMode ->
+                        onThemeModeChange = { newMode ->
                             themeMode = newMode
                             themePreferences.edit {
                                 putString(THEME_MODE_KEY, newMode.name)

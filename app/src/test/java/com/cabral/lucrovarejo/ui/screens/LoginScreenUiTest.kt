@@ -15,7 +15,8 @@ import com.cabral.lucrovarejo.ui.components.LOADING_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.LOADING_INDICATOR_TAG
 import com.cabral.lucrovarejo.ui.screens.login.LOGIN_PASSWORD_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.login.LOGIN_REGISTER_BUTTON_TAG
-import com.cabral.lucrovarejo.ui.screens.login.LOGIN_STORE_NAME_FIELD_TAG
+import com.cabral.lucrovarejo.ui.screens.login.LOGIN_EMAIL_FIELD_TAG
+import com.cabral.lucrovarejo.ui.screens.login.LOGIN_FORGOT_PASSWORD_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreenContent
 import com.cabral.lucrovarejo.ui.screens.login.LoginUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -27,7 +28,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
+@Config(sdk = [35], qualifiers = "w411dp-h891dp")
 class LoginScreenUiTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -38,7 +39,7 @@ class LoginScreenUiTest {
             LucroVarejoTheme {
                 LoginScreenContent(
                     state = LoginUiState(),
-                    onStoreNameChange = {},
+                    onEmailChange = {},
                     onPasswordChange = {},
                     onSubmit = {},
                     onRegister = {}
@@ -46,8 +47,7 @@ class LoginScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithText("Login").assertIsDisplayed()
-        composeRule.onNodeWithTag(LOGIN_STORE_NAME_FIELD_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(LOGIN_REGISTER_BUTTON_TAG).assertIsDisplayed()
@@ -55,7 +55,7 @@ class LoginScreenUiTest {
 
     @Test
     fun forwardsInputAndEnablesSignInAndRegisterNavigation() {
-        var storeName = ""
+        var email = ""
         var password = ""
         var submitCount = 0
         var registerCount = 0
@@ -64,9 +64,9 @@ class LoginScreenUiTest {
                 var state by remember { mutableStateOf(LoginUiState()) }
                 LoginScreenContent(
                     state = state,
-                    onStoreNameChange = {
-                        storeName = it
-                        state = state.copy(storeName = it)
+                    onEmailChange = {
+                        email = it
+                        state = state.copy(email = it)
                     },
                     onPasswordChange = {
                         password = it
@@ -78,17 +78,38 @@ class LoginScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(LOGIN_STORE_NAME_FIELD_TAG).performTextInput("minhaloja")
+        composeRule.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).performTextInput("minhaloja@exemplo.com")
         composeRule.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).performTextInput("senha123")
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performClick()
         composeRule.onNodeWithTag(LOGIN_REGISTER_BUTTON_TAG).performClick()
 
         composeRule.runOnIdle {
-            assertEquals("minhaloja", storeName)
+            assertEquals("minhaloja@exemplo.com", email)
             assertEquals("senha123", password)
             assertEquals(1, submitCount)
             assertEquals(1, registerCount)
         }
+    }
+
+    @Test
+    fun forgotPasswordButtonTriggersNavigation() {
+        var forgotCount = 0
+        composeRule.setContent {
+            LucroVarejoTheme {
+                LoginScreenContent(
+                    state = LoginUiState(),
+                    onEmailChange = {},
+                    onPasswordChange = {},
+                    onSubmit = {},
+                    onRegister = {},
+                    onForgotPassword = { forgotCount++ }
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(LOGIN_FORGOT_PASSWORD_BUTTON_TAG).performClick()
+
+        composeRule.runOnIdle { assertEquals(1, forgotCount) }
     }
 
     @Test
@@ -97,11 +118,11 @@ class LoginScreenUiTest {
             LucroVarejoTheme {
                 LoginScreenContent(
                     state = LoginUiState(
-                        storeName = "minhaloja",
+                        email = "minhaloja@exemplo.com",
                         password = "senha123",
                         isLoading = true
                     ),
-                    onStoreNameChange = {},
+                    onEmailChange = {},
                     onPasswordChange = {},
                     onSubmit = {},
                     onRegister = {}
@@ -109,7 +130,7 @@ class LoginScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(LOGIN_STORE_NAME_FIELD_TAG).assertIsNotEnabled()
+        composeRule.onNodeWithTag(LOGIN_EMAIL_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(LOGIN_PASSWORD_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(LOADING_INDICATOR_TAG).assertIsDisplayed()
@@ -121,7 +142,7 @@ class LoginScreenUiTest {
             LucroVarejoTheme {
                 LoginScreenContent(
                     state = LoginUiState(errorMessage = "Não foi possível entrar com esses dados."),
-                    onStoreNameChange = {},
+                    onEmailChange = {},
                     onPasswordChange = {},
                     onSubmit = {},
                     onRegister = {}

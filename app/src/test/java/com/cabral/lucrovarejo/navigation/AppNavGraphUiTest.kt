@@ -54,7 +54,8 @@ class AppNavGraphUiTest {
                     startDestination = LoggedRoutes.HOME,
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
-                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                        ObserveSalesChangesUseCase(EmptySalesRepository()),
+                        GetProductsUseCase(EmptyProductRepository())
                     ),
                     productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
                     homeViewModel = HomeViewModel(
@@ -71,7 +72,7 @@ class AppNavGraphUiTest {
         composeRule.onNodeWithText("Buscar produto...").assertIsDisplayed()
 
         composeRule.onNodeWithText("Produtos").performClick()
-        composeRule.onNodeWithText("Nenhum produto encontrado.").assertIsDisplayed()
+        composeRule.onNodeWithText("Nenhum produto cadastrado").assertIsDisplayed()
 
         composeRule.onNodeWithText("Configurações").performClick()
         composeRule.onNodeWithText("Modo escuro").assertIsDisplayed()
@@ -117,10 +118,11 @@ class AppNavGraphUiTest {
                     isUserAuthenticated = true,
                     onSignOut = {},
                     currentThemeMode = ThemeMode.LIGHT,
-                    onThemeModeChanged = {},
+                    onThemeModeChange = {},
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
-                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                        ObserveSalesChangesUseCase(EmptySalesRepository()),
+                        GetProductsUseCase(EmptyProductRepository())
                     ),
                     productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
                     homeViewModel = HomeViewModel(

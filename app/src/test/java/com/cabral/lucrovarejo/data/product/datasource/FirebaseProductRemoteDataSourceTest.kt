@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.data.product.datasource
 
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -27,7 +27,7 @@ class FirebaseProductRemoteDataSourceTest {
     @Test
     fun createsUpdatesAndDeletesProductsForTheAuthenticatedStore() = runTest {
         val firebase = firebaseWithAuthenticatedStore()
-        val dataSource = FirebaseProductRemoteDataSource(firebase.auth, firebase.firestore)
+        val dataSource = FirebaseProductRemoteDataSource({ "store-uid" }, firebase.firestore)
         val request = ProductRequest("A-1", "Produto", 1234, "Descricao")
 
         assertEquals("product-1", dataSource.createProduct(request))
@@ -42,7 +42,7 @@ class FirebaseProductRemoteDataSourceTest {
     @Test
     fun requiresAuthenticationForEveryProductOperation() = runTest {
         val dataSource = FirebaseProductRemoteDataSource(
-            mock(FirebaseAuth::class.java),
+            { null },
             mock(FirebaseFirestore::class.java)
         )
         val request = ProductRequest("A-1", "Produto", 1234, "Descricao")
@@ -50,7 +50,7 @@ class FirebaseProductRemoteDataSourceTest {
         assertUnauthenticated { dataSource.createProduct(request) }
         assertUnauthenticated { dataSource.updateProduct("product-1", request) }
         assertUnauthenticated { dataSource.deleteProduct("product-1") }
-        assertTrue(runCatching { dataSource.observeProducts() }.exceptionOrNull() is ProductFailure)
+        assertTrue(runCatching { dataSource.observeProducts() }.exceptionOrNull() is DataFailure)
     }
 
     @Test
@@ -68,7 +68,7 @@ class FirebaseProductRemoteDataSourceTest {
             registration
         }.`when`(firebase.products).addSnapshotListener(org.mockito.ArgumentMatchers.any())
 
-        val records = FirebaseProductRemoteDataSource(firebase.auth, firebase.firestore)
+        val records = FirebaseProductRemoteDataSource({ "store-uid" }, firebase.firestore)
             .observeProducts()
             .first()
 
@@ -78,8 +78,8 @@ class FirebaseProductRemoteDataSourceTest {
 
     private suspend fun assertUnauthenticated(operation: suspend () -> Unit) {
         val failure = runCatching { operation() }.exceptionOrNull()
-        assertTrue(failure is ProductFailure)
-        assertEquals(ProductFailure.Reason.UNAUTHENTICATED, (failure as ProductFailure).reason)
+        assertTrue(failure is DataFailure)
+        assertEquals(DataFailure.Reason.UNAUTHENTICATED, (failure as DataFailure).reason)
     }
 
     private fun firebaseWithAuthenticatedStore(): FirebaseObjects {
@@ -94,7 +94,7 @@ class FirebaseProductRemoteDataSourceTest {
 
         `when`(auth.currentUser).thenReturn(user)
         `when`(user.uid).thenReturn("store-uid")
-        `when`(firestore.collection("stores")).thenReturn(stores)
+        `when`(firestore.collection(com.cabral.lucrovarejo.BuildConfig.STORES_COLLECTION)).thenReturn(stores)
         `when`(stores.document("store-uid")).thenReturn(store)
         `when`(store.collection("products")).thenReturn(products)
         `when`(products.document()).thenReturn(newDocument)

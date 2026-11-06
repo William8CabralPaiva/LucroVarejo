@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase.datasource
 
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.CollectionReference
@@ -67,10 +67,10 @@ class FirebaseSalesRemoteDataSourceTest {
             dataSource.observeSalesChanges(null, null)
         }.exceptionOrNull()
 
-        assertTrue(fetchFailure is PurchaseFailure)
-        assertEquals(PurchaseFailure.Reason.UNAUTHENTICATED, (fetchFailure as PurchaseFailure).reason)
-        assertTrue(observeFailure is PurchaseFailure)
-        assertEquals(PurchaseFailure.Reason.UNAUTHENTICATED, (observeFailure as PurchaseFailure).reason)
+        assertTrue(fetchFailure is DataFailure)
+        assertEquals(DataFailure.Reason.UNAUTHENTICATED, (fetchFailure as DataFailure).reason)
+        assertTrue(observeFailure is DataFailure)
+        assertEquals(DataFailure.Reason.UNAUTHENTICATED, (observeFailure as DataFailure).reason)
     }
 
     private class FirestoreTree {
@@ -87,7 +87,7 @@ class FirebaseSalesRemoteDataSourceTest {
         val changeRegistration = mock(ListenerRegistration::class.java)
 
         init {
-            `when`(firestore.collection("stores")).thenReturn(stores)
+            `when`(firestore.collection(com.cabral.lucrovarejo.BuildConfig.STORES_COLLECTION)).thenReturn(stores)
             `when`(stores.document("store-1")).thenReturn(store)
             `when`(store.collection("purchases")).thenReturn(purchases)
             `when`(purchases.whereGreaterThanOrEqualTo(
@@ -129,9 +129,20 @@ class FirebaseSalesRemoteDataSourceTest {
         override val hasSession: Boolean
             get() = storeKey != null
 
-        override suspend fun registerStore(storeName: String, email: String, password: String) = Unit
+        override suspend fun registerStore(
+            email: String,
+            password: String,
+            displayName: String
+        ) = Unit
 
-        override suspend fun signIn(storeName: String, password: String) = Unit
+        override suspend fun getStoreDisplayName(): String? = null
+
+        override suspend fun updateStoreDisplayName(displayName: String) = Unit
+
+        override suspend fun signIn(email: String, password: String) = Unit
+
+        override suspend fun requestPasswordReset(email: String) = Unit
+
 
         override fun signOut() = Unit
     }

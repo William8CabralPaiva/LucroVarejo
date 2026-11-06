@@ -44,21 +44,13 @@ object DateUtils {
         }.format(date).uppercase(locale)
     }
 
-    // O DatePicker devolve o dia à meia-noite UTC; converte para [início, início + 1 dia) no fuso local.
-    fun localDayRangeFromUtcMillis(utcMillis: Long): Pair<Date, Date> {
-        val utcDay = Calendar.getInstance(UTC_TIME_ZONE).apply { timeInMillis = utcMillis }
+    // [início do mês, início do mês seguinte) no fuso local.
+    fun localMonthRange(year: Int, month: Int): Pair<Date, Date> {
         val start = Calendar.getInstance().apply {
             clear()
-            set(
-                utcDay.get(Calendar.YEAR),
-                utcDay.get(Calendar.MONTH),
-                utcDay.get(Calendar.DAY_OF_MONTH),
-                0,
-                0,
-                0
-            )
+            set(year, month - 1, 1, 0, 0, 0)
         }
-        val end = (start.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, 1) }
+        val end = (start.clone() as Calendar).apply { add(Calendar.MONTH, 1) }
         return start.time to end.time
     }
 }

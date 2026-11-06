@@ -18,8 +18,8 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @Composable
 fun LoadingFullScreen(
-    modifier: Modifier = Modifier,
     @StringRes loadingTextId: Int,
+    modifier: Modifier = Modifier,
 ) {
     LoadingFullScreenContent(
         modifier = modifier,
@@ -29,8 +29,8 @@ fun LoadingFullScreen(
 
 @Composable
 fun LoadingFullScreenContent(
-    modifier: Modifier = Modifier,
     @StringRes loadingTextId: Int,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
@@ -48,7 +48,7 @@ fun LoadingFullScreenContent(
 
 @Preview
 @Composable
-fun LoadingFullScreenPreview() {
+private fun LoadingFullScreenPreview() {
     LucroVarejoTheme {
         LoadingFullScreen(loadingTextId = R.string.purchase_load_products_loading)
     }

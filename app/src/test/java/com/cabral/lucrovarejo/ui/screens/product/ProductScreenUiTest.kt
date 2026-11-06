@@ -1,7 +1,10 @@
 package com.cabral.lucrovarejo.ui.screens.product
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -118,11 +121,31 @@ class ProductScreenUiTest {
     }
 
     @Test
-    fun displaysEmptyMessageWhenThereAreNoProducts() {
+    fun displaysEmptyStateWithAddActionWhenThereAreNoProducts() {
+        var added = false
         composeRule.setContent {
             LucroVarejoTheme {
                 ProductContent(
                     state = ProductUiState(isLoading = false),
+                    onQueryChange = {},
+                    onAddProduct = { added = true }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Nenhum produto cadastrado").assertIsDisplayed()
+        composeRule.onNodeWithText("Os produtos que você cadastrar aparecerão aqui")
+            .assertIsDisplayed()
+        composeRule.onAllNodesWithContentDescription("Novo produto")[1].performClick()
+        composeRule.runOnIdle { assertTrue(added) }
+    }
+
+    @Test
+    fun displaysNotFoundMessageWhenSearchHasNoResults() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                ProductContent(
+                    state = ProductUiState(isLoading = false, query = "xyz"),
                     onQueryChange = {},
                     onAddProduct = {}
                 )
@@ -130,6 +153,7 @@ class ProductScreenUiTest {
         }
 
         composeRule.onNodeWithText("Nenhum produto encontrado.").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Nenhum produto cadastrado").assertCountEquals(0)
     }
 
     @Test

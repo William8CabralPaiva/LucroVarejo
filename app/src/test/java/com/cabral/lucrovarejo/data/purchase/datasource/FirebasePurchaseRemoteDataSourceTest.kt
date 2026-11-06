@@ -5,7 +5,7 @@ import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,8 +84,8 @@ class FirebasePurchaseRemoteDataSourceTest {
 
         val failure = runCatching { dataSource.createPurchase(request) }.exceptionOrNull()
 
-        assertTrue(failure is PurchaseFailure)
-        assertEquals(PurchaseFailure.Reason.UNAUTHENTICATED, (failure as PurchaseFailure).reason)
+                assertTrue(failure is DataFailure)
+                assertEquals(DataFailure.Reason.UNAUTHENTICATED, (failure as DataFailure).reason)
         assertEquals(null, client.storeKey)
     }
 
@@ -138,8 +138,8 @@ class FirebasePurchaseRemoteDataSourceTest {
 
         val failure = runCatching { dataSource.observeLatestPurchases(4).first() }.exceptionOrNull()
 
-        assertTrue(failure is PurchaseFailure)
-        assertEquals(PurchaseFailure.Reason.UNAUTHENTICATED, (failure as PurchaseFailure).reason)
+                assertTrue(failure is DataFailure)
+                assertEquals(DataFailure.Reason.UNAUTHENTICATED, (failure as DataFailure).reason)
         assertEquals(null, client.storeKey)
     }
 
@@ -224,9 +224,20 @@ class FirebasePurchaseRemoteDataSourceTest {
         override val hasSession: Boolean
             get() = storeKey != null
 
-        override suspend fun registerStore(storeName: String, email: String, password: String) = Unit
+        override suspend fun registerStore(
+            email: String,
+            password: String,
+            displayName: String
+        ) = Unit
 
-        override suspend fun signIn(storeName: String, password: String) = Unit
+        override suspend fun getStoreDisplayName(): String? = null
+
+        override suspend fun updateStoreDisplayName(displayName: String) = Unit
+
+        override suspend fun signIn(email: String, password: String) = Unit
+
+        override suspend fun requestPasswordReset(email: String) = Unit
+
 
         override fun signOut() = Unit
     }

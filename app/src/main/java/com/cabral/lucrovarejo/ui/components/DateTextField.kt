@@ -24,6 +24,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,7 @@ fun DateTextField(
     required: Boolean = true,
     onDateChange: (Long) -> Unit = {},
 ) {
-    var selectedDateMillis by remember { mutableStateOf(initialDateMillis) }
+    var selectedDateMillis by remember { mutableLongStateOf(initialDateMillis) }
     DateTextFieldContent(
         dateMillis = selectedDateMillis,
         onDateChange = {
@@ -112,7 +113,6 @@ fun DateTextFieldContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                modifier = modifier.clickable { showDatePicker = true },
                 imageVector = Icons.Outlined.CalendarMonth,
                 contentDescription = null,
                 tint = accentColor

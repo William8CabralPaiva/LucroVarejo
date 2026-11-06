@@ -3,14 +3,13 @@ package com.cabral.lucrovarejo.ui.screens.machinehistory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
-import com.cabral.lucrovarejo.domain.payment.toRateBps
+import com.cabral.lucrovarejo.domain.payment.parseRatePercentToBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddPaymentMachineUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetPaymentMachinesUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetFilteredCurrentTariffUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import java.util.Date
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,10 +51,16 @@ class MachineHistoryViewModel @Inject constructor(
         viewModelScope.launch {
             getPaymentMachines(slot.terminalId)
                 .onStart { _uiState.update { it.copy(isLoading = true, loadError = null) } }
-                .catch { _uiState.update { state -> state.copy(isLoading = false, loadError = R.string.machine_history_load_error) } }
+                .catch {
+                    _uiState.update { state ->
+                        state.copy(isLoading = false, loadError = R.string.machine_history_load_error)
+                    }
+                }
                 .collect { allTariffs ->
                     val tariffsForSlot = allTariffs.filter {
-                        it.method == slot.method && it.brandId == slot.brandId && it.installments == slot.installments
+                        it.method == slot.method &&
+                            it.brandId == slot.brandId &&
+                            it.installments == slot.installments
                     }.sortedByDescending { it.effectiveFrom }
                     val current = getFilteredCurrentTariff(tariffsForSlot, Date())
                     _uiState.update {
@@ -71,7 +76,14 @@ class MachineHistoryViewModel @Inject constructor(
 
     fun onShowAddDialog() {
         _uiState.update {
-            it.copy(showAddDialog = true, rateText = "", effectiveFromMillis = Date().time, rateError = null, dateError = null, saveError = null)
+            it.copy(
+                showAddDialog = true,
+                rateText = "",
+                effectiveFromMillis = Date().time,
+                rateError = null,
+                dateError = null,
+                saveError = null
+            )
         }
     }
 
@@ -90,19 +102,21 @@ class MachineHistoryViewModel @Inject constructor(
     fun onConfirmAdd() {
         val slot = loadedSlot ?: return
         val state = _uiState.value
-        val rateBps = state.rateText.replace(',', '.').toBigDecimalOrNull()
-            ?.takeIf { it >= BigDecimal.ZERO && it <= BigDecimal.valueOf(100) }
-            ?.let { runCatching { it.toRateBps() }.getOrNull() }
+        val rateBps = parseRatePercentToBps(state.rateText)
+        val effectiveFromMillis = state.effectiveFromMillis
 
-        if (rateBps == null) {
-            _uiState.update { it.copy(rateError = R.string.terminal_form_tariff_rate_invalid) }
-            return
-        }
-        if (state.effectiveFromMillis == null) {
-            _uiState.update { it.copy(dateError = R.string.terminal_form_tariff_rate_required) }
-            return
-        }
+        when {
+            rateBps == null ->
+                _uiState.update { it.copy(rateError = R.string.terminal_form_tariff_rate_invalid) }
 
+            effectiveFromMillis == null ->
+                _uiState.update { it.copy(dateError = R.string.terminal_form_tariff_rate_required) }
+
+            else -> saveTariff(slot, rateBps, effectiveFromMillis)
+        }
+    }
+
+    private fun saveTariff(slot: PaymentMachineHistoryArgs, rateBps: Int, effectiveFromMillis: Long) {
         _uiState.update { it.copy(isSaving = true, saveError = null) }
         viewModelScope.launch {
             runCatching {
@@ -113,16 +127,13 @@ class MachineHistoryViewModel @Inject constructor(
                         brandId = slot.brandId,
                         installments = slot.installments,
                         rateBps = rateBps,
-                        effectiveFrom = Date(state.effectiveFromMillis)
+                        effectiveFrom = Date(effectiveFromMillis)
                     )
                 )
             }.onSuccess {
                 _uiState.update { it.copy(isSaving = false, showAddDialog = false) }
             }.onFailure { failure ->
-                val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
-                    else -> R.string.terminal_form_tariff_save_error
-                }
+                val errorRes = failure.userMessageRes(R.string.terminal_form_tariff_save_error)
                 _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
             }
         }

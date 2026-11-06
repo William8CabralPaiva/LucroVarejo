@@ -5,8 +5,13 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import com.cabral.lucrovarejo.ui.theme.ThemeMode
 /**
  * Switch padrão do app: mantém a bolinha (thumb) com bom contraste tanto ligado quanto
  * desligado. Use este componente em vez de `Switch` do Material3 para que todas as telas
@@ -35,4 +40,38 @@ fun AppSwitch(
         enabled = enabled,
         colors = appSwitchColors()
     )
+}
+
+@Preview(showBackground = true, name = "AppSwitch - claro")
+@Composable
+private fun AppSwitchLightPreview() {
+    LucroVarejoTheme(themeMode = ThemeMode.LIGHT) {
+        AppSwitchPreviewContent()
+    }
+}
+
+@Preview(
+    showBackground = true,
+    name = "AppSwitch - escuro",
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun AppSwitchDarkPreview() {
+    LucroVarejoTheme(themeMode = ThemeMode.DARK) {
+        AppSwitchPreviewContent()
+    }
+}
+
+@Composable
+private fun AppSwitchPreviewContent() {
+    Row(modifier = Modifier.padding(16.dp)) {
+        AppSwitch(checked = true, onCheckedChange = {})
+        AppSwitch(checked = false, onCheckedChange = {}, modifier = Modifier.padding(start = 16.dp))
+        AppSwitch(
+            checked = true,
+            onCheckedChange = {},
+            enabled = false,
+            modifier = Modifier.padding(start = 16.dp)
+        )
+    }
 }

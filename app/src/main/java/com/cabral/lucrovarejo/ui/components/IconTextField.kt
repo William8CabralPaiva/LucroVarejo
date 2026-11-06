@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.cabral.lucrovarejo.ui.components
 
 import androidx.annotation.StringRes
@@ -28,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,7 +42,9 @@ import com.cabral.lucrovarejo.R
 
 enum class IconTextFieldType {
     TEXT,
-    MONEY
+    MONEY,
+    // Moeda: sempre com 2 casas ("50,00"); o estado guarda o decimal simples ("50.00").
+    CURRENCY
 }
 
 @Composable
@@ -121,9 +127,34 @@ fun IconTextFieldContent(
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
+        val displayText = if (type == IconTextFieldType.CURRENCY) {
+            plainToCurrencyDisplay(value)
+        } else {
+            filterIconTextFieldInput(value, type)
+        }
+        var field by remember {
+            mutableStateOf(
+                TextFieldValue(
+                    displayText,
+                    TextRange(displayText.indexOf(',').takeIf { it >= 0 } ?: displayText.length)
+                )
+            )
+        }
+        if (field.text != displayText) {
+            field = TextFieldValue(displayText, TextRange(displayText.length))
+        }
         TextField(
-            value = filterIconTextFieldInput(value, type),
-            onValueChange = { onValueChange(filterIconTextFieldInput(it, type)) },
+            value = field,
+            onValueChange = { newField ->
+                if (type == IconTextFieldType.CURRENCY) {
+                    val input = applyCurrencyInput(newField.text, newField.selection.end)
+                    field = TextFieldValue(input.display, TextRange(input.cursor))
+                    onValueChange(input.plain)
+                } else {
+                    field = newField
+                    onValueChange(filterIconTextFieldInput(newField.text, type))
+                }
+            },
             placeholder = { Text(placeholder) },
             leadingIcon = {
                 Icon(
@@ -140,10 +171,10 @@ fun IconTextFieldContent(
             singleLine = true,
             minLines = 1,
             keyboardOptions = KeyboardOptions(
-                keyboardType = if (type == IconTextFieldType.MONEY) {
-                    KeyboardType.Decimal
-                } else {
-                    KeyboardType.Text
+                keyboardType = when (type) {
+                    IconTextFieldType.MONEY -> KeyboardType.Decimal
+                    IconTextFieldType.CURRENCY -> KeyboardType.Decimal
+                    IconTextFieldType.TEXT -> KeyboardType.Text
                 }
             ),
             shape = fieldShape,
@@ -177,9 +208,63 @@ fun IconTextFieldContent(
     }
 }
 
+// Resultado da digitação em campo de moeda: decimal simples ("50.00"), texto exibido ("50,00") e cursor.
+internal data class CurrencyInput(val plain: String, val display: String, val cursor: Int)
+
+// Digitação natural com ",00" sempre visível: "5" -> "5,00"; "50" -> "50,00".
+// Dígitos antes da vírgula editam os reais; depois da vírgula, os centavos (máx. 2).
+// Digitar "," ou "." leva o cursor para os centavos. Apagar tudo limpa o campo.
+internal fun applyCurrencyInput(text: String, cursor: Int): CurrencyInput {
+    val caret = cursor.coerceIn(0, text.length)
+    val separatorIndex = text.indexOfFirst { it == ',' || it == '.' }
+    val typedSeparator = caret > 0 && (text[caret - 1] == ',' || text[caret - 1] == '.')
+    val integerDigits = (if (separatorIndex < 0) text else text.substring(0, separatorIndex))
+        .filter { it in '0'..'9' }
+    val decimalDigits = (if (separatorIndex < 0) "" else text.substring(separatorIndex + 1))
+        .filter { it in '0'..'9' }
+        .take(CURRENCY_DECIMAL_DIGITS)
+
+    if (integerDigits.isEmpty() && !typedSeparator && decimalDigits.all { it == '0' }) {
+        return CurrencyInput(plain = "", display = "", cursor = 0)
+    }
+
+    val integer = integerDigits.trimStart('0').take(MAX_CURRENCY_INTEGER_DIGITS)
+    val integerOut = integer.ifEmpty { "0" }
+    val decimalsOut = decimalDigits.padEnd(CURRENCY_DECIMAL_DIGITS, '0')
+
+    val newCursor = when {
+        typedSeparator -> integerOut.length + 1
+        integer.isEmpty() -> integerOut.length
+        separatorIndex < 0 || caret <= separatorIndex -> {
+            val digitsBefore = text.substring(0, caret).count { it in '0'..'9' }
+            val stripped = integerDigits.length - integerDigits.trimStart('0').length
+            (digitsBefore - stripped).coerceIn(0, integerOut.length)
+        }
+        else -> {
+            val decimalsBefore = text.substring(separatorIndex + 1, caret).count { it in '0'..'9' }
+            integerOut.length + 1 + minOf(decimalsBefore, CURRENCY_DECIMAL_DIGITS)
+        }
+    }
+    return CurrencyInput(
+        plain = "$integerOut.$decimalsOut",
+        display = "$integerOut,$decimalsOut",
+        cursor = newCursor
+    )
+}
+
+// "89.9" -> "89,90"; valor vazio ou inválido -> "".
+internal fun plainToCurrencyDisplay(plain: String): String =
+    plain.toBigDecimalOrNull()
+        ?.setScale(CURRENCY_DECIMAL_DIGITS, java.math.RoundingMode.HALF_UP)
+        ?.toPlainString()
+        ?.replace('.', ',')
+        ?: ""
+private const val MAX_CURRENCY_INTEGER_DIGITS = 10
+private const val CURRENCY_DECIMAL_DIGITS = 2
+
 internal fun filterIconTextFieldInput(value: String, type: IconTextFieldType): String =
     when (type) {
-        IconTextFieldType.TEXT -> value
+        IconTextFieldType.TEXT, IconTextFieldType.CURRENCY -> value
         IconTextFieldType.MONEY -> buildString {
             var decimalSeparatorAdded = false
             value.forEach { character ->

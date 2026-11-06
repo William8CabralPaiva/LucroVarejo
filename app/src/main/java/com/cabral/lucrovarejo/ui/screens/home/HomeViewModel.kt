@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+
+private const val MONTHS_IN_YEAR = 12
 
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -44,7 +46,7 @@ class HomeViewModel @Inject constructor(
 
     fun onMonthYearChanged(year: Int, month: Int) {
         require(year > 0)
-        require(month in 1..12)
+        require(month in 1..MONTHS_IN_YEAR)
         _uiState.update { it.copy(year = year, month = month) }
         selectedMonth.value = year to month
     }
@@ -68,9 +70,7 @@ class HomeViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                errorMessage = (failure as? PurchaseFailure)
-                                    ?.let { purchaseErrorMessage(it.reason) }
-                                    ?: R.string.summary_load_error_generic
+                                errorMessage = failure.userMessageRes(R.string.summary_load_error_generic)
                             )
                         }
                     }
@@ -98,13 +98,6 @@ class HomeViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
-    private fun purchaseErrorMessage(reason: PurchaseFailure.Reason): Int = when (reason) {
-        PurchaseFailure.Reason.NETWORK -> R.string.summary_load_error_network
-        PurchaseFailure.Reason.PERMISSION_DENIED -> R.string.summary_load_error_permission
-        PurchaseFailure.Reason.UNAUTHENTICATED -> R.string.summary_load_error_unauthenticated
-        PurchaseFailure.Reason.UNKNOWN -> R.string.summary_load_error_generic
-    }
-
     private fun monthRange(year: Int, month: Int): Pair<Date, Date> {
         val start = Calendar.getInstance().apply {
             set(year, month - 1, 1, 0, 0, 0)
@@ -116,6 +109,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private companion object {
-        const val LATEST_PURCHASES_LIMIT = 4
+        const val LATEST_PURCHASES_LIMIT = 5
     }
 }

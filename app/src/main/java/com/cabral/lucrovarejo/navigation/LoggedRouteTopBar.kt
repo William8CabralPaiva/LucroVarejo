@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -11,16 +12,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LightMintContainer
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoggedRouteTopBar(
     route: String,
     onBackPress: () -> Unit,
+    modifier: Modifier = Modifier,
+    homeTitle: String? = null,
+    onSwitchStore: () -> Unit = {},
 ) {
 
     val titleId = when (route) {
@@ -40,9 +47,14 @@ fun LoggedRouteTopBar(
         else -> return
     }
     TopAppBar(
+        modifier = modifier,
         title = {
             Text(
-                text = stringResource(titleId),
+                text = if (route == LoggedRoutes.HOME && !homeTitle.isNullOrBlank()) {
+                    homeTitle
+                } else {
+                    stringResource(titleId)
+                },
                 color = LightMintContainer,
                 fontWeight = FontWeight.Bold
             )
@@ -50,6 +62,17 @@ fun LoggedRouteTopBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = ForestGreenHeader
         ),
+        actions = {
+            if (route == LoggedRoutes.HOME) {
+                IconButton(onClick = onSwitchStore) {
+                    Icon(
+                        imageVector = Icons.Outlined.SwapHoriz,
+                        contentDescription = stringResource(R.string.settings_switch_store),
+                        tint = LightMintContainer
+                    )
+                }
+            }
+        },
         navigationIcon = {
             if (showBackButton(route)) {
                 IconButton(onClick = onBackPress) {
@@ -73,4 +96,20 @@ private fun showBackButton(route: String): Boolean {
             route == LoggedRoutes.ADD_MACHINE ||
             route == LoggedRoutes.EDIT_MACHINE ||
             route == LoggedRoutes.MACHINE_HISTORY
+}
+
+@Preview(name = "Topo - Home")
+@Composable
+private fun LoggedRouteTopBarHomePreview() {
+    LucroVarejoTheme {
+        LoggedRouteTopBar(route = LoggedRoutes.HOME, homeTitle = "Loja Centro", onBackPress = {})
+    }
+}
+
+@Preview(name = "Topo - Nova venda")
+@Composable
+private fun LoggedRouteTopBarNestedPreview() {
+    LucroVarejoTheme {
+        LoggedRouteTopBar(route = LoggedRoutes.ADD_PURCHASE, onBackPress = {})
+    }
 }

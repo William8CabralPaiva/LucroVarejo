@@ -78,8 +78,10 @@ fun MachineHistoryContent(
     onRateChange: (String) -> Unit,
     onDateChange: (Long) -> Unit,
     onConfirmAdd: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onShowAddDialog) {

@@ -2,16 +2,20 @@ package com.cabral.lucrovarejo.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
+import com.cabral.lucrovarejo.ui.screens.forgotpassword.ForgotPasswordScreen
 import com.cabral.lucrovarejo.ui.screens.home.HomeViewModel
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreen
 import com.cabral.lucrovarejo.ui.screens.sales.SalesViewModel
 import com.cabral.lucrovarejo.ui.screens.product.ProductViewModel
+import com.cabral.lucrovarejo.ui.store.StoreViewModel
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 @Composable
@@ -21,10 +25,11 @@ fun AppNavGraph(
     isUserAuthenticated: Boolean = false,
     onSignOut: () -> Unit = {},
     currentThemeMode: ThemeMode = ThemeMode.SYSTEM,
-    onThemeModeChanged: (ThemeMode) -> Unit = {},
+    onThemeModeChange: (ThemeMode) -> Unit = {},
     homeViewModel: HomeViewModel? = null,
     salesViewModel: SalesViewModel? = null,
     productViewModel: ProductViewModel? = null,
+    storeViewModel: StoreViewModel? = null,
 ) {
     AppNavGraphContent(
         navController = navController,
@@ -32,21 +37,50 @@ fun AppNavGraph(
         isUserAuthenticated = isUserAuthenticated,
         onSignOut = onSignOut,
         splashScreen = { onSplashFinished -> LaunchedEffect(Unit) { onSplashFinished() } },
-        loginScreen = { goToRegisterScreen, goToLoggedFlow ->
-            LoginScreen(goToRegisterScreen, goToLoggedFlow)
+        loginScreen = { goToRegisterScreen, goToLoggedFlow, goToForgotPassword ->
+            LoginScreen(
+                goToRegisterScreen,
+                {
+                    // Apenas o login manual abre as dicas; a sessao restaurada pela splash nao.
+                    storeViewModel?.showTips()
+                    goToLoggedFlow()
+                },
+                goToForgotPassword
+            )
         },
+        forgotPasswordScreen = { onBack -> ForgotPasswordScreen(onBack) },
         registerScreen = { onBackPress, onRegisterSuccess ->
             RegisterScreen(onBackPress, onRegisterSuccess)
         },
         loggedFlowScreen = { onLogout ->
-            LoggedFlowScreen(
-                currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
-                homeViewModel = homeViewModel,
-                salesViewModel = salesViewModel,
-                productViewModel = productViewModel,
-                onLogout = onLogout
-            )
+            LaunchedEffect(storeViewModel) { storeViewModel?.load() }
+            val storeState = storeViewModel?.uiState?.collectAsState()?.value
+            // A chave recria o fluxo logado ao trocar de loja, e as telas passam a observar a nova loja.
+            key(storeState?.storeEpoch ?: 0) {
+                LoggedFlow(
+                    currentThemeMode = currentThemeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    homeViewModel = homeViewModel,
+                    salesViewModel = salesViewModel,
+                    productViewModel = productViewModel,
+                    storeName = storeState?.displayName,
+                    stores = storeState?.stores.orEmpty(),
+                    activeStoreId = storeState?.activeStoreId,
+                    onSwitchStore = { storeViewModel?.selectStore(it) },
+                    onCreateStore = { name, onResult ->
+                        storeViewModel?.createStore(name, onResult) ?: onResult(false)
+                    },
+                    showTips = storeState?.showTips == true,
+                    onDismissTips = { storeViewModel?.dismissTips() },
+                    onUpdateStoreName = { name, onResult ->
+                        storeViewModel?.updateDisplayName(name, onResult) ?: onResult(false)
+                    },
+                    onLogout = {
+                        storeViewModel?.clear()
+                        onLogout()
+                    }
+                )
+            }
         }
     )
 }
@@ -58,9 +92,10 @@ internal fun AppNavGraphContent(
     isUserAuthenticated: Boolean,
     onSignOut: () -> Unit,
     splashScreen: @Composable (() -> Unit) -> Unit,
-    loginScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
+    loginScreen: @Composable (() -> Unit, () -> Unit, () -> Unit) -> Unit,
     registerScreen: @Composable (() -> Unit, () -> Unit) -> Unit,
     loggedFlowScreen: @Composable (() -> Unit) -> Unit,
+    forgotPasswordScreen: @Composable (() -> Unit) -> Unit = {},
 ) {
     NavHost(
         navController = navController,
@@ -85,8 +120,15 @@ internal fun AppNavGraphContent(
                     navController.navigate(LoggedRoutes.HOME) {
                         popUpTo(NotLoggedRoutes.LOGIN) { inclusive = true }
                     }
+                },
+                {
+                    navController.navigate(NotLoggedRoutes.FORGOT_PASSWORD)
                 }
             )
+        }
+
+        composable(NotLoggedRoutes.FORGOT_PASSWORD) {
+            forgotPasswordScreen(navController::popBackStack)
         }
 
         composable(NotLoggedRoutes.REGISTER) {

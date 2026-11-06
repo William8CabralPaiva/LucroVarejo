@@ -10,33 +10,77 @@ import org.junit.Test
 
 class AuthRepositoryImplTest {
     @Test
-    fun registrationMapsStoreCredentialsToTechnicalAuthAddressAndProfile() = runTest {
+    fun registrationUsesRealEmailAsAuthAddressAndSavesProfile() = runTest {
         // Given: a repository connected to a fake remote data source.
         val remote = FakeAuthRemoteDataSource()
         val repository = AuthRepositoryImpl(remote)
 
-        // When: registration is requested with padded mixed-case values.
-        repository.registerStore(" My-Store.1 ", " owner@example.com ", "secret1")
+        // When: registration is requested with padded values.
+        repository.registerStore(" owner@example.com ", "secret1", " Minha Loja ")
 
-        // Then: identifiers and profile fields are normalized before reaching Firebase.
-        assertEquals("my-store.1@auth.lucrovarejo.invalid", remote.createdEmail)
+        // Then: email and profile fields are trimmed before reaching Firebase.
+        assertEquals("owner@example.com", remote.createdEmail)
         assertEquals("secret1", remote.createdPassword)
-        assertEquals(StoreProfile("my-store.1", "owner@example.com"), remote.createdProfile)
+        assertEquals(
+            StoreProfile("owner@example.com", "Minha Loja"),
+            remote.createdProfile
+        )
     }
 
     @Test
-    fun loginUsesTheSameNormalizedTechnicalAddress() = runTest {
+    fun blankStoredDisplayNameIsTreatedAsMissing() = runTest {
+        val remote = FakeAuthRemoteDataSource().apply { displayName = "  " }
+        val repository = AuthRepositoryImpl(remote)
+
+        assertEquals(null, repository.getStoreDisplayName())
+
+        remote.displayName = " Minha Loja "
+        assertEquals("Minha Loja", repository.getStoreDisplayName())
+    }
+
+    @Test
+    fun updateStoreDisplayNameTrimsBeforeSaving() = runTest {
+        val remote = FakeAuthRemoteDataSource()
+        val repository = AuthRepositoryImpl(remote)
+
+        repository.updateStoreDisplayName("  Loja Nova ")
+
+        assertEquals("Loja Nova", remote.displayName)
+    }
+
+    @Test
+    fun loginTrimsEmail() = runTest {
         // Given: an auth repository backed by a fake remote source.
         val remote = FakeAuthRemoteDataSource()
         val repository = AuthRepositoryImpl(remote)
 
         // When: signing in with a mixed-case store name.
-        repository.signIn(" My-Store.1 ", "secret1")
+        repository.signIn(" owner@example.com ", "secret1")
 
         // Then: the same canonical technical address is used.
-        assertEquals("my-store.1@auth.lucrovarejo.invalid", remote.signedInEmail)
+        assertEquals("owner@example.com", remote.signedInEmail)
         assertEquals("secret1", remote.signedInPassword)
         assertEquals("firebase-uid-123", repository.storeKey)
+    }
+
+    @Test
+    fun loginKeepsEmailCase() = runTest {
+        val remote = FakeAuthRemoteDataSource()
+        val repository = AuthRepositoryImpl(remote)
+
+        repository.signIn(" Owner@Example.com ", "secret1")
+
+        assertEquals("Owner@Example.com", remote.signedInEmail)
+    }
+
+    @Test
+    fun passwordResetTrimsEmail() = runTest {
+        val remote = FakeAuthRemoteDataSource()
+        val repository = AuthRepositoryImpl(remote)
+
+        repository.requestPasswordReset(" owner@example.com ")
+
+        assertEquals("owner@example.com", remote.resetEmail)
     }
 
     @Test
@@ -69,21 +113,32 @@ class AuthRepositoryImplTest {
         var signedInEmail: String? = null
         var signedInPassword: String? = null
         var signedOut = false
+        var displayName: String? = null
+        var resetEmail: String? = null
 
+        override suspend fun fetchDisplayName(): String? = displayName
+
+        override suspend fun updateDisplayName(displayName: String) {
+            this.displayName = displayName
+        }
         override suspend fun createAccount(
-            technicalEmail: String,
+            email: String,
             password: String,
             profile: StoreProfile
         ) {
-            createdEmail = technicalEmail
+            createdEmail = email
             createdPassword = password
             createdProfile = profile
         }
 
-        override suspend fun signIn(technicalEmail: String, password: String) {
-            signedInEmail = technicalEmail
+        override suspend fun signIn(email: String, password: String) {
+            signedInEmail = email
             signedInPassword = password
             storeKey = "firebase-uid-123"
+        }
+
+        override suspend fun requestPasswordReset(email: String) {
+            resetEmail = email
         }
 
         override fun signOut() {

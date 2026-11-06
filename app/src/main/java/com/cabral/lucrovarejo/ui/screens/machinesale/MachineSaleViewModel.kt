@@ -3,18 +3,18 @@ package com.cabral.lucrovarejo.ui.screens.machinesale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
-import com.cabral.lucrovarejo.domain.payment.toRateBps
+import com.cabral.lucrovarejo.domain.payment.bpsToRate
+import com.cabral.lucrovarejo.domain.payment.parseRatePercentToBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddPaymentMachineUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.CreateTerminalUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetPaymentMachinesUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetFilteredCurrentTariffUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.UpdateTerminalUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.math.BigDecimal
 import java.util.Date
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -157,88 +157,103 @@ class MachineSaleViewModel @Inject constructor(
 
     fun onSave(closeAfter: Boolean) {
         val state = _uiState.value
-        if (state.name.isBlank()) {
-            _uiState.update { it.copy(nameError = R.string.terminal_form_name_required) }
-            return
-        }
-        if (state.selectedMethods.isEmpty()) {
-            _uiState.update { it.copy(methodsError = R.string.terminal_form_methods_required) }
-            return
-        }
+        if (!validateForm(state)) return
 
-        val invalidEntries = state.tariffEntries.filter { entry ->
-            entry.rateText.isNotBlank() && entry.effectiveFromMillis != null && entry.parseRateBpsOrNull() == null
+        _uiState.update { it.copy(isSaving = true, closeAfterSave = closeAfter, saveError = null) }
+        viewModelScope.launch {
+            runCatching { saveTerminalWithTariffs(state) }
+                .onSuccess { terminalId -> onSaveSuccess(terminalId, closeAfter) }
+                .onFailure(::onSaveFailure)
         }
-        if (invalidEntries.isNotEmpty()) {
-            _uiState.update { s ->
+    }
+
+    // Marca o erro no estado e devolve false quando o formulario nao pode ser salvo.
+    private fun validateForm(state: MachineSaleUiState): Boolean {
+        val invalidEntryIds = state.tariffEntries
+            .filter { entry ->
+                entry.rateText.isNotBlank() &&
+                    entry.effectiveFromMillis != null &&
+                    entry.parseRateBpsOrNull() == null
+            }
+            .map { it.id }
+            .toSet()
+        when {
+            state.name.isBlank() ->
+                _uiState.update { it.copy(nameError = R.string.terminal_form_name_required) }
+
+            state.selectedMethods.isEmpty() ->
+                _uiState.update { it.copy(methodsError = R.string.terminal_form_methods_required) }
+
+            invalidEntryIds.isNotEmpty() -> _uiState.update { s ->
                 s.copy(tariffEntries = s.tariffEntries.map { entry ->
-                    if (entry.id in invalidEntries.map { it.id }) {
+                    if (entry.id in invalidEntryIds) {
                         entry.copy(error = R.string.terminal_form_tariff_rate_invalid)
                     } else entry
                 })
             }
-            return
+
+            else -> return true
         }
+        return false
+    }
 
-        _uiState.update { it.copy(isSaving = true, closeAfterSave = closeAfter, saveError = null) }
-        viewModelScope.launch {
-            runCatching {
-                val terminal = PaymentTerminalModel(
-                    key = state.terminalId,
-                    name = state.name.trim(),
-                    active = true,
-                    enabledMethods = state.selectedMethods,
-                    brands = state.availableBrands
-                )
-                val saved = if (state.terminalId == null) createTerminal(terminal) else updateTerminal(terminal)
-                val terminalId = requireNotNull(saved.key)
-                // Evita criar outra maquininha se um novo "Salvar" ocorrer apos falha parcial ou sucesso.
-                _uiState.update { it.copy(terminalId = terminalId) }
+    private suspend fun saveTerminalWithTariffs(state: MachineSaleUiState): String {
+        val terminal = PaymentTerminalModel(
+            key = state.terminalId,
+            name = state.name.trim(),
+            active = true,
+            enabledMethods = state.selectedMethods,
+            brands = state.availableBrands
+        )
+        val saved = if (state.terminalId == null) createTerminal(terminal) else updateTerminal(terminal)
+        val terminalId = requireNotNull(saved.key)
+        // Evita criar outra maquininha se um novo "Salvar" ocorrer apos falha parcial ou sucesso.
+        _uiState.update { it.copy(terminalId = terminalId) }
 
-                state.tariffEntries
-                    .filter { it.rateText.isNotBlank() && it.effectiveFromMillis != null }
-                    .forEach { entry ->
-                        val rateBps = entry.parseRateBpsOrNull() ?: return@forEach
-                        addPaymentMachine(
-                            PaymentMachineModel(
-                                terminalId = terminalId,
-                                method = entry.method,
-                                brandId = entry.brandId,
-                                installments = entry.installments,
-                                rateBps = rateBps,
-                                effectiveFrom = Date(entry.effectiveFromMillis!!)
-                            )
-                        )
-                    }
-                terminalId
-            }.onSuccess { terminalId ->
-                savedChannel.send(Unit)
-                if (closeAfter) {
-                    _uiState.update { it.copy(isSaving = false) }
-                    completionChannel.send(Unit)
-                } else {
-                    existingTariffs = runCatching { getPaymentMachines(terminalId).first() }
-                        .getOrDefault(existingTariffs)
-                    _uiState.update { s ->
-                        s.copy(
-                            isSaving = false,
-                            tariffEntries = s.tariffEntries.map {
-                                it.copy(rateText = "", effectiveFromMillis = null, error = null)
-                            }
-                        )
-                    }
-                    recomputeTariffEntries()
-                }
-            }.onFailure { failure ->
-                val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
-                    else -> R.string.terminal_form_save_error
-                }
-                _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
+        state.tariffEntries
+            .filter {
+                it.rateText.isNotBlank() && it.effectiveFromMillis != null &&
+                    it.rateText != it.initialRateText
             }
+            .forEach { entry ->
+                val rateBps = entry.parseRateBpsOrNull() ?: return@forEach
+                addPaymentMachine(
+                    PaymentMachineModel(
+                        terminalId = terminalId,
+                        method = entry.method,
+                        brandId = entry.brandId,
+                        installments = entry.installments,
+                        rateBps = rateBps,
+                        effectiveFrom = Date(entry.effectiveFromMillis!!)
+                    )
+                )
+            }
+        return terminalId
+    }
+
+    private suspend fun onSaveSuccess(terminalId: String, closeAfter: Boolean) {
+        savedChannel.send(Unit)
+        if (closeAfter) {
+            _uiState.update { it.copy(isSaving = false) }
+            completionChannel.send(Unit)
+        } else {
+            existingTariffs = runCatching { getPaymentMachines(terminalId).first() }
+                .getOrDefault(existingTariffs)
+            _uiState.update { s ->
+                s.copy(
+                    isSaving = false,
+                    tariffEntries = emptyList()
+                )
+            }
+            recomputeTariffEntries()
         }
     }
 
+    private fun onSaveFailure(failure: Throwable) {
+        _uiState.update {
+            it.copy(isSaving = false, saveError = failure.userMessageRes(R.string.terminal_form_save_error))
+        }
+    }
     private fun recomputeTariffEntries() {
         _uiState.update { state ->
             val entries = mutableListOf<TariffEntryUi>()
@@ -283,11 +298,14 @@ class MachineSaleViewModel @Inject constructor(
             it.method == method && it.brandId == brandId && it.installments == installments
         }
         val currentTariff = getFilteredCurrentTariff(tariffsForKey, date)
+        val currentRateText = currentTariff?.rateBps?.bpsToRate()?.toPlainString().orEmpty()
         return TariffEntryUi(
             method = method,
             brandId = brandId,
             brandName = brandName,
             installments = installments,
+            rateText = currentRateText,
+            initialRateText = currentRateText,
             effectiveFromMillis = date.time,
             currentRateBps = currentTariff?.rateBps
         )
@@ -295,9 +313,4 @@ class MachineSaleViewModel @Inject constructor(
 
 }
 
-private fun TariffEntryUi.parseRateBpsOrNull(): Int? {
-    val normalized = rateText.replace(',', '.')
-    val value = normalized.toBigDecimalOrNull() ?: return null
-    if (value < BigDecimal.ZERO || value > BigDecimal.valueOf(100)) return null
-    return runCatching { value.toRateBps() }.getOrNull()
-}
+private fun TariffEntryUi.parseRateBpsOrNull(): Int? = parseRatePercentToBps(rateText)

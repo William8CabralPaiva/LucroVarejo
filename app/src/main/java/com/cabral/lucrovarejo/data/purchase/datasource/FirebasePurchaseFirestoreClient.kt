@@ -1,5 +1,6 @@
 package com.cabral.lucrovarejo.data.purchase.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
@@ -18,9 +19,9 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
     private val firestore: FirebaseFirestore
 ) : PurchaseFirestoreClient {
     override suspend fun savePurchase(storeKey: String, request: PurchaseRequest): String {
-        val purchaseDocument = firestore.collection(COLLECTION_STORES)
+        val purchaseDocument = firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
-            .collection(COLLECTION_PURCHASES)
+            .collection(FirestoreCollections.PURCHASES)
             .document()
 
         purchaseDocument.set(request.toFirestoreFields()).await()
@@ -69,9 +70,9 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
                 snapshot.documents.map { it.toPurchaseRecord() }
             }
 
-    private fun purchasesCollection(storeKey: String) = firestore.collection(COLLECTION_STORES)
+    private fun purchasesCollection(storeKey: String) = firestore.collection(FirestoreCollections.STORES)
         .document(storeKey)
-        .collection(COLLECTION_PURCHASES)
+        .collection(FirestoreCollections.PURCHASES)
 
     // Converte o snapshot listener em Flow. Cada alteracao na colecao (inclusive uma venda
     // cadastrada em outra tela) gera uma nova emissao; awaitClose remove o listener.
@@ -91,8 +92,6 @@ class FirebasePurchaseFirestoreClient @Inject constructor(
         awaitClose { registration.remove() }
     }
     private companion object {
-        const val COLLECTION_STORES = "stores"
-        const val COLLECTION_PURCHASES = "purchases"
         const val FIELD_COST = "cost"
         const val FIELD_SALE_PRICE = "sale_price"
         const val FIELD_QUANTITY = "quantity"

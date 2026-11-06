@@ -3,7 +3,8 @@ package com.cabral.lucrovarejo.ui.screens.addproduct
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
 import com.cabral.lucrovarejo.domain.product.usecase.DeleteProductUseCase
@@ -76,11 +77,7 @@ class AddProductViewModel @Inject constructor(
         if (current.isLoading) return
 
         val nameError = if (current.name.isBlank()) R.string.product_name_required else null
-        val costError = when {
-            current.cost.isBlank() -> R.string.product_cost_required
-            parseProductCost(current.cost) == null -> R.string.product_cost_invalid
-            else -> null
-        }
+        val costError = validateCost(current.cost)
         if (nameError != null || costError != null) {
             _uiState.update {
                 it.copy(nameError = nameError, costError = costError, errorMessage = null)
@@ -100,39 +97,49 @@ class AddProductViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
-                if (product.key != null) {
-                    updateProduct(product)
-                    _uiState.update { it.copy(isLoading = false) }
-                    completionChannel.send(Unit)
-                    return@launch
-                }
-                createProduct(product)
-                _uiState.update {
-                    it.copy(
-                        name = "",
-                        cod = "",
-                        cost = "",
-                        description = "",
-                        nameError = null,
-                        costError = null,
-                        isLoading = false
-                    )
-                }
-                effectChannel.send(Unit)
+                persist(product)
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (failure: ProductFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = productErrorMessage(
-                            failure.reason,
-                            R.string.product_edit_error_generic.takeIf { product.key != null }
+                        errorMessage = failure.userMessageRes(
+                            if (product.key != null) R.string.product_edit_error_generic
+                            else R.string.product_create_error_generic
                         )
                     )
                 }
             }
         }
+    }
+
+    private fun validateCost(cost: String): Int? = when {
+        cost.isBlank() -> R.string.product_cost_required
+        parseProductCost(cost) == null -> R.string.product_cost_invalid
+        else -> null
+    }
+
+    private suspend fun persist(product: ProductModel) {
+        if (product.key != null) {
+            updateProduct(product)
+            _uiState.update { it.copy(isLoading = false) }
+            completionChannel.send(Unit)
+            return
+        }
+        createProduct(product)
+        _uiState.update {
+            it.copy(
+                name = "",
+                cod = "",
+                cost = "",
+                description = "",
+                nameError = null,
+                costError = null,
+                isLoading = false
+            )
+        }
+        effectChannel.send(Unit)
     }
 
     fun onDeleteRequested() {
@@ -157,28 +164,14 @@ class AddProductViewModel @Inject constructor(
                 completionChannel.send(Unit)
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (failure: ProductFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = productErrorMessage(
-                            failure.reason,
-                            R.string.product_delete_error_generic
-                        )
+                        errorMessage = failure.userMessageRes(R.string.product_delete_error_generic)
                     )
                 }
             }
         }
     }
-
-    private fun productErrorMessage(reason: ProductFailure.Reason, unknownOverride: Int? = null): Int =
-        when (reason) {
-            ProductFailure.Reason.NETWORK -> R.string.product_create_error_network
-            ProductFailure.Reason.PERMISSION_DENIED ->
-                R.string.product_create_error_permission
-            ProductFailure.Reason.UNAUTHENTICATED ->
-                R.string.product_create_error_unauthenticated
-            ProductFailure.Reason.UNKNOWN ->
-                unknownOverride ?: R.string.product_create_error_generic
-        }
 }

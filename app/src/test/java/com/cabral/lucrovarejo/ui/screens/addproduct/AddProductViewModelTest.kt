@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.addproduct
 
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
@@ -82,14 +82,14 @@ class AddProductViewModelTest {
 
     @Test
     fun surfacesFirebaseFailureAndStopsLoading() = runTest {
-        repository.failure = ProductFailure(ProductFailure.Reason.NETWORK)
+        repository.failure = DataFailure(DataFailure.Reason.NETWORK)
         viewModel.onNameChanged("Produto")
         viewModel.onCostChanged("10.00")
 
         viewModel.saveProduct()
         advanceUntilIdle()
 
-        assertEquals(R.string.product_create_error_network, viewModel.uiState.value.errorMessage)
+        assertEquals(R.string.error_network, viewModel.uiState.value.errorMessage)
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
@@ -164,12 +164,12 @@ class AddProductViewModelTest {
     @Test
     fun mapsEveryFailureReasonForCreate() = runTest {
         val expected = mapOf(
-            ProductFailure.Reason.PERMISSION_DENIED to R.string.product_create_error_permission,
-            ProductFailure.Reason.UNAUTHENTICATED to R.string.product_create_error_unauthenticated,
-            ProductFailure.Reason.UNKNOWN to R.string.product_create_error_generic
+            DataFailure.Reason.PERMISSION_DENIED to R.string.error_permission,
+            DataFailure.Reason.UNAUTHENTICATED to R.string.error_unauthenticated,
+            DataFailure.Reason.UNKNOWN to R.string.product_create_error_generic
         )
         expected.forEach { (reason, message) ->
-            repository.failure = ProductFailure(reason)
+            repository.failure = DataFailure(reason)
             viewModel.onNameChanged("Produto")
             viewModel.onCostChanged("10.00")
             viewModel.saveProduct()
@@ -180,7 +180,7 @@ class AddProductViewModelTest {
 
     @Test
     fun updateAndDeleteFailuresUseSpecificMessages() = runTest {
-        repository.failure = ProductFailure(ProductFailure.Reason.UNKNOWN)
+        repository.failure = DataFailure(DataFailure.Reason.UNKNOWN)
         viewModel.loadProduct(existingProduct)
 
         viewModel.saveProduct()
@@ -220,7 +220,7 @@ class AddProductViewModelTest {
         var createdProduct: ProductModel? = null
         var updatedProduct: ProductModel? = null
         var deletedKey: String? = null
-        var failure: ProductFailure? = null
+        var failure: DataFailure? = null
 
         override suspend fun createProduct(product: ProductModel): ProductModel {
             failure?.let { throw it }

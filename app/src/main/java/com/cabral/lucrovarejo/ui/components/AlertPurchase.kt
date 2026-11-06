@@ -114,18 +114,20 @@ fun AlertPurchase(
 }
 
 internal const val ALERT_PURCHASE_TAG = "alert-purchase"
+private const val PREVIEW_PRICE = 50.90
+private const val PREVIEW_PRODUCTS_SIZE = 10
 
 @Composable
 @Preview(showBackground = true)
-fun AlertPurchasePreview() {
+private fun AlertPurchasePreview() {
     LucroVarejoTheme {
-        AlertPurchase(50.90, 10)
+        AlertPurchase(PREVIEW_PRICE, PREVIEW_PRODUCTS_SIZE)
     }
 }
 
 @Composable
 @Preview(showBackground = true, name = "Tarifas da Maquininha")
-fun AlertPurchaseTariffPreview() {
+private fun AlertPurchaseTariffPreview() {
     LucroVarejoTheme {
         AlertPurchase(
             price = 12.50,
@@ -142,7 +144,7 @@ fun AlertPurchaseTariffPreview() {
 
 @Composable
 @Preview(showBackground = true, name = "Vendas do mês sem vendas")
-fun AlertPurchaseEmptyPreview() {
+private fun AlertPurchaseEmptyPreview() {
     LucroVarejoTheme {
         AlertPurchase(price = 0.0, productsSize = 0)
     }

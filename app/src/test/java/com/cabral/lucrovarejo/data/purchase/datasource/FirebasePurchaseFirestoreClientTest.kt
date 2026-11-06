@@ -92,7 +92,7 @@ class FirebasePurchaseFirestoreClientTest {
         val latestRegistration = mock(ListenerRegistration::class.java)
 
         init {
-            `when`(firestore.collection("stores")).thenReturn(stores)
+            `when`(firestore.collection(com.cabral.lucrovarejo.BuildConfig.STORES_COLLECTION)).thenReturn(stores)
             `when`(stores.document("store-1")).thenReturn(store)
             `when`(store.collection("purchases")).thenReturn(purchases)
             `when`(purchases.document()).thenReturn(newDocument)

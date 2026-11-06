@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.ui.screens.sales
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
@@ -29,7 +30,8 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalCoroutinesApi::class)
 class SalesViewModel @Inject constructor(
     private val getSalesPage: GetSalesPageUseCase,
-    private val observeSalesChanges: ObserveSalesChangesUseCase
+    private val observeSalesChanges: ObserveSalesChangesUseCase,
+    private val getProducts: GetProductsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SalesUiState())
     val uiState: StateFlow<SalesUiState> = _uiState.asStateFlow()
@@ -40,7 +42,17 @@ class SalesViewModel @Inject constructor(
     private val selectedFilter = MutableStateFlow(SalesFilter())
 
     init {
+        selectedFilter.value = currentFilter()
         observeSales()
+        observeProductAvailability()
+    }
+
+    // Em falha mantém null (desconhecido), sem bloquear a venda.
+    private fun observeProductAvailability() {
+        getProducts()
+            .onEach { products -> _uiState.update { it.copy(hasProducts = products.isNotEmpty()) } }
+            .catch { }
+            .launchIn(viewModelScope)
     }
 
     fun onQueryChange(query: String) {
@@ -52,16 +64,18 @@ class SalesViewModel @Inject constructor(
         }
     }
 
-    // O DatePicker devolve a data à meia-noite UTC; null remove o filtro.
-    fun onDateSelected(utcMillis: Long?) {
-        _uiState.update { it.copy(selectedDateMillis = utcMillis) }
+    fun onMonthYearChanged(year: Int, month: Int) {
+        require(year > 0)
+        require(month in 1..MONTHS_IN_YEAR)
+        _uiState.update { it.copy(year = year, month = month) }
         searchJob?.cancel()
         selectedFilter.value = currentFilter()
     }
 
     fun loadNextPage() {
         val state = _uiState.value
-        if (state.isLoading || state.isLoadingMore || state.endReached || state.hasError) return
+        val busy = state.isLoading || state.isLoadingMore
+        if (busy || state.endReached || state.hasError) return
         _uiState.update { it.copy(isLoadingMore = true) }
         loadPage()
     }
@@ -131,13 +145,12 @@ class SalesViewModel @Inject constructor(
 
     private fun currentFilter(): SalesFilter {
         val state = _uiState.value
-        val utcMillis = state.selectedDateMillis ?: return SalesFilter(nameQuery = state.query)
-
-        val (start, end) = DateUtils.localDayRangeFromUtcMillis(utcMillis)
+        val (start, end) = DateUtils.localMonthRange(state.year, state.month)
         return SalesFilter(nameQuery = state.query, dateStart = start, dateEnd = end)
     }
 
     private companion object {
         const val SEARCH_DEBOUNCE_MILLIS = 300L
+        const val MONTHS_IN_YEAR = 12
     }
 }

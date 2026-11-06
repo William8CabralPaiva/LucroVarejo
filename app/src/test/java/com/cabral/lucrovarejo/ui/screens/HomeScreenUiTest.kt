@@ -13,6 +13,7 @@ import com.cabral.lucrovarejo.ui.screens.home.HomeContent
 import com.cabral.lucrovarejo.ui.screens.home.HomeUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -52,7 +53,7 @@ class HomeScreenUiTest {
         composeRule.onNodeWithText("R$ 8.450,00").assertIsDisplayed()
         composeRule.onNodeWithText("32 produtos vendidos").assertIsDisplayed()
         composeRule.onNodeWithText("Custo mensal").assertIsDisplayed()
-        composeRule.onNodeWithText("R$ 5.200,00").assertIsDisplayed()
+        composeRule.onNodeWithText("R$ 5.200,00").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Tarifas da Maquininha").assertIsDisplayed()
         composeRule.onNodeWithText("R$ 125,00").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("Lucro mensal").assertIsDisplayed()
@@ -90,7 +91,7 @@ class HomeScreenUiTest {
             LucroVarejoTheme {
                 HomeContent(
                     state = HomeUiState(year = 2026, month = 10, isLoading = false),
-                    latestPurchases = listOf(
+                    latestPurchases = persistentListOf(
                         PurchaseModel(
                             cod = "A-1",
                             name = "Bolsa Feminina",
@@ -119,5 +120,34 @@ class HomeScreenUiTest {
         composeRule.runOnIdle {
             assertEquals(true, openedSales)
         }
+    }
+
+    @Test
+    fun clickingLatestSaleForwardsPurchaseToEdit() {
+        var edited: PurchaseModel? = null
+        val purchase = PurchaseModel(
+            key = "sale-1",
+            cod = "A-1",
+            name = "Bolsa Feminina",
+            cost = 5000,
+            description = "",
+            salePrice = 8990,
+            quantity = 1,
+            saleDate = Date(),
+            paymentMethod = PaymentMethods.CASH
+        )
+        composeRule.setContent {
+            LucroVarejoTheme {
+                HomeContent(
+                    state = HomeUiState(year = 2026, month = 10, isLoading = false),
+                    latestPurchases = persistentListOf(purchase),
+                    onMonthYearChange = { _, _ -> },
+                    onEditPurchase = { edited = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Bolsa Feminina").performScrollTo().performClick()
+        composeRule.runOnIdle { assertEquals(purchase, edited) }
     }
 }

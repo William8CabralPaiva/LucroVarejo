@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.detekt)
     jacoco
 }
 
@@ -19,8 +20,8 @@ android {
         applicationId = "com.cabral.lucrovarejo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "2.0"
 
         testInstrumentationRunner = "com.cabral.lucrovarejo.HiltTestRunner"
     }
@@ -28,11 +29,18 @@ android {
     buildTypes {
         debug {
             enableUnitTestCoverage = true
+            buildConfigField("String", "STORES_COLLECTION", "\"stores_debug\"")
+            buildConfigField("String", "USERS_COLLECTION", "\"users_debug\"")
         }
         release {
-            optimization {
-                enable = false
-            }
+            buildConfigField("String", "STORES_COLLECTION", "\"stores\"")
+            buildConfigField("String", "USERS_COLLECTION", "\"users\"")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
     compileOptions {
@@ -76,6 +84,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.ui)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
@@ -106,4 +115,12 @@ dependencies {
     kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+    detektPlugins(libs.detekt.compose.rules)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    config.setFrom(rootProject.file("config/detekt/detekt.yml"))
+    baseline = file("detekt-baseline.xml")
+    source.setFrom("src/main/java", "src/test/java", "src/androidTest/java")
 }

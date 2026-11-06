@@ -3,14 +3,18 @@ package com.cabral.lucrovarejo.ui.screens.config
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Lightbulb
 import androidx.compose.material.icons.outlined.ModeNight
 import androidx.compose.material.icons.outlined.PointOfSale
+import androidx.compose.material.icons.outlined.Storefront
+import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,20 +31,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.BuildConfig
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.StoreNameDialog
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 
 @Composable
 fun ConfigScreen(
     currentThemeMode: ThemeMode,
-    onThemeModeChanged: (ThemeMode) -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    modifier: Modifier = Modifier,
     onLogout: () -> Unit = {},
     onNavigateToTerminals: () -> Unit = {},
+    storeName: String? = null,
+    onShowTips: () -> Unit = {},
+    onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
+    onOpenSwitchStore: () -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
+    var showStoreNameDialog by remember { mutableStateOf(false) }
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
@@ -51,6 +62,14 @@ fun ConfigScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            SettingsItem(
+                icon = Icons.Outlined.Storefront,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_store_name),
+                subtitle = storeName ?: stringResource(R.string.settings_store_name_subtitle),
+                onClick = { showStoreNameDialog = true }
+            )
+
             DarkModeItem(
                 checked = when (currentThemeMode) {
                     ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -58,7 +77,7 @@ fun ConfigScreen(
                     ThemeMode.DARK -> true
                 },
                 onCheckedChange = { enabled ->
-                    onThemeModeChanged(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
+                    onThemeModeChange(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
                 }
             )
 
@@ -68,6 +87,25 @@ fun ConfigScreen(
                 title = stringResource(R.string.settings_terminals),
                 subtitle = stringResource(R.string.settings_terminals_subtitle),
                 onClick = onNavigateToTerminals
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.Lightbulb,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_tips),
+                subtitle = stringResource(R.string.settings_tips_subtitle),
+                onClick = onShowTips
+            )
+
+            SettingsItem(
+                icon = Icons.Outlined.SwapHoriz,
+                iconTint = MaterialTheme.colorScheme.primary,
+                title = stringResource(R.string.settings_switch_store),
+                subtitle = stringResource(
+                    R.string.settings_switch_store_subtitle,
+                    storeName ?: stringResource(R.string.settings_store_unnamed)
+                ),
+                onClick = onOpenSwitchStore
             )
 
             SettingsItem(
@@ -85,6 +123,16 @@ fun ConfigScreen(
         }
     }
 
+    if (showStoreNameDialog) {
+        StoreNameDialog(
+            initialName = storeName.orEmpty(),
+            title = R.string.settings_store_name_dialog_title,
+            errorMessage = R.string.settings_store_name_error,
+            onSave = onUpdateStoreName,
+            onDismiss = { showStoreNameDialog = false }
+        )
+    }
+
     if (showAboutDialog) {
         AlertDialog(
             onDismissRequest = { showAboutDialog = false },
@@ -98,6 +146,7 @@ fun ConfigScreen(
         )
     }
 }
+
 
 @Composable
 private fun DarkModeItem(
@@ -116,11 +165,11 @@ private fun DarkModeItem(
 
 @Preview(name = "Configurações - claro")
 @Composable
-fun ConfigScreenLightPreview() {
+private fun ConfigScreenLightPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.LIGHT) {
         ConfigScreen(
             currentThemeMode = ThemeMode.LIGHT,
-            onThemeModeChanged = {},
+            onThemeModeChange = {},
             onLogout = {}
         )
     }
@@ -128,11 +177,11 @@ fun ConfigScreenLightPreview() {
 
 @Preview(name = "Configurações - escuro", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun ConfigScreenDarkPreview() {
+private fun ConfigScreenDarkPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.DARK) {
         ConfigScreen(
             currentThemeMode = ThemeMode.DARK,
-            onThemeModeChanged = {},
+            onThemeModeChange = {},
             onLogout = {}
         )
     }

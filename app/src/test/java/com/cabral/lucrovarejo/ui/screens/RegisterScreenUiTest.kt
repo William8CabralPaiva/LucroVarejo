@@ -19,7 +19,7 @@ import com.cabral.lucrovarejo.ui.screens.register.REGISTER_BACK_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_CONFIRM_PASSWORD_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_EMAIL_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_PASSWORD_FIELD_TAG
-import com.cabral.lucrovarejo.ui.screens.register.REGISTER_STORE_NAME_FIELD_TAG
+import com.cabral.lucrovarejo.ui.screens.register.REGISTER_DISPLAY_NAME_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.register.REGISTER_TITLE_TAG
 import com.cabral.lucrovarejo.ui.screens.register.RegisterScreenContent
 import com.cabral.lucrovarejo.ui.screens.register.RegisterUiState
@@ -43,7 +43,7 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(),
-                    onStoreNameChange = {},
+                    onDisplayNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -54,10 +54,10 @@ class RegisterScreenUiTest {
         }
 
         composeRule.onNodeWithTag(REGISTER_TITLE_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(REGISTER_DISPLAY_NAME_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).assertIsNotEnabled()
         composeRule.onNodeWithContentDescription("Mostrar senha").performClick()
         composeRule.onNodeWithContentDescription("Ocultar senha").assertIsDisplayed()
@@ -65,7 +65,6 @@ class RegisterScreenUiTest {
 
     @Test
     fun inputChangesAreForwardedAndValidFormCanBeSubmitted() {
-        var storeName = ""
         var email = ""
         var submitCount = 0
         var backCount = 0
@@ -74,6 +73,7 @@ class RegisterScreenUiTest {
                 var formState by remember {
                     mutableStateOf(
                         RegisterUiState(
+                            displayName = "Minha Loja",
                             password = "senha123",
                             confirmPassword = "senha123"
                         )
@@ -81,10 +81,7 @@ class RegisterScreenUiTest {
                 }
                 RegisterScreenContent(
                     state = formState,
-                    onStoreNameChange = {
-                        storeName = it
-                        formState = formState.copy(storeName = it)
-                    },
+                    onDisplayNameChange = {},
                     onEmailChange = {
                         email = it
                         formState = formState.copy(email = it)
@@ -97,13 +94,11 @@ class RegisterScreenUiTest {
             }
         }
 
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).performTextInput("minhaloja")
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).performTextInput("loja@example.com")
         composeRule.onNodeWithTag(LOADING_BUTTON_TAG).performScrollTo().performClick()
         composeRule.onNodeWithTag(REGISTER_BACK_BUTTON_TAG).performScrollTo().performClick()
 
         composeRule.runOnIdle {
-            assertEquals("minhaloja", storeName)
             assertEquals("loja@example.com", email)
             assertEquals(1, submitCount)
             assertEquals(1, backCount)
@@ -116,13 +111,13 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(
-                        storeName = "minhaloja",
+                        displayName = "Minha Loja",
                         email = "loja@example.com",
                         password = "senha123",
                         confirmPassword = "senha123",
                         isLoading = true
                     ),
-                    onStoreNameChange = {},
+                    onDisplayNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -133,7 +128,6 @@ class RegisterScreenUiTest {
         }
 
         composeRule.onNodeWithTag(LOADING_INDICATOR_TAG).performScrollTo().assertIsDisplayed()
-        composeRule.onNodeWithTag(REGISTER_STORE_NAME_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_EMAIL_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_PASSWORD_FIELD_TAG).assertIsNotEnabled()
         composeRule.onNodeWithTag(REGISTER_CONFIRM_PASSWORD_FIELD_TAG).assertIsNotEnabled()
@@ -147,13 +141,13 @@ class RegisterScreenUiTest {
             LucroVarejoTheme {
                 RegisterScreenContent(
                     state = RegisterUiState(
-                        storeNameError = com.cabral.lucrovarejo.R.string.register_store_required,
+                        displayNameError = com.cabral.lucrovarejo.R.string.register_display_name_required,
                         emailError = com.cabral.lucrovarejo.R.string.register_email_invalid,
                         passwordError = com.cabral.lucrovarejo.R.string.register_password_too_short,
                         confirmPasswordError = com.cabral.lucrovarejo.R.string.register_password_mismatch,
                         errorMessage = com.cabral.lucrovarejo.R.string.register_error_network
                     ),
-                    onStoreNameChange = {},
+                    onDisplayNameChange = {},
                     onEmailChange = {},
                     onPasswordChange = {},
                     onConfirmPasswordChange = {},
@@ -168,7 +162,7 @@ class RegisterScreenUiTest {
             "Informe um e-mail válido.",
             "A senha deve ter pelo menos 6 caracteres.",
             "As senhas não coincidem.",
-            "Sem conexão com o Firebase. Verifique sua internet e tente novamente."
+            "Sem conexão. Verifique sua internet e tente novamente."
         ).forEach { message ->
             composeRule.onNodeWithText(message).performScrollTo().assertIsDisplayed()
         }

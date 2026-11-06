@@ -27,10 +27,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.ProdCodPrice
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.math.BigDecimal
@@ -56,9 +58,11 @@ fun ProductContent(
     state: ProductUiState,
     onQueryChange: (String) -> Unit,
     onAddProduct: () -> Unit,
+    modifier: Modifier = Modifier,
     onEditProduct: (ProductModel) -> Unit = {},
 ) {
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             FloatingActionButton(
@@ -118,10 +122,20 @@ fun ProductContent(
                 }
                 if (state.items.isEmpty()) {
                     item {
-                        Text(
-                            text = stringResource(R.string.products_empty),
-                            modifier = Modifier.padding(top = 24.dp)
-                        )
+                        if (state.query.isBlank()) {
+                            EmptyList(
+                                title = stringResource(R.string.products_empty_title),
+                                message = stringResource(R.string.products_empty_message),
+                                actionText = stringResource(R.string.products_add),
+                                onAddPurchase = onAddProduct,
+                                modifier = Modifier.fillParentMaxHeight(0.7f)
+                            )
+                        } else {
+                            Text(
+                                text = stringResource(R.string.products_empty),
+                                modifier = Modifier.padding(top = 24.dp)
+                            )
+                        }
                     }
                 } else {
                     items(state.items, key = { it.key ?: "${it.cod}-${it.name}" }) { product ->
@@ -174,12 +188,36 @@ private fun ProductContentEmptyPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Produtos sem resultado na busca")
+@Composable
+private fun ProductContentNoSearchResultPreview() {
+    LucroVarejoTheme {
+        ProductContent(
+            state = ProductUiState(isLoading = false, query = "xyz"),
+            onQueryChange = {},
+            onAddProduct = {}
+        )
+    }
+}
+
 @Preview(showBackground = true, name = "Produtos com erro")
 @Composable
 private fun ProductContentErrorPreview() {
     LucroVarejoTheme {
         ProductContent(
             state = ProductUiState(isLoading = false, hasError = true),
+            onQueryChange = {},
+            onAddProduct = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Produtos vazio - escuro")
+@Composable
+private fun ProductContentEmptyDarkPreview() {
+    LucroVarejoTheme(themeMode = ThemeMode.DARK) {
+        ProductContent(
+            state = ProductUiState(isLoading = false),
             onQueryChange = {},
             onAddProduct = {}
         )

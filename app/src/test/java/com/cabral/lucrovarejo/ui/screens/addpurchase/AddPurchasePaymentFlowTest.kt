@@ -131,7 +131,8 @@ class AddPurchasePaymentFlowTest {
         advanceUntilIdle()
 
         assertEquals(listOf("Maquininha A"), viewModel.uiState.value.terminalOptions.map { it.name })
-        assertTrue(viewModel.uiState.value.brandOptions.isEmpty())
+        // A única maquininha ativa já vem selecionada, então as bandeiras já estão disponíveis.
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
 
         viewModel.onTerminalSelected("Maquininha A")
         advanceUntilIdle()
@@ -154,9 +155,33 @@ class AddPurchasePaymentFlowTest {
         viewModel.onPaymentMethodSelected(PaymentMethods.DEBIT)
 
         val form = viewModel.uiState.value.form
-        assertNull(form.terminalId)
+        // Só há uma maquininha ativa com Débito, então ela é preenchida sozinha.
+        assertEquals("t1", form.terminalId)
         assertNull(form.brand)
         assertNull(form.installments)
+    }
+
+    @Test
+    fun singleActiveTerminalIsSelectedAutomatically() = runTest {
+        advanceUntilIdle()
+        assertNull(viewModel.uiState.value.form.terminalId)
+
+        viewModel.onPaymentMethodSelected(PaymentMethods.CREDIT)
+        advanceUntilIdle()
+
+        val form = viewModel.uiState.value.form
+        assertEquals("t1", form.terminalId)
+        assertEquals("Maquininha A", form.terminalName)
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+    }
+
+    @Test
+    fun cashDoesNotSelectTerminal() = runTest {
+        advanceUntilIdle()
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.form.terminalId)
     }
 
     @Test
@@ -229,7 +254,7 @@ class AddPurchasePaymentFlowTest {
     }
 
     @Test
-    fun editingKeepsSavedTariffSnapshotUntilPaymentFieldsChange() = runTest {
+    fun editingKeepsSelectionAndRefreshesTariffToCurrentRate() = runTest {
         advanceUntilIdle()
         val saved = PurchaseModel(
             key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
@@ -240,18 +265,63 @@ class AddPurchasePaymentFlowTest {
 
         viewModel.loadPurchase(saved)
         advanceUntilIdle()
-        assertEquals(777, viewModel.uiState.value.appliedTariff.rateBps)
-        assertTrue(viewModel.uiState.value.canSubmit)
+        val state = viewModel.uiState.value
+        assertEquals("t1", state.form.terminalId)
+        assertEquals("Maquininha A", state.form.terminalName)
+        assertEquals(99, state.appliedTariff.rateBps)
+        assertEquals("tp1", state.appliedTariff.tariffId)
+        assertTrue(state.canSubmit)
 
-        viewModel.onSaleDateChanged(date(2026, 7, 11).time)
+        viewModel.savePurchase()
+        advanceUntilIdle()
 
-        assertEquals(99, viewModel.uiState.value.appliedTariff.rateBps)
-        assertNotNull(viewModel.uiState.value.appliedTariff.tariffId)
+        val updated = requireNotNull(purchases.updated)
+        assertEquals(99, updated.tariffRateBps)
+        assertEquals("tp1", updated.tariffId)
+        assertEquals(99L, updated.tariffAmountCents)
+    }
+
+    @Test
+    fun editingSaleAndChangingToDebitOffersBrandsWithSingleTerminal() = runTest {
+        advanceUntilIdle()
+        val pix = PurchaseModel(
+            key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
+            salePrice = 10000, quantity = 1, saleDate = date(2026, 7, 10),
+            paymentMethod = PaymentMethods.PIX, terminalId = "t1", terminalName = "Maquininha A"
+        )
+        viewModel.loadPurchase(pix)
+        advanceUntilIdle()
+
+        viewModel.onPaymentMethodSelected(PaymentMethods.DEBIT)
+        advanceUntilIdle()
+
+        assertEquals("t1", viewModel.uiState.value.form.terminalId)
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+    }
+
+    @Test
+    fun editingSaleWithSelectedDebitStillOffersBrands() = runTest {
+        advanceUntilIdle()
+        val debit = PurchaseModel(
+            key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
+            salePrice = 10000, quantity = 1, saleDate = date(2026, 7, 10),
+            paymentMethod = PaymentMethods.DEBIT, terminalId = "t1", terminalName = "Maquininha A",
+            brand = "Visa"
+        )
+        viewModel.loadPurchase(debit)
+        advanceUntilIdle()
+
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+        assertEquals("Visa", viewModel.uiState.value.form.brand)
     }
 
     private class RecordingPurchaseRepository : PurchaseRepository {
         var created: PurchaseModel? = null
-        override suspend fun updatePurchase(purchase: PurchaseModel) = purchase
+        var updated: PurchaseModel? = null
+        override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
+            updated = purchase
+            return purchase
+        }
         override suspend fun deletePurchase(key: String) = Unit
         override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
             created = purchase

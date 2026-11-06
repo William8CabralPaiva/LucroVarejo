@@ -1,6 +1,6 @@
 package com.cabral.lucrovarejo.domain.payment.usecase
 
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineRepository
 import javax.inject.Inject
@@ -14,7 +14,7 @@ class AddPaymentMachineUseCase @Inject constructor(
             existing.tariffKey() == tariff.tariffKey() && existing.effectiveFrom == tariff.effectiveFrom
         }
         if (duplicate) {
-            throw PaymentFailure(PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE)
+            throw DataFailure(DataFailure.Reason.DUPLICATE_EFFECTIVE_DATE)
         }
         return repository.addTariff(tariff)
     }

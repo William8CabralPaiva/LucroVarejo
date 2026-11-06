@@ -1,5 +1,9 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
@@ -18,8 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+
+private const val BAR_ANIMATION_MS = 300
 
 private data class BottomNavItem(
     val route: String,
@@ -31,6 +39,7 @@ private data class BottomNavItem(
 fun BottomNavBar(
     currentRoute: String,
     onNavigate: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val items = listOf(
         BottomNavItem(LoggedRoutes.HOME, R.string.bottom_nav_home, Icons.Default.Home),
@@ -45,12 +54,17 @@ fun BottomNavBar(
         BottomNavItem(LoggedRoutes.CONFIG, R.string.bottom_nav_config, Icons.Default.Settings)
     )
 
-    if (items.any { it.route == currentRoute }) {
+    // A barra é overlay: troca por fade, sem alterar a altura do conteúdo.
+    AnimatedVisibility(
+        visible = items.any { it.route == currentRoute },
+        enter = fadeIn(animationSpec = tween(BAR_ANIMATION_MS)),
+        exit = fadeOut(animationSpec = tween(BAR_ANIMATION_MS))
+    ) {
         val dividerColor = MaterialTheme.colorScheme.outline
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            modifier = Modifier.drawBehind {
+            modifier = modifier.drawBehind {
                 drawLine(
                     color = dividerColor,
                     start = Offset(0f, 0f),
@@ -81,5 +95,13 @@ fun BottomNavBar(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Barra inferior")
+@Composable
+private fun BottomNavBarPreview() {
+    LucroVarejoTheme {
+        BottomNavBar(currentRoute = LoggedRoutes.HOME, onNavigate = {})
     }
 }

@@ -1,41 +1,96 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /stores/{storeId} {
-      function ownsStore() {
-        return request.auth != null && request.auth.uid == storeId;
+    // Lojas de cada usuario (atalho opcional para listar; nao concede acesso). O acesso aos dados vem de stores/{id}/members.
+    // users_debug e usada pelas builds de debug.
+    match /{usersCollection}/{uid}/stores/{storeId} {
+      function isUsersCollection() {
+        return usersCollection in ['users', 'users_debug'];
+      }
+      function isSelf() {
+        return isUsersCollection() && request.auth != null && request.auth.uid == uid;
+      }
+      function validName(data) {
+        return data.displayName is string && data.displayName.size() <= 100;
       }
 
-      allow create: if ownsStore()
-        && request.resource.data.keys().hasAll(['storeName', 'email', 'createdAt'])
-        && request.resource.data.storeName is string
-        && request.resource.data.storeName.matches('^[a-z0-9][a-z0-9._-]{1,28}[a-z0-9]$')
-        && request.auth.token.email == request.resource.data.storeName + '@auth.lucrovarejo.invalid'
+      allow read: if isSelf();
+      allow create: if isSelf()
+        && request.resource.data.keys().hasAll(['displayName', 'role', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['displayName', 'role', 'createdAt'])
+        && validName(request.resource.data)
+        && request.resource.data.role == 'OWNER'
+        && request.resource.data.createdAt == request.time;
+      allow update: if isSelf()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName'])
+        && validName(request.resource.data);
+      allow delete: if false;
+    }
+
+    // stores_debug e usada pelas builds de debug, separada dos dados reais.
+    match /{storesCollection}/{storeId} {
+      function isStoresCollection() {
+        return storesCollection in ['stores', 'stores_debug'];
+      }
+      // Lojas antigas usam o UID como id; as demais exigem o documento em members.
+      function isMember() {
+        return isStoresCollection() && request.auth != null
+          && (request.auth.uid == storeId
+            || exists(/databases/$(database)/documents/$(storesCollection)/$(storeId)/members/$(request.auth.uid)));
+      }
+      // Na criacao da loja, o membro dono e gravado no mesmo lote.
+      function isCreatingOwnStore() {
+        return isStoresCollection() && request.auth != null
+          && (request.auth.uid == storeId
+            || existsAfter(/databases/$(database)/documents/$(storesCollection)/$(storeId)/members/$(request.auth.uid)));
+      }
+
+      allow create: if isCreatingOwnStore()
+        && request.resource.data.keys().hasAll(['displayName', 'email', 'createdAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
         && request.resource.data.email is string
         && request.resource.data.email.size() <= 254
+        && request.auth.token.email.lower() == request.resource.data.email.lower()
         && request.resource.data.createdAt == request.time;
-      allow get: if ownsStore();
-      allow update: if ownsStore()
-        && request.resource.data.storeName == resource.data.storeName
+      allow get: if isMember();
+      allow update: if isMember()
         && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
         && request.resource.data.email is string
         && request.resource.data.email.size() <= 254;
       allow list, delete: if false;
 
+      match /members/{memberUid} {
+        allow get: if isStoresCollection() && request.auth != null && request.auth.uid == memberUid;
+        // So o criador pode se registrar como dono, e apenas se a loja ainda nao existia.
+        allow create: if isStoresCollection()
+          && request.auth != null
+          && request.auth.uid == memberUid
+          && request.resource.data.keys().hasOnly(['role', 'createdAt'])
+          && request.resource.data.role == 'OWNER'
+          && !exists(/databases/$(database)/documents/$(storesCollection)/$(storeId))
+          && existsAfter(/databases/$(database)/documents/$(storesCollection)/$(storeId));
+        allow list, update, delete: if false;
+      }
+
       // Coleções da loja sem exigência de imutabilidade.
       match /products/{productId} {
-        allow read, write: if ownsStore();
+        allow read, write: if isMember();
       }
       match /purchases/{purchaseId} {
-        allow read, write: if ownsStore();
+        allow read, write: if isMember();
       }
       match /paymentTerminals/{terminalId} {
-        allow read, create, update: if ownsStore();
+        allow read, create, update: if isMember();
         allow delete: if false;
 
         // Tarifas são append-only: nunca sobrescrever/apagar o histórico.
         match /tariffs/{tariffId} {
-          allow read, create: if ownsStore();
+          allow read, create: if isMember();
           allow update, delete: if false;
         }
       }
