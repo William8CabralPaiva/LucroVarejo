@@ -54,6 +54,7 @@ import kotlinx.collections.immutable.toImmutableList
 @Composable
 fun HomeScreen(
     goToSalesScreen: () -> Unit,
+    onEditPurchase: (PurchaseModel) -> Unit = {},
     viewModel: HomeViewModel? = null,
 ) {
     val resolvedViewModel = viewModel ?: hiltViewModel()
@@ -69,6 +70,7 @@ fun HomeScreen(
         hasLatestSalesError = state.hasLatestPurchasesError,
         onMonthYearChange = resolvedViewModel::onMonthYearChanged,
         goToSalesScreen = goToSalesScreen,
+        onEditPurchase = onEditPurchase,
     )
 }
 
@@ -81,6 +83,7 @@ fun HomeContent(
     isLatestSalesLoading: Boolean = false,
     hasLatestSalesError: Boolean = false,
     goToSalesScreen: () -> Unit = {},
+    onEditPurchase: (PurchaseModel) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -143,6 +146,7 @@ fun HomeContent(
                 isLoading = isLatestSalesLoading,
                 hasError = hasLatestSalesError,
                 onShowAll = goToSalesScreen,
+                onEditPurchase = onEditPurchase,
             )
         }
     }
@@ -191,6 +195,7 @@ private fun LatestSalesSection(
     isLoading: Boolean,
     hasError: Boolean,
     onShowAll: () -> Unit,
+    onEditPurchase: (PurchaseModel) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -230,6 +235,7 @@ private fun LatestSalesSection(
                     productName = purchase.name,
                     priceInCents = purchase.salePrice.toLong(),
                     saleDate = purchase.saleDate,
+                    onClick = { onEditPurchase(purchase) },
                 )
             }
         }

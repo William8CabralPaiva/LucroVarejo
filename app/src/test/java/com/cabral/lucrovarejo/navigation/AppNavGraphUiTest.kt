@@ -54,7 +54,8 @@ class AppNavGraphUiTest {
                     startDestination = LoggedRoutes.HOME,
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
-                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                        ObserveSalesChangesUseCase(EmptySalesRepository()),
+                        GetProductsUseCase(EmptyProductRepository())
                     ),
                     productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
                     homeViewModel = HomeViewModel(
@@ -120,7 +121,8 @@ class AppNavGraphUiTest {
                     onThemeModeChange = {},
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
-                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                        ObserveSalesChangesUseCase(EmptySalesRepository()),
+                        GetProductsUseCase(EmptyProductRepository())
                     ),
                     productViewModel = ProductViewModel(GetProductsUseCase(EmptyProductRepository())),
                     homeViewModel = HomeViewModel(

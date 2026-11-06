@@ -45,23 +45,71 @@ class SalesScreenUiTest {
     private fun show(
         state: SalesUiState,
         onQueryChange: (String) -> Unit = {},
-        onDateSelected: (Long?) -> Unit = {},
+        onMonthYearChange: (Int, Int) -> Unit = { _, _ -> },
         onLoadMore: () -> Unit = {},
         onRetry: () -> Unit = {},
         onAddPurchase: (() -> Unit)? = null,
+        onAddProduct: (() -> Unit)? = null,
         onEditPurchase: ((PurchaseModel) -> Unit)? = null
     ) = composeRule.setContent {
         LucroVarejoTheme {
             SalesContent(
                 state = state,
                 onQueryChange = onQueryChange,
-                onDateSelect = onDateSelected,
+                onMonthYearChange = onMonthYearChange,
                 onLoadMore = onLoadMore,
                 onRetry = onRetry,
                 onAddPurchase = onAddPurchase,
+                onAddProduct = onAddProduct,
                 onEditPurchase = onEditPurchase
             )
         }
+    }
+
+    @Test
+    fun addButtonWithoutProductsShowsWarningAndOffersProductRegistration() {
+        var addedPurchase = false
+        var addedProduct = false
+        show(
+            SalesUiState(isLoading = false, hasProducts = false),
+            onAddPurchase = { addedPurchase = true },
+            onAddProduct = { addedProduct = true }
+        )
+
+        composeRule.onNodeWithContentDescription(string(R.string.sales_add)).performClick()
+        composeRule.onNodeWithText(string(R.string.sales_no_products_title)).assertIsDisplayed()
+        assertTrue(!addedPurchase)
+
+        composeRule.onNodeWithText(string(R.string.sales_no_products_action)).performClick()
+        assertTrue(addedProduct)
+        assertTrue(!addedPurchase)
+    }
+
+    @Test
+    fun emptyListAddButtonWithoutProductsShowsWarning() {
+        var addedPurchase = false
+        show(
+            SalesUiState(isLoading = false, hasProducts = false),
+            onAddPurchase = { addedPurchase = true }
+        )
+
+        composeRule.onNodeWithText(string(R.string.empty_list_add_purchase)).performClick()
+
+        composeRule.onNodeWithText(string(R.string.sales_no_products_title)).assertIsDisplayed()
+        assertTrue(!addedPurchase)
+    }
+
+    @Test
+    fun addButtonWithProductsNavigatesDirectly() {
+        var addedPurchase = false
+        show(
+            SalesUiState(isLoading = false, hasProducts = true),
+            onAddPurchase = { addedPurchase = true }
+        )
+
+        composeRule.onNodeWithContentDescription(string(R.string.sales_add)).performClick()
+
+        assertTrue(addedPurchase)
     }
 
     @Test
@@ -143,6 +191,15 @@ class SalesScreenUiTest {
     }
 
     @Test
+    fun searchWithoutResultsShowsFriendlyMessageInsteadOfEmptyList() {
+        show(SalesUiState(isLoading = false, query = "bolsa"))
+
+        composeRule.onNodeWithText(string(R.string.sales_search_empty, "bolsa")).assertIsDisplayed()
+        composeRule.onNodeWithText(string(R.string.empty_list_add_purchase), substring = true)
+            .assertDoesNotExist()
+    }
+
+    @Test
     fun searchFieldForwardsQuery() {
         var query = ""
         show(SalesUiState(isLoading = false), onQueryChange = { query = it })
@@ -153,32 +210,16 @@ class SalesScreenUiTest {
     }
 
     @Test
-    fun dateChipClearsFilterAndPickerAppliesSelection() {
-        var selected: Long? = 1L
+    fun monthSelectorShowsSelectedMonthAndForwardsChanges() {
+        var changed: Pair<Int, Int>? = null
         show(
-            SalesUiState(isLoading = false, selectedDateMillis = 1_759_708_800_000L),
-            onDateSelected = { selected = it }
+            SalesUiState(isLoading = false, year = 2026, month = 12),
+            onMonthYearChange = { year, month -> changed = year to month }
         )
 
-        composeRule.onNodeWithContentDescription(string(R.string.sales_date_filter_clear))
-            .performClick()
-        assertEquals(null, selected)
+        composeRule.onNodeWithText("Dezembro 2026").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription(string(R.string.month_year_next)).performClick()
 
-        composeRule.onNodeWithContentDescription(string(R.string.sales_filter_by_date))
-            .performClick()
-        composeRule.onNodeWithText(string(R.string.date_picker_confirm)).performClick()
-        assertEquals(1_759_708_800_000L, selected)
-    }
-
-    @Test
-    fun datePickerCanBeDismissed() {
-        show(SalesUiState(isLoading = false))
-
-        composeRule.onNodeWithContentDescription(string(R.string.sales_filter_by_date))
-            .performClick()
-        composeRule.onNodeWithText(string(R.string.date_picker_cancel)).performClick()
-
-        composeRule.onNodeWithContentDescription(string(R.string.sales_filter_by_date))
-            .assertIsDisplayed()
+        assertEquals(2027 to 1, changed)
     }
 }

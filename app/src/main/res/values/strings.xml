@@ -184,10 +184,12 @@
     <string name="purchase_item_profit">Lucro: %1$s</string>
     <string name="purchase_item_options">Mais opções</string>
     <string name="sales_search_placeholder">Buscar produto...</string>
-    <string name="sales_filter_by_date">Filtrar por data</string>
-    <string name="sales_date_filter_label">Data: %1$s</string>
-    <string name="sales_date_filter_clear">Remover filtro de data</string>
+    <string name="sales_search_empty">Não encontramos nenhuma venda para \"%1$s\" neste mês. Confira o nome ou tente outro mês.</string>
     <string name="sales_empty">Nenhuma venda encontrada.</string>
+    <string name="sales_no_products_title">Cadastre um produto primeiro</string>
+    <string name="sales_no_products_message">Para registrar uma venda você precisa ter pelo menos um produto cadastrado.</string>
+    <string name="sales_no_products_action">Cadastrar produto</string>
+    <string name="sales_no_products_dismiss">Agora não</string>
     <string name="sales_retry">Tentar novamente</string>
     <string name="sales_load_error">Não foi possível carregar as vendas.</string>
     <string name="sales_add">Nova venda</string>

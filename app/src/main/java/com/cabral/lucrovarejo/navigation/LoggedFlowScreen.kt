@@ -230,6 +230,7 @@ private fun LoggedDestinationNavHost(
                 goToSalesScreen = {
                     navigator.navigateToTab(LoggedRoutes.SALES)
                 },
+                onEditPurchase = navigator::navigateToEditPurchase,
                 viewModel = homeViewModel
             )
         }
@@ -262,6 +263,7 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.SALES) {
             SalesScreen(
                 onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
+                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
                 onEditPurchase = navigator::navigateToEditPurchase,
                 viewModel = salesViewModel
             )

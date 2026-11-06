@@ -121,4 +121,33 @@ class HomeScreenUiTest {
             assertEquals(true, openedSales)
         }
     }
+
+    @Test
+    fun clickingLatestSaleForwardsPurchaseToEdit() {
+        var edited: PurchaseModel? = null
+        val purchase = PurchaseModel(
+            key = "sale-1",
+            cod = "A-1",
+            name = "Bolsa Feminina",
+            cost = 5000,
+            description = "",
+            salePrice = 8990,
+            quantity = 1,
+            saleDate = Date(),
+            paymentMethod = PaymentMethods.CASH
+        )
+        composeRule.setContent {
+            LucroVarejoTheme {
+                HomeContent(
+                    state = HomeUiState(year = 2026, month = 10, isLoading = false),
+                    latestPurchases = persistentListOf(purchase),
+                    onMonthYearChange = { _, _ -> },
+                    onEditPurchase = { edited = it },
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Bolsa Feminina").performScrollTo().performClick()
+        composeRule.runOnIdle { assertEquals(purchase, edited) }
+    }
 }

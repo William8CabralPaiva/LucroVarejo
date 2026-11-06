@@ -74,7 +74,8 @@ class AppNavGraphStoreFlowUiTest {
                     storeViewModel = storeViewModel,
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySales()),
-                        ObserveSalesChangesUseCase(EmptySales())
+                        ObserveSalesChangesUseCase(EmptySales()),
+                        GetProductsUseCase(EmptyProducts())
                     ),
                     productViewModel = ProductViewModel(GetProductsUseCase(EmptyProducts())),
                     homeViewModel = HomeViewModel(
