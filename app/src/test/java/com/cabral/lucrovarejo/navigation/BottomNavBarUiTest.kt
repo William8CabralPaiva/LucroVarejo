@@ -1,5 +1,8 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
@@ -67,6 +70,22 @@ class BottomNavBarUiTest {
                 )
             }
         }
+
+        composeRule.onAllNodesWithText("Início").assertCountEquals(0)
+    }
+
+    @Test
+    fun removesBarAfterAnimationWhenLeavingToDetailRoute() {
+        var route by mutableStateOf(LoggedRoutes.HOME)
+        composeRule.setContent {
+            LucroVarejoTheme {
+                BottomNavBar(currentRoute = route, onNavigate = {})
+            }
+        }
+        composeRule.onNodeWithText("Início").assertIsDisplayed()
+
+        route = LoggedRoutes.ADD_PRODUCT
+        composeRule.waitForIdle()
 
         composeRule.onAllNodesWithText("Início").assertCountEquals(0)
     }

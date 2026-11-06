@@ -48,8 +48,15 @@ fun BottomNavBar(
         BottomNavItem(LoggedRoutes.CONFIG, R.string.bottom_nav_config, Icons.Default.Settings)
     )
 
-    if (items.any { it.route == currentRoute }) {
-        val dividerColor = MaterialTheme.colorScheme.outline
+    // A barra mantem a altura nas telas de formulario (so esconde os itens e a linha); sumir
+    // de vez mudava o layout e fazia a tela descer.
+    val isTabRoute = items.any { it.route == currentRoute }
+    run {
+        val dividerColor = if (isTabRoute) {
+            MaterialTheme.colorScheme.outline
+        } else {
+            MaterialTheme.colorScheme.surface
+        }
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
@@ -62,7 +69,7 @@ fun BottomNavBar(
                 )
             }
         ) {
-            items.forEach { item ->
+            if (isTabRoute) items.forEach { item ->
                 val label = stringResource(item.labelRes)
                 NavigationBarItem(
                     selected = currentRoute == item.route,
