@@ -76,6 +76,26 @@ class MachineSaleContentUiTest {
     }
 
     @Test
+    fun bothSaveButtonsAreDisabledWhileSavingWithoutClosing() = assertBothDisabled(closeAfterSave = false)
+
+    @Test
+    fun bothSaveButtonsAreDisabledWhileSavingAndClosing() = assertBothDisabled(closeAfterSave = true)
+
+    private fun assertBothDisabled(closeAfterSave: Boolean) {
+        render(
+            MachineSaleUiState(
+                name = "Stone",
+                selectedMethods = setOf(TerminalPaymentType.PIX),
+                isSaving = true,
+                closeAfterSave = closeAfterSave
+            )
+        )
+
+        composeRule.onNodeWithTag("save-product-button").assertIsNotEnabled()
+        composeRule.onNodeWithTag("save-and-back-machine-button").assertIsNotEnabled()
+    }
+
+    @Test
     fun saveDisabledWhenFormIncompleteAndShowsErrors() {
         render(
             MachineSaleUiState(

@@ -191,7 +191,7 @@ fun MachineSaleContent(
                         }
                         IconButton(
                             modifier = Modifier.coachTarget(coach, CoachTarget.SAVE),
-                            enabled = state.canSubmit,
+                            enabled = state.canSubmit && !state.isSaving,
                             onClick = { onSave(false) },
                             isLoading = state.isSaving && !state.closeAfterSave,
                             icon = Icons.Default.Save,
@@ -199,7 +199,7 @@ fun MachineSaleContent(
                             loadingText = stringResource(R.string.terminal_form_saving)
                         )
                         IconButton(
-                            enabled = state.canSubmit,
+                            enabled = state.canSubmit && !state.isSaving,
                             onClick = { onSave(true) },
                             modifier = Modifier.padding(top = 8.dp),
                             isLoading = state.isSaving && state.closeAfterSave,
