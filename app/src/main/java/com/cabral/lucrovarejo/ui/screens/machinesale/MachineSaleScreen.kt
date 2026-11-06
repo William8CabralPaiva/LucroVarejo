@@ -687,7 +687,8 @@ private fun CreditInstallmentPicker(
                     showPicker = false
                 },
                 textId = R.string.terminal_form_installments_label,
-                placeholderResId = R.string.terminal_form_installments_placeholder
+                placeholderResId = R.string.terminal_form_installments_placeholder,
+                required = true
             )
         } else if (availableInstallments.isNotEmpty()) {
             TextButton(onClick = { showPicker = true }) {
@@ -723,7 +724,7 @@ private fun TariffEntryFields(
             placeholderResId = R.string.terminal_form_tariff_rate_placeholder,
             icon = Icons.Outlined.Percent,
             type = IconTextFieldType.MONEY,
-            required = false,
+            required = true,
             isError = entry.error != null,
             supportingText = entry.error?.let { { Text(stringResource(it)) } }
         )
@@ -731,7 +732,7 @@ private fun TariffEntryFields(
             dateMillis = entry.effectiveFromMillis,
             onDateChange = onDateChange,
             labelResId = R.string.terminal_form_tariff_effective_from_label,
-            required = false
+            required = true
         )
         if (entry.currentRateBps != null) {
             TextButton(onClick = onOpenHistory) {

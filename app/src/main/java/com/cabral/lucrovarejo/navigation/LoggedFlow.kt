@@ -1,6 +1,8 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -55,7 +57,7 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-internal fun LoggedFlowScreen(
+internal fun LoggedFlow(
     currentThemeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
@@ -127,7 +129,10 @@ internal fun LoggedFlowScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                //keyboard screen
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
             color = MaterialTheme.colorScheme.surface,
             shadowElevation = 4.dp

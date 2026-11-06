@@ -281,6 +281,40 @@ class AddPurchasePaymentFlowTest {
         assertEquals(99L, updated.tariffAmountCents)
     }
 
+    @Test
+    fun editingSaleAndChangingToDebitOffersBrandsWithSingleTerminal() = runTest {
+        advanceUntilIdle()
+        val pix = PurchaseModel(
+            key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
+            salePrice = 10000, quantity = 1, saleDate = date(2026, 7, 10),
+            paymentMethod = PaymentMethods.PIX, terminalId = "t1", terminalName = "Maquininha A"
+        )
+        viewModel.loadPurchase(pix)
+        advanceUntilIdle()
+
+        viewModel.onPaymentMethodSelected(PaymentMethods.DEBIT)
+        advanceUntilIdle()
+
+        assertEquals("t1", viewModel.uiState.value.form.terminalId)
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+    }
+
+    @Test
+    fun editingSaleWithSelectedDebitStillOffersBrands() = runTest {
+        advanceUntilIdle()
+        val debit = PurchaseModel(
+            key = "k1", cod = "A-1", name = "Bolsa", cost = 5000, description = "",
+            salePrice = 10000, quantity = 1, saleDate = date(2026, 7, 10),
+            paymentMethod = PaymentMethods.DEBIT, terminalId = "t1", terminalName = "Maquininha A",
+            brand = "Visa"
+        )
+        viewModel.loadPurchase(debit)
+        advanceUntilIdle()
+
+        assertEquals(listOf("Visa"), viewModel.uiState.value.brandOptions)
+        assertEquals("Visa", viewModel.uiState.value.form.brand)
+    }
+
     private class RecordingPurchaseRepository : PurchaseRepository {
         var created: PurchaseModel? = null
         var updated: PurchaseModel? = null

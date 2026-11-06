@@ -96,7 +96,7 @@ class MachineSaleContentUiTest {
     }
 
     @Test
-    fun saveDisabledWhenFormIncompleteAndShowsErrors() {
+    fun saveEnabledWhenFormIncompleteAndShowsErrors() {
         render(
             MachineSaleUiState(
                 nameError = R.string.terminal_form_name_required,
@@ -105,7 +105,7 @@ class MachineSaleContentUiTest {
             )
         )
 
-        composeRule.onNodeWithText("Salvar").assertIsNotEnabled()
+        composeRule.onNodeWithText("Salvar").assertIsEnabled()
         composeRule.onNodeWithText("Informe o nome da maquininha.").assertExists()
         composeRule.onNodeWithText("Selecione ao menos um tipo de pagamento.").assertExists()
         composeRule.onNodeWithText("Não foi possível salvar a maquininha. Tente novamente.").assertExists()

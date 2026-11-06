@@ -56,7 +56,7 @@ Em conflito entre código e documentação, o código mostra o estado atual e o 
 - Compose: separar composable stateful (ViewModel, estado, navegação) do stateless (estado + callbacks, usado em previews).
 - Textos em `res/values/strings.xml` com `stringResource` (ViewModels podem guardar `@StringRes`); medidas em `dimens.xml` com `dimensionResource`.
 - Reutilizar tema e componentes; estilização repetida de Material3 vai em wrapper em `ui/components` (ex.: `AppSwitch` com `appSwitchColors()`).
-- Telas dentro do `Scaffold` de `LoggedFlowScreen` (que repassa `innerPadding`) não aplicam `windowInsetsPadding(WindowInsets.safeDrawing)`; só telas fora dele (Login, Cadastro).
+- Telas dentro do `Scaffold` de `LoggedFlow` (que repassa `innerPadding`) não aplicam `windowInsetsPadding(WindowInsets.safeDrawing)`; só telas fora dele (Login, Cadastro).
 - Datas de vigência/início vêm pré-preenchidas com a data atual.
 - Rolar até elemento recém-exibido: `BringIntoViewRequester` + `bringIntoView()` dentro de `LaunchedEffect` chaveado no estado, nunca direto no clique.
 - Telas de edição não usam `SavedStateHandle` injetado pelo Hilt: o model vai no `savedStateHandle` do `LoggedNavigator`, é lido pelo `NavHost`, passado como parâmetro e carregado com `loadX(model)` em `LaunchedEffect`.

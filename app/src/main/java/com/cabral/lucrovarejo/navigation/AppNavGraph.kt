@@ -57,7 +57,7 @@ fun AppNavGraph(
             val storeState = storeViewModel?.uiState?.collectAsState()?.value
             // A chave recria o fluxo logado ao trocar de loja, e as telas passam a observar a nova loja.
             key(storeState?.storeEpoch ?: 0) {
-                LoggedFlowScreen(
+                LoggedFlow(
                     currentThemeMode = currentThemeMode,
                     onThemeModeChange = onThemeModeChange,
                     homeViewModel = homeViewModel,
