@@ -1,5 +1,9 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
@@ -22,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+
+private const val BAR_ANIMATION_MS = 300
 
 private data class BottomNavItem(
     val route: String,
@@ -48,15 +54,13 @@ fun BottomNavBar(
         BottomNavItem(LoggedRoutes.CONFIG, R.string.bottom_nav_config, Icons.Default.Settings)
     )
 
-    // A barra mantem a altura nas telas de formulario (so esconde os itens e a linha); sumir
-    // de vez mudava o layout e fazia a tela descer.
-    val isTabRoute = items.any { it.route == currentRoute }
-    run {
-        val dividerColor = if (isTabRoute) {
-            MaterialTheme.colorScheme.outline
-        } else {
-            MaterialTheme.colorScheme.surface
-        }
+    // A barra é overlay: troca por fade, sem alterar a altura do conteúdo.
+    AnimatedVisibility(
+        visible = items.any { it.route == currentRoute },
+        enter = fadeIn(animationSpec = tween(BAR_ANIMATION_MS)),
+        exit = fadeOut(animationSpec = tween(BAR_ANIMATION_MS))
+    ) {
+        val dividerColor = MaterialTheme.colorScheme.outline
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
@@ -69,7 +73,7 @@ fun BottomNavBar(
                 )
             }
         ) {
-            if (isTabRoute) items.forEach { item ->
+            items.forEach { item ->
                 val label = stringResource(item.labelRes)
                 NavigationBarItem(
                     selected = currentRoute == item.route,

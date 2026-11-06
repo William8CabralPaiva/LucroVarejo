@@ -1,8 +1,15 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -21,10 +28,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import com.cabral.lucrovarejo.R
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -101,7 +112,7 @@ internal fun LoggedFlow(
     }
 
     Scaffold(
-        containerColor = scaffoldContainerColor,
+        containerColor = MaterialTheme.colorScheme.surface,
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState) { data ->
                 Snackbar(
@@ -119,44 +130,65 @@ internal fun LoggedFlow(
                 onBackPress = navigator::navigateBack
             )
         },
-        bottomBar = {
-            BottomNavBar(
-                currentRoute = currentRoute,
-                onNavigate = navigator::navigateToTab
-            )
-        }
+        bottomBar = {}
     ) { innerPadding ->
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                //keyboard screen
-                .consumeWindowInsets(innerPadding)
-                .imePadding(),
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-            color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 4.dp
-        ) {
-            LoggedDestinationNavHost(
-                navController = navController,
-                navigator = navigator,
-                currentThemeMode = currentThemeMode,
-                onThemeModeChange = onThemeModeChange,
-                onLogout = onLogout,
-                onShowMessage = showMessage,
-                homeViewModel = homeViewModel,
-                salesViewModel = salesViewModel,
-                productViewModel = productViewModel,
-                storeName = storeName,
-                onOpenSwitchStore = { showSwitchStoreDialog = true },
-                onShowTips = startMachineTour,
-                machineTourActive = machineTourActive,
-                onMachineTourFinish = {
-                    machineTourActive = false
-                    navigator.navigateBack()
-                },
-                onUpdateStoreName = onUpdateStoreName
+        // A barra é overlay: o espaço dela é reservado por tela (só nas abas), então a tela que
+        // está saindo na animação não muda de tamanho.
+        val density = LocalDensity.current
+        var barHeight by remember { mutableStateOf(0.dp) }
+        val tabBottomPadding = (barHeight - WindowInsets.navigationBars.asPaddingValues()
+            .calculateBottomPadding()).coerceAtLeast(0.dp)
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Faixa verde só atrás dos cantos arredondados; o resto do fundo é surface, sem flash verde.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = innerPadding.calculateTopPadding())
+                    .height(20.dp)
+                    .background(scaffoldContainerColor)
             )
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    //keyboard screen
+                    .consumeWindowInsets(innerPadding)
+                    .imePadding(),
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 4.dp
+            ) {
+                LoggedDestinationNavHost(
+                    navController = navController,
+                    navigator = navigator,
+                    tabBottomPadding = tabBottomPadding,
+                    currentThemeMode = currentThemeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    onLogout = onLogout,
+                    onShowMessage = showMessage,
+                    homeViewModel = homeViewModel,
+                    salesViewModel = salesViewModel,
+                    productViewModel = productViewModel,
+                    storeName = storeName,
+                    onOpenSwitchStore = { showSwitchStoreDialog = true },
+                    onShowTips = startMachineTour,
+                    machineTourActive = machineTourActive,
+                    onMachineTourFinish = {
+                        machineTourActive = false
+                        navigator.navigateBack()
+                    },
+                    onUpdateStoreName = onUpdateStoreName
+                )
+            }
+            Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                BottomNavBar(
+                    currentRoute = currentRoute,
+                    onNavigate = navigator::navigateToTab,
+                    modifier = Modifier.onSizeChanged { size ->
+                        if (size.height > 0) barHeight = with(density) { size.height.toDp() }
+                    }
+                )
+            }
         }
     }
 
@@ -209,6 +241,7 @@ internal fun LoggedFlow(
 private fun LoggedDestinationNavHost(
     navController: NavHostController,
     navigator: LoggedNavigator,
+    tabBottomPadding: Dp,
     currentThemeMode: ThemeMode,
     onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
@@ -231,13 +264,15 @@ private fun LoggedDestinationNavHost(
         modifier = Modifier.fillMaxSize()
     ) {
         composable(LoggedRoutes.HOME) {
-            HomeScreen(
-                goToSalesScreen = {
-                    navigator.navigateToTab(LoggedRoutes.SALES)
-                },
-                onEditPurchase = navigator::navigateToEditPurchase,
-                viewModel = homeViewModel
-            )
+            Box(Modifier.padding(bottom = tabBottomPadding)) {
+                HomeScreen(
+                    goToSalesScreen = {
+                        navigator.navigateToTab(LoggedRoutes.SALES)
+                    },
+                    onEditPurchase = navigator::navigateToEditPurchase,
+                    viewModel = homeViewModel
+                )
+            }
         }
 
         composable(LoggedRoutes.ADD_PURCHASE) {
@@ -254,11 +289,13 @@ private fun LoggedDestinationNavHost(
         }
 
         composable(LoggedRoutes.PRODUCTS) {
-            ProductScreen(
-                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
-                onEditProduct = navigator::navigateToEditProduct,
-                viewModel = productViewModel
-            )
+            Box(Modifier.padding(bottom = tabBottomPadding)) {
+                ProductScreen(
+                    onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                    onEditProduct = navigator::navigateToEditProduct,
+                    viewModel = productViewModel
+                )
+            }
         }
 
         composable(LoggedRoutes.ADD_PRODUCT) {
@@ -266,12 +303,14 @@ private fun LoggedDestinationNavHost(
         }
 
         composable(LoggedRoutes.SALES) {
-            SalesScreen(
-                onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
-                onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
-                onEditPurchase = navigator::navigateToEditPurchase,
-                viewModel = salesViewModel
-            )
+            Box(Modifier.padding(bottom = tabBottomPadding)) {
+                SalesScreen(
+                    onAddPurchase = { navigator.navigateTo(LoggedRoutes.ADD_PURCHASE) },
+                    onAddProduct = { navigator.navigateTo(LoggedRoutes.ADD_PRODUCT) },
+                    onEditPurchase = navigator::navigateToEditPurchase,
+                    viewModel = salesViewModel
+                )
+            }
         }
 
         composable(LoggedRoutes.EDIT_SALES) {
@@ -289,16 +328,18 @@ private fun LoggedDestinationNavHost(
 //        }
 
         composable(LoggedRoutes.CONFIG) {
-            ConfigScreen(
-                currentThemeMode = currentThemeMode,
-                onThemeModeChange = onThemeModeChange,
-                onLogout = onLogout,
-                onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
-                storeName = storeName,
-                onOpenSwitchStore = onOpenSwitchStore,
-                onShowTips = onShowTips,
-                onUpdateStoreName = onUpdateStoreName
-            )
+            Box(Modifier.padding(bottom = tabBottomPadding)) {
+                ConfigScreen(
+                    currentThemeMode = currentThemeMode,
+                    onThemeModeChange = onThemeModeChange,
+                    onLogout = onLogout,
+                    onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) },
+                    storeName = storeName,
+                    onOpenSwitchStore = onOpenSwitchStore,
+                    onShowTips = onShowTips,
+                    onUpdateStoreName = onUpdateStoreName
+                )
+            }
         }
 
         composable(LoggedRoutes.MACHINE_LIST) {
