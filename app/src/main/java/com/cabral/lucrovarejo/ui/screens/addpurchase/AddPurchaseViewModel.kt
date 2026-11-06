@@ -227,6 +227,7 @@ class AddPurchaseViewModel @Inject constructor(
     fun savePurchase() {
         val current = _uiState.value
         if (current.isSaving || current.isLoadingProducts || current.isLoadingTariffs) return
+        if (current.hasLoss) return
 
         val form = current.form
         val salePrice = parseSalePrice(form.salePrice)

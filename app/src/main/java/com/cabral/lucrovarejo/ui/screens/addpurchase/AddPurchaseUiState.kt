@@ -37,6 +37,7 @@ data class AddPurchaseUiState(
         get() = form.selectedProduct != null &&
                 parseSalePrice(form.salePrice) != null &&
                 form.isPaymentSelectionComplete &&
+                !hasLoss &&
                 !isLoadingProducts &&
                 !isLoadingTariffs &&
                 !isSaving
@@ -46,6 +47,13 @@ data class AddPurchaseUiState(
             val product = form.selectedProduct ?: return null
             val price = parseSalePrice(form.salePrice) ?: return null
             return price.subtract(product.cost).multiply(BigDecimal.valueOf(form.quantity.toLong()))
+        }
+
+    // A venda não pode dar prejuízo: o lucro, já descontada a tarifa, precisa ser >= 0.
+    val hasLoss: Boolean
+        get() {
+            val profit = profit ?: return false
+            return profit.subtract(BigDecimal.valueOf(tariffAmountCents(), 2)).signum() < 0
         }
 
     val terminalOptions: List<PaymentTerminalModel>

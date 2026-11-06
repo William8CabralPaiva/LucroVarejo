@@ -308,6 +308,13 @@ fun AddPurchaseScreenContent(
                     onDateChange = onSaleDateChange
                 )
 
+                if (state.hasLoss && form.isPaymentSelectionComplete && !state.isLoadingTariffs) {
+                    Text(
+                        text = stringResource(R.string.purchase_loss_error),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 form.selectedProduct?.let { product ->
                     ProfitCard(
                         profit = profitText,

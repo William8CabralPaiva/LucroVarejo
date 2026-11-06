@@ -139,6 +139,7 @@
     <string name="purchase_create_success">Venda registrada com sucesso</string>
     <string name="purchase_create_loading">REGISTRANDO...</string>
     <string name="purchase_load_products_loading">Buscando produtos...</string>
+    <string name="purchase_loss_error">Esta venda daria prejuízo (valor vendido menor que o custo somado à tarifa). Aumente o valor vendido para cadastrar.</string>
     <string name="purchase_sale_price_required">Informe o valor vendido.</string>
     <string name="purchase_sale_price_invalid">Informe um valor válido, maior que zero e com até duas casas decimais.</string>
     <string name="purchase_no_products">Cadastre um produto antes de registrar uma venda.</string>

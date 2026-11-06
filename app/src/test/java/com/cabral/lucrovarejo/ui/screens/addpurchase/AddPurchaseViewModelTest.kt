@@ -264,10 +264,28 @@ class AddPurchaseViewModelTest {
     }
 
     @Test
+    fun saleBelowCostBlocksSaving() = runTest {
+        advanceUntilIdle()
+        viewModel.onProductSelected(productDisplayName(product))
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
+        viewModel.onSalePriceChanged("49.99")
+
+        assertTrue(viewModel.uiState.value.hasLoss)
+        assertFalse(viewModel.uiState.value.canSubmit)
+        viewModel.savePurchase()
+        advanceUntilIdle()
+        assertNull(purchaseRepository.createdPurchase)
+
+        viewModel.onSalePriceChanged("50.00")
+        assertFalse(viewModel.uiState.value.hasLoss)
+        assertTrue(viewModel.uiState.value.canSubmit)
+    }
+
+    @Test
     fun mapsPurchaseFailureReasonsForCreate() = runTest {
         advanceUntilIdle()
         viewModel.onProductSelected(productDisplayName(product))
-        viewModel.onSalePriceChanged("10")
+        viewModel.onSalePriceChanged("80")
         viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         val expected = mapOf(
             DataFailure.Reason.NETWORK to R.string.error_network,
