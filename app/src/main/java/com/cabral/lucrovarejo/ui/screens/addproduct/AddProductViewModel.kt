@@ -3,7 +3,8 @@ package com.cabral.lucrovarejo.ui.screens.addproduct
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.CreateProductUseCase
 import com.cabral.lucrovarejo.domain.product.usecase.DeleteProductUseCase
@@ -99,13 +100,13 @@ class AddProductViewModel @Inject constructor(
                 persist(product)
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (failure: ProductFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = productErrorMessage(
-                            failure.reason,
-                            R.string.product_edit_error_generic.takeIf { product.key != null }
+                        errorMessage = failure.userMessageRes(
+                            if (product.key != null) R.string.product_edit_error_generic
+                            else R.string.product_create_error_generic
                         )
                     )
                 }
@@ -163,28 +164,14 @@ class AddProductViewModel @Inject constructor(
                 completionChannel.send(Unit)
             } catch (cancellation: CancellationException) {
                 throw cancellation
-            } catch (failure: ProductFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = productErrorMessage(
-                            failure.reason,
-                            R.string.product_delete_error_generic
-                        )
+                        errorMessage = failure.userMessageRes(R.string.product_delete_error_generic)
                     )
                 }
             }
         }
     }
-
-    private fun productErrorMessage(reason: ProductFailure.Reason, unknownOverride: Int? = null): Int =
-        when (reason) {
-            ProductFailure.Reason.NETWORK -> R.string.product_create_error_network
-            ProductFailure.Reason.PERMISSION_DENIED ->
-                R.string.product_create_error_permission
-            ProductFailure.Reason.UNAUTHENTICATED ->
-                R.string.product_create_error_unauthenticated
-            ProductFailure.Reason.UNKNOWN ->
-                unknownOverride ?: R.string.product_create_error_generic
-        }
 }

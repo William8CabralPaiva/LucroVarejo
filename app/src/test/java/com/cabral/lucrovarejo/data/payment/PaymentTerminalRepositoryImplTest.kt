@@ -3,7 +3,8 @@ package com.cabral.lucrovarejo.data.payment
 import com.cabral.lucrovarejo.data.payment.datasource.PaymentTerminalRemoteDataSource
 import com.cabral.lucrovarejo.data.payment.model.PaymentTerminalRecord
 import com.cabral.lucrovarejo.data.payment.model.PaymentTerminalRequest
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.data.common.toDataFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.flow.Flow
@@ -55,21 +56,21 @@ class PaymentTerminalRepositoryImplTest {
     }
 
     @Test
-    fun failuresAreMappedToPaymentFailure() = runTest {
+    fun failuresAreMappedToDataFailure() = runTest {
         source.failure = FirebaseFirestoreException("x", FirebaseFirestoreException.Code.UNAVAILABLE)
         try {
             repository.archiveTerminal("k")
             fail()
-        } catch (failure: PaymentFailure) {
-            assertEquals(PaymentFailure.Reason.NETWORK, failure.reason)
+        } catch (failure: DataFailure) {
+            assertEquals(DataFailure.Reason.NETWORK, failure.reason)
         }
 
-        val existing = PaymentFailure(PaymentFailure.Reason.UNAUTHENTICATED)
+        val existing = DataFailure(DataFailure.Reason.UNAUTHENTICATED)
         source.failure = existing
         try {
             repository.archiveTerminal("k")
             fail()
-        } catch (failure: PaymentFailure) {
+        } catch (failure: DataFailure) {
             assertSame(existing, failure)
         }
     }
@@ -95,26 +96,26 @@ class PaymentTerminalRepositoryImplTest {
         try {
             repository.observeTerminals().first()
             fail()
-        } catch (failure: PaymentFailure) {
-            assertTrue(failure.reason == PaymentFailure.Reason.UNKNOWN)
+        } catch (failure: DataFailure) {
+            assertTrue(failure.reason == DataFailure.Reason.UNKNOWN)
         }
         try {
             repository.observeTerminal("d").first()
             fail()
-        } catch (failure: PaymentFailure) {
-            assertTrue(failure.reason == PaymentFailure.Reason.UNKNOWN)
+        } catch (failure: DataFailure) {
+            assertTrue(failure.reason == DataFailure.Reason.UNKNOWN)
         }
     }
 
     @Test
     fun permissionDeniedMapsReason() {
         val failure = FirebaseFirestoreException("x", FirebaseFirestoreException.Code.PERMISSION_DENIED)
-            .toPaymentFailure()
-        assertEquals(PaymentFailure.Reason.PERMISSION_DENIED, failure.reason)
+            .toDataFailure()
+        assertEquals(DataFailure.Reason.PERMISSION_DENIED, failure.reason)
         assertEquals(
-            PaymentFailure.Reason.UNKNOWN,
+            DataFailure.Reason.UNKNOWN,
             FirebaseFirestoreException("x", FirebaseFirestoreException.Code.INTERNAL)
-                .toPaymentFailure().reason
+                .toDataFailure().reason
         )
     }
 

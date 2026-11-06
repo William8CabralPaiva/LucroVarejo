@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.data.purchase.datasource
 import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -26,7 +26,7 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
         limit: Int
     ): List<PurchaseRecord> {
         val storeKey = authRepository.storeKey
-            ?: throw PurchaseFailure(PurchaseFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
 
         var query = salesQuery(storeKey)
         dateStart?.let { query = query.whereGreaterThanOrEqualTo(FIELD_SALE_DATE, it) }
@@ -41,7 +41,7 @@ class FirebaseSalesRemoteDataSource @Inject constructor(
 
     override fun observeSalesChanges(dateStart: Date?, dateEnd: Date?): Flow<Unit> {
         val storeKey = authRepository.storeKey
-            ?: throw PurchaseFailure(PurchaseFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
 
         var query = salesQuery(storeKey)
         dateStart?.let { query = query.whereGreaterThanOrEqualTo(FIELD_SALE_DATE, it) }

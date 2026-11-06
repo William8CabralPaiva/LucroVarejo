@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.machinesale
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
@@ -250,11 +250,9 @@ class MachineSaleViewModel @Inject constructor(
     }
 
     private fun onSaveFailure(failure: Throwable) {
-        val errorRes = when ((failure as? PaymentFailure)?.reason) {
-            PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
-            else -> R.string.terminal_form_save_error
+        _uiState.update {
+            it.copy(isSaving = false, saveError = failure.userMessageRes(R.string.terminal_form_save_error))
         }
-        _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
     }
     private fun recomputeTariffEntries() {
         _uiState.update { state ->

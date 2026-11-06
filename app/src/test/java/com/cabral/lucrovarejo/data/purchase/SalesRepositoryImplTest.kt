@@ -2,6 +2,7 @@ package com.cabral.lucrovarejo.data.purchase
 
 import com.cabral.lucrovarejo.data.purchase.datasource.SalesRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
@@ -82,7 +83,7 @@ class SalesRepositoryImplTest {
             .exceptionOrNull() is IllegalArgumentException)
 
         val failure = runCatching { repository.getSalesPage(SalesFilter()) }.exceptionOrNull()
-        assertTrue(failure is com.cabral.lucrovarejo.domain.purchase.PurchaseFailure)
+        assertTrue(failure is DataFailure)
     }
 
     @Test
@@ -101,7 +102,7 @@ class SalesRepositoryImplTest {
         val failure = runCatching {
             SalesRepositoryImpl(failingSource).observeSalesChanges(SalesFilter()).first()
         }.exceptionOrNull()
-        assertTrue(failure is com.cabral.lucrovarejo.domain.purchase.PurchaseFailure)
+        assertTrue(failure is DataFailure)
     }
 
     private fun records(count: Int) = (count downTo 1).map { record(it, "p$it") }

@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.data.product.datasource
 
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -50,7 +50,7 @@ class FirebaseProductRemoteDataSourceTest {
         assertUnauthenticated { dataSource.createProduct(request) }
         assertUnauthenticated { dataSource.updateProduct("product-1", request) }
         assertUnauthenticated { dataSource.deleteProduct("product-1") }
-        assertTrue(runCatching { dataSource.observeProducts() }.exceptionOrNull() is ProductFailure)
+        assertTrue(runCatching { dataSource.observeProducts() }.exceptionOrNull() is DataFailure)
     }
 
     @Test
@@ -78,8 +78,8 @@ class FirebaseProductRemoteDataSourceTest {
 
     private suspend fun assertUnauthenticated(operation: suspend () -> Unit) {
         val failure = runCatching { operation() }.exceptionOrNull()
-        assertTrue(failure is ProductFailure)
-        assertEquals(ProductFailure.Reason.UNAUTHENTICATED, (failure as ProductFailure).reason)
+        assertTrue(failure is DataFailure)
+        assertEquals(DataFailure.Reason.UNAUTHENTICATED, (failure as DataFailure).reason)
     }
 
     private fun firebaseWithAuthenticatedStore(): FirebaseObjects {

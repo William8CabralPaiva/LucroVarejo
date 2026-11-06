@@ -162,7 +162,7 @@ class RegisterScreenUiTest {
             "Informe um e-mail válido.",
             "A senha deve ter pelo menos 6 caracteres.",
             "As senhas não coincidem.",
-            "Sem conexão com o Firebase. Verifique sua internet e tente novamente."
+            "Sem conexão. Verifique sua internet e tente novamente."
         ).forEach { message ->
             composeRule.onNodeWithText(message).performScrollTo().assertIsDisplayed()
         }

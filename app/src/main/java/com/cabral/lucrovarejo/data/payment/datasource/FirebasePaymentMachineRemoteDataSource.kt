@@ -4,7 +4,7 @@ import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRecord
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRequest
 import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -40,7 +40,7 @@ class FirebasePaymentMachineRemoteDataSource @Inject constructor(
 
     private fun tariffsCollection(terminalId: String): CollectionReference {
         val storeKey = activeStore.currentStoreKey()
-            ?: throw PaymentFailure(PaymentFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
         return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
             .collection(FirestoreCollections.PAYMENT_TERMINALS)

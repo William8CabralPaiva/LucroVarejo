@@ -4,7 +4,7 @@ import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.product.model.ProductRequest
 import com.cabral.lucrovarejo.data.product.model.ProductRecord
 import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -21,7 +21,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
 ) : ProductRemoteDataSource {
     override suspend fun createProduct(request: ProductRequest): String {
         val storeKey = activeStore.currentStoreKey()
-            ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
         val productDocument = firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
             .collection(FirestoreCollections.PRODUCTS)
@@ -41,7 +41,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
 
     private fun productDocument(key: String): DocumentReference {
         val storeKey = activeStore.currentStoreKey()
-            ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
         return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)
             .collection(FirestoreCollections.PRODUCTS)
@@ -50,7 +50,7 @@ class FirebaseProductRemoteDataSource @Inject constructor(
 
     override fun observeProducts(): Flow<List<ProductRecord>> {
         val storeKey = activeStore.currentStoreKey()
-            ?: throw ProductFailure(ProductFailure.Reason.UNAUTHENTICATED)
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
 
         return firestore.collection(FirestoreCollections.STORES)
             .document(storeKey)

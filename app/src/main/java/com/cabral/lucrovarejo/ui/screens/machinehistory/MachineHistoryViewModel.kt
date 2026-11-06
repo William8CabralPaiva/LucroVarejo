@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.machinehistory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.parseRatePercentToBps
 import com.cabral.lucrovarejo.domain.payment.usecase.AddPaymentMachineUseCase
@@ -133,10 +133,7 @@ class MachineHistoryViewModel @Inject constructor(
             }.onSuccess {
                 _uiState.update { it.copy(isSaving = false, showAddDialog = false) }
             }.onFailure { failure ->
-                val errorRes = when ((failure as? PaymentFailure)?.reason) {
-                    PaymentFailure.Reason.DUPLICATE_EFFECTIVE_DATE -> R.string.terminal_form_tariff_duplicate_date
-                    else -> R.string.terminal_form_tariff_save_error
-                }
+                val errorRes = failure.userMessageRes(R.string.terminal_form_tariff_save_error)
                 _uiState.update { it.copy(isSaving = false, saveError = errorRes) }
             }
         }

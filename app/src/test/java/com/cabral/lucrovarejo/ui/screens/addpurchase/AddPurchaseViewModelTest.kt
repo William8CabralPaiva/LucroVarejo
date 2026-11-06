@@ -6,12 +6,11 @@ import com.cabral.lucrovarejo.domain.payment.usecase.GetSaleTariffUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalTariffsUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalsUseCase
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
-import com.cabral.lucrovarejo.domain.product.ProductFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.ProductRepository
 import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
@@ -130,7 +129,7 @@ class AddPurchaseViewModelTest {
         override suspend fun deleteProduct(key: String) = Unit
                 override suspend fun createProduct(product: ProductModel): ProductModel = product
                 override fun observeProducts(): Flow<List<ProductModel>> = flow {
-                    throw ProductFailure(ProductFailure.Reason.NETWORK)
+                    throw DataFailure(DataFailure.Reason.NETWORK)
                 }
             }
         )
@@ -139,7 +138,7 @@ class AddPurchaseViewModelTest {
 
         assertFalse(viewModel.uiState.value.isLoadingProducts)
         assertEquals(
-            R.string.purchase_load_products_error_network,
+            R.string.error_network,
             viewModel.uiState.value.errorMessage
         )
     }
@@ -271,13 +270,13 @@ class AddPurchaseViewModelTest {
         viewModel.onSalePriceChanged("10")
         viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
         val expected = mapOf(
-            PurchaseFailure.Reason.NETWORK to R.string.purchase_create_error_network,
-            PurchaseFailure.Reason.PERMISSION_DENIED to R.string.purchase_create_error_permission,
-            PurchaseFailure.Reason.UNAUTHENTICATED to R.string.purchase_create_error_unauthenticated,
-            PurchaseFailure.Reason.UNKNOWN to R.string.purchase_create_error_generic
+            DataFailure.Reason.NETWORK to R.string.error_network,
+            DataFailure.Reason.PERMISSION_DENIED to R.string.error_permission,
+            DataFailure.Reason.UNAUTHENTICATED to R.string.error_unauthenticated,
+            DataFailure.Reason.UNKNOWN to R.string.purchase_create_error_generic
         )
         expected.forEach { (reason, message) ->
-            purchaseRepository.failure = PurchaseFailure(reason)
+            purchaseRepository.failure = DataFailure(reason)
             viewModel.savePurchase()
             advanceUntilIdle()
             assertEquals(message, viewModel.uiState.value.errorMessage)
@@ -290,7 +289,7 @@ class AddPurchaseViewModelTest {
         advanceUntilIdle()
         viewModel.loadPurchase(existingPurchase)
         viewModel.loadPurchase(existingPurchase)
-        purchaseRepository.failure = PurchaseFailure(PurchaseFailure.Reason.UNKNOWN)
+        purchaseRepository.failure = DataFailure(DataFailure.Reason.UNKNOWN)
 
         viewModel.savePurchase()
         advanceUntilIdle()
@@ -319,11 +318,9 @@ class AddPurchaseViewModelTest {
     @Test
     fun mapsProductLoadFailureReasonsAndUnexpectedErrors() = runTest {
         val expected = listOf(
-            ProductFailure(ProductFailure.Reason.PERMISSION_DENIED) to
-                R.string.purchase_load_products_error_permission,
-            ProductFailure(ProductFailure.Reason.UNAUTHENTICATED) to
-                R.string.purchase_load_products_error_unauthenticated,
-            ProductFailure(ProductFailure.Reason.UNKNOWN) to
+            DataFailure(DataFailure.Reason.PERMISSION_DENIED) to R.string.error_permission,
+            DataFailure(DataFailure.Reason.UNAUTHENTICATED) to R.string.error_unauthenticated,
+            DataFailure(DataFailure.Reason.UNKNOWN) to
                 R.string.purchase_load_products_error_generic,
             IllegalStateException("boom") to R.string.purchase_load_products_error_generic
         )
@@ -377,7 +374,7 @@ class AddPurchaseViewModelTest {
         var createdPurchase: PurchaseModel? = null
         var updatedPurchase: PurchaseModel? = null
         var deletedKey: String? = null
-        var failure: PurchaseFailure? = null
+        var failure: DataFailure? = null
 
         override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
             failure?.let { throw it }

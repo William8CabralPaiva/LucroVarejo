@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.data.payment.datasource
 import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.payment.model.PaymentMachineRequest
 import com.cabral.lucrovarejo.data.payment.model.PaymentTerminalRequest
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.CollectionReference
@@ -118,8 +118,8 @@ class FirebasePaymentRemoteDataSourcesTest {
         try {
             source.setTerminalActive("t1", true)
             fail()
-        } catch (failure: PaymentFailure) {
-            assertEquals(PaymentFailure.Reason.UNAUTHENTICATED, failure.reason)
+        } catch (failure: DataFailure) {
+            assertEquals(DataFailure.Reason.UNAUTHENTICATED, failure.reason)
         }
     }
 
@@ -196,8 +196,8 @@ class FirebasePaymentRemoteDataSourcesTest {
         try {
             source.getTariffsSnapshot("t1")
             fail()
-        } catch (failure: PaymentFailure) {
-            assertEquals(PaymentFailure.Reason.UNAUTHENTICATED, failure.reason)
+        } catch (failure: DataFailure) {
+            assertEquals(DataFailure.Reason.UNAUTHENTICATED, failure.reason)
         }
     }
 

@@ -1,7 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.machinesale
 
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineRepository
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
@@ -200,10 +200,10 @@ class MachineSaleViewModelTest {
         advanceUntilIdle()
         assertEquals(R.string.terminal_form_tariff_duplicate_date, vm.uiState.value.saveError)
 
-        terminals.failure = PaymentFailure(PaymentFailure.Reason.NETWORK)
+        terminals.failure = DataFailure(DataFailure.Reason.NETWORK)
         vm.onSave(false)
         advanceUntilIdle()
-        assertEquals(R.string.terminal_form_save_error, vm.uiState.value.saveError)
+        assertEquals(R.string.error_network, vm.uiState.value.saveError)
         assertFalse(vm.uiState.value.isSaving)
     }
 

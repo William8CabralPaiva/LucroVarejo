@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetMonthlyPurchaseSummaryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,9 +70,7 @@ class HomeViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 isLoading = false,
-                                errorMessage = (failure as? PurchaseFailure)
-                                    ?.let { purchaseErrorMessage(it.reason) }
-                                    ?: R.string.summary_load_error_generic
+                                errorMessage = failure.userMessageRes(R.string.summary_load_error_generic)
                             )
                         }
                     }
@@ -98,13 +96,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
             .launchIn(viewModelScope)
-    }
-
-    private fun purchaseErrorMessage(reason: PurchaseFailure.Reason): Int = when (reason) {
-        PurchaseFailure.Reason.NETWORK -> R.string.summary_load_error_network
-        PurchaseFailure.Reason.PERMISSION_DENIED -> R.string.summary_load_error_permission
-        PurchaseFailure.Reason.UNAUTHENTICATED -> R.string.summary_load_error_unauthenticated
-        PurchaseFailure.Reason.UNKNOWN -> R.string.summary_load_error_generic
     }
 
     private fun monthRange(year: Int, month: Int): Pair<Date, Date> {
