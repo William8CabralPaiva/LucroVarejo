@@ -118,6 +118,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private companion object {
-        const val LATEST_PURCHASES_LIMIT = 4
+        const val LATEST_PURCHASES_LIMIT = 5
     }
 }
