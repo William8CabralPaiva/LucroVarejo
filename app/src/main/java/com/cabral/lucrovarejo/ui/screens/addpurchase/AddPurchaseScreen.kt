@@ -317,7 +317,8 @@ fun AddPurchaseScreenContent(
                 form.selectedProduct?.let { product ->
                     ProfitCard(
                         profit = profitText,
-                        salePrice = form.salePrice,
+                        salePrice = parseSalePrice(form.salePrice)?.let { currencyFormat.format(it) }
+                            ?: form.salePrice,
                         cost = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
                             .format(product.cost.multiply(java.math.BigDecimal.valueOf(form.quantity.toLong())))
                     )
