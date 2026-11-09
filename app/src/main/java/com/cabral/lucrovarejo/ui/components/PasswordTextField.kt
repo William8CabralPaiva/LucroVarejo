@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,7 +66,7 @@ fun PasswordTextFieldContent(
     isError: Boolean = false,
     supportingText: (@Composable () -> Unit)? = null,
 ) {
-    OutlinedTextField(
+    AppOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(stringResource(labelResId)) },
@@ -76,7 +75,7 @@ fun PasswordTextFieldContent(
         singleLine = true,
         enabled = enabled,
         visualTransformation = passwordVisualTransformation(passwordVisible),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = AppKeyboardDefaults.password,
         trailingIcon = {
             IconButton(onClick = { onPasswordVisibilityChange(!passwordVisible) }) {
                 Icon(

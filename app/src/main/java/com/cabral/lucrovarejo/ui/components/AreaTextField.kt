@@ -45,6 +45,7 @@ fun AreaTextField(
     initialValue: String = "",
     @StringRes labelResId: Int = R.string.product_description_label,
     @StringRes placeholderResId: Int = R.string.product_description_placeholder,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onValueChange: (String) -> Unit = {},
 ) {
     var value by remember { mutableStateOf(initialValue) }
@@ -56,7 +57,8 @@ fun AreaTextField(
         },
         modifier = modifier,
         labelResId = labelResId,
-        placeholderResId = placeholderResId
+        placeholderResId = placeholderResId,
+        keyboardOptions = keyboardOptions
     )
 }
 
@@ -69,6 +71,7 @@ fun AreaTextFieldContent(
     @StringRes placeholderResId: Int = R.string.product_description_placeholder,
     enabled: Boolean = true,
     isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
 ) {
     val shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val label = stringResource(labelResId)
@@ -117,7 +120,7 @@ fun AreaTextFieldContent(
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize
                 ),
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                keyboardOptions = keyboardOptions,
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { innerTextField ->
                     if (value.isEmpty()) {

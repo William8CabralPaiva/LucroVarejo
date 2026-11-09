@@ -11,10 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,10 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.AppKeyboardDefaults
+import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
 import com.cabral.lucrovarejo.ui.components.LoadingButton
 import com.cabral.lucrovarejo.ui.components.PasswordTextField
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -92,7 +91,7 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_title_spacing)))
 
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = state.displayName,
                 onValueChange = onDisplayNameChange,
                 label = { Text(stringResource(R.string.register_display_name_label)) },
@@ -109,7 +108,7 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChange,
                 label = { Text(stringResource(R.string.register_email_label)) },
@@ -119,7 +118,7 @@ internal fun RegisterScreenContent(
                 isError = state.emailError != null,
                 singleLine = true,
                 enabled = !state.isLoading,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = AppKeyboardDefaults.email,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(REGISTER_EMAIL_FIELD_TAG)

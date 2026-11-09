@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.AppKeyboardDefaults
+import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
 import com.cabral.lucrovarejo.ui.components.LoadingButton
 import com.cabral.lucrovarejo.ui.components.PasswordTextField
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -93,12 +94,13 @@ internal fun LoginScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_32dp)))
 
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChange,
                 label = { Text(stringResource(R.string.login_email_label)) },
                 singleLine = true,
                 enabled = !state.isLoading,
+                keyboardOptions = AppKeyboardDefaults.email,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(LOGIN_EMAIL_FIELD_TAG)

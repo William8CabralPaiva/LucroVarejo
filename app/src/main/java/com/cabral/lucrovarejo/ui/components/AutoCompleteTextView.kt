@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.DropdownMenuItem
@@ -62,6 +63,7 @@ fun AutoCompleteTextView(
     modifier: Modifier = Modifier,
     initialValue: String? = null,
     required: Boolean = false,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onItemSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(initialValue) }
@@ -75,7 +77,8 @@ fun AutoCompleteTextView(
         modifier = modifier,
         textId = textId,
         placeholderResId = placeholderResId,
-        required = required
+        required = required,
+        keyboardOptions = keyboardOptions
     )
 }
 
@@ -91,6 +94,7 @@ fun AutoCompleteTextViewContent(
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onTextChange: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -176,6 +180,7 @@ fun AutoCompleteTextViewContent(
                         color = MaterialTheme.colorScheme.onSurface
                     ),
                     cursorBrush = SolidColor(accentColor),
+                    keyboardOptions = keyboardOptions,
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = dimensionResource(R.dimen.spacing_16dp))

@@ -60,6 +60,7 @@ fun IconTextField(
     enabled: Boolean = true,
     isError: Boolean = false,
     supportingText: (@Composable () -> Unit)? = null,
+    keyboardOptions: KeyboardOptions? = null,
     onValueChange: (String) -> Unit = {},
 ) {
     var value by remember { mutableStateOf(filterIconTextFieldInput(initialValue, type)) }
@@ -80,7 +81,8 @@ fun IconTextField(
         iconContentDescriptionResId = iconContentDescriptionResId,
         enabled = enabled,
         isError = isError,
-        supportingText = supportingText
+        supportingText = supportingText,
+        keyboardOptions = keyboardOptions
     )
 }
 
@@ -98,6 +100,7 @@ fun IconTextFieldContent(
     enabled: Boolean = true,
     isError: Boolean = false,
     supportingText: (@Composable () -> Unit)? = null,
+    keyboardOptions: KeyboardOptions? = null,
 ) {
     val fieldShape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val label = stringResource(labelResId)
@@ -170,13 +173,11 @@ fun IconTextFieldContent(
             enabled = enabled,
             singleLine = true,
             minLines = 1,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = when (type) {
-                    IconTextFieldType.MONEY -> KeyboardType.Decimal
-                    IconTextFieldType.CURRENCY -> KeyboardType.Decimal
-                    IconTextFieldType.TEXT -> KeyboardType.Text
-                }
-            ),
+            keyboardOptions = keyboardOptions ?: when (type) {
+                IconTextFieldType.TEXT -> AppKeyboardDefaults.common
+                IconTextFieldType.MONEY,
+                IconTextFieldType.CURRENCY -> AppKeyboardDefaults.decimal
+            },
             shape = fieldShape,
             colors = TextFieldDefaults.colors(
                 focusedTextColor = MaterialTheme.colorScheme.onSurface,

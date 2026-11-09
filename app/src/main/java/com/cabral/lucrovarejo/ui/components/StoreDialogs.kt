@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -95,7 +94,7 @@ fun StoreNameDialog(
         onDismissRequest = { if (!isSaving) onDismiss() },
         title = { Text(stringResource(title)) },
         text = {
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = name,
                 onValueChange = {
                     name = it.take(MAX_STORE_NAME_LENGTH)

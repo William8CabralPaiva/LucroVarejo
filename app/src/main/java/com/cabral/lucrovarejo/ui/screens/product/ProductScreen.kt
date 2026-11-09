@@ -17,7 +17,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
 import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.ProdCodPrice
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -107,7 +107,7 @@ fun ProductContent(
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))
             ) {
                 item {
-                    OutlinedTextField(
+                    AppOutlinedTextField(
                         value = state.query,
                         onValueChange = onQueryChange,
                         modifier = Modifier.fillParentMaxWidth(),
