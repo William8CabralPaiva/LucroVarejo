@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.DarkSurfaceVariant
@@ -94,7 +93,7 @@ fun SaveProductButtonContent(
         ),
         border = if (isBorderButton) {
             BorderStroke(
-                width = 1.dp,
+                width = dimensionResource(R.dimen.border_width_1dp),
                 color = if (enabled || isLoading) palette.container else palette.disabledContent
             )
         } else {

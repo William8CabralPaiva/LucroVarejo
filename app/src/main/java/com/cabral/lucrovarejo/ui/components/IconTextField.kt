@@ -29,13 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.R
@@ -99,7 +99,7 @@ fun IconTextFieldContent(
     isError: Boolean = false,
     supportingText: (@Composable () -> Unit)? = null,
 ) {
-    val fieldShape = RoundedCornerShape(8.dp)
+    val fieldShape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val label = stringResource(labelResId)
     val placeholder = stringResource(placeholderResId)
     val accentColor = formFieldAccentColor(
@@ -123,10 +123,10 @@ fun IconTextFieldContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (required) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_4dp))
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         val displayText = if (type == IconTextFieldType.CURRENCY) {
             plainToCurrencyDisplay(value)
         } else {
@@ -196,7 +196,7 @@ fun IconTextFieldContent(
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant, fieldShape)
                 .border(
-                    width = 1.dp,
+                    width = dimensionResource(R.dimen.border_width_1dp),
                     color = if (isError) {
                         MaterialTheme.colorScheme.error
                     } else {

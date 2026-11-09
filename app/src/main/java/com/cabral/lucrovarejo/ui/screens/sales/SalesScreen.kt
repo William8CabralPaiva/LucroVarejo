@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,13 +36,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.compose.runtime.collectAsState
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
@@ -92,9 +93,11 @@ fun SalesContent(
     onEditPurchase: ((PurchaseModel) -> Unit)? = null,
 ) {
     var showNoProductsDialog by remember { mutableStateOf(false) }
+
     val addPurchaseIfHasProducts: (() -> Unit)? = onAddPurchase?.let { add ->
         { if (state.hasProducts == false) showNoProductsDialog = true else add() }
     }
+
     if (showNoProductsDialog) {
         AlertDialog(
             onDismissRequest = { showNoProductsDialog = false },
@@ -115,8 +118,12 @@ fun SalesContent(
             }
         )
     }
+
     val listState = rememberLazyListState()
-    val entries = remember(state.items) { buildSalesEntries(state.items).toImmutableList() }
+    val entries = remember(state.items) {
+        buildSalesEntries(state.items).toImmutableList()
+    }
+
     val shouldLoadMore by remember {
         derivedStateOf {
             val info = listState.layoutInfo
@@ -124,7 +131,9 @@ fun SalesContent(
             lastVisible >= info.totalItemsCount - LOAD_MORE_THRESHOLD
         }
     }
+
     val currentOnLoadMore by rememberUpdatedState(onLoadMore)
+
     LaunchedEffect(shouldLoadMore, state.items.size) {
         if (shouldLoadMore) currentOnLoadMore()
     }
@@ -151,14 +160,18 @@ fun SalesContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = dimensionResource(R.dimen.spacing_16dp)),
+            verticalArrangement = Arrangement.spacedBy(
+                dimensionResource(R.dimen.spacing_12dp)
+            )
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(top = dimensionResource(R.dimen.spacing_16dp)),
+                horizontalArrangement = Arrangement.spacedBy(
+                    dimensionResource(R.dimen.spacing_8dp)
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
@@ -166,11 +179,18 @@ fun SalesContent(
                     onValueChange = onQueryChange,
                     modifier = Modifier.weight(1f),
                     singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(
+                        dimensionResource(R.dimen.radius_12dp)
+                    ),
                     leadingIcon = {
-                        Icon(imageVector = Icons.Filled.Search, contentDescription = null)
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = null
+                        )
                     },
-                    placeholder = { Text(stringResource(R.string.sales_search_placeholder)) }
+                    placeholder = {
+                        Text(stringResource(R.string.sales_search_placeholder))
+                    }
                 )
             }
 
@@ -226,11 +246,18 @@ private fun SalesList(
         }
 
         state.items.isEmpty() && state.query.isNotBlank() -> Box(
-            modifier = modifier.fillMaxSize().padding(horizontal = 24.dp),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = dimensionResource(R.dimen.spacing_24dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = stringResource(R.string.sales_search_empty, state.query.trim()),
+                text = stringResource(
+                    R.string.sales_search_empty,
+                    state.query.trim()
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -247,23 +274,32 @@ private fun SalesList(
         else -> LazyColumn(
             state = listState,
             modifier = modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = 88.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(bottom = dimensionResource(R.dimen.sales_list_bottom_padding)),
+            verticalArrangement = Arrangement.spacedBy(
+                dimensionResource(R.dimen.spacing_8dp)
+            )
         ) {
             entries.forEach { entry ->
                 when (entry) {
-                    is SalesEntry.Header -> item(key = "header-${entry.label}") {
+                    is SalesEntry.Header -> item(
+                        key = "header-${entry.label}"
+                    ) {
                         Text(
                             text = entry.label,
-                            modifier = Modifier.padding(top = 8.dp),
+                            modifier = Modifier.padding(
+                                top = dimensionResource(R.dimen.spacing_8dp)
+                            ),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    is SalesEntry.Sale -> item(key = "sale-${entry.purchase.key ?: entry.hashCode()}") {
+                    is SalesEntry.Sale -> item(
+                        key = "sale-${entry.purchase.key ?: entry.hashCode()}"
+                    ) {
                         val purchase = entry.purchase
+
                         PurchaseItem(
                             productName = purchase.name,
                             salePriceInCents = purchase.salePrice.toLong() * purchase.quantity,
@@ -275,12 +311,15 @@ private fun SalesList(
                     }
                 }
             }
+
             if (state.isLoadingMore) {
                 item(key = "loading-more") {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
+                            .padding(
+                                dimensionResource(R.dimen.spacing_16dp)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator()
@@ -313,14 +352,18 @@ fun buildSalesEntries(
 ): List<SalesEntry> {
     val entries = mutableListOf<SalesEntry>()
     var currentLabel: String? = null
+
     purchases.forEach { purchase ->
         val label = DateUtils.formatDayHeader(purchase.saleDate, timeZone)
+
         if (label != currentLabel) {
             entries += SalesEntry.Header(label)
             currentLabel = label
         }
+
         entries += SalesEntry.Sale(purchase)
     }
+
     return entries
 }
 
@@ -328,6 +371,7 @@ fun buildSalesEntries(
 @Composable
 private fun SalesContentPreview() {
     val today = Calendar.getInstance().time
+
     LucroVarejoTheme {
         SalesContent(
             state = SalesUiState(

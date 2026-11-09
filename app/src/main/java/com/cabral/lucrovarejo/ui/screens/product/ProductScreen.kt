@@ -26,9 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
@@ -102,9 +102,9 @@ fun ProductContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = dimensionResource(R.dimen.spacing_16dp)),
+                contentPadding = PaddingValues(top = dimensionResource(R.dimen.spacing_16dp), bottom = dimensionResource(R.dimen.size_88dp)),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))
             ) {
                 item {
                     OutlinedTextField(
@@ -133,7 +133,7 @@ fun ProductContent(
                         } else {
                             Text(
                                 text = stringResource(R.string.products_empty),
-                                modifier = Modifier.padding(top = 24.dp)
+                                modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_24dp))
                             )
                         }
                     }

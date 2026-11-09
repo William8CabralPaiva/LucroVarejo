@@ -21,9 +21,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.LoadingButton
@@ -58,7 +58,7 @@ internal fun ForgotPasswordScreenContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(dimensionResource(R.dimen.spacing_24dp)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -67,14 +67,14 @@ internal fun ForgotPasswordScreenContent(
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
 
             Text(
                 stringResource(R.string.forgot_password_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_24dp)))
 
             OutlinedTextField(
                 value = state.email,
@@ -88,19 +88,19 @@ internal fun ForgotPasswordScreenContent(
             )
 
             state.errorMessage?.let {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_12dp)))
                 Text(stringResource(it), color = MaterialTheme.colorScheme.error)
             }
 
             if (state.isEmailSent) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_12dp)))
                 Text(
                     stringResource(R.string.forgot_password_success),
                     modifier = Modifier.testTag(FORGOT_PASSWORD_SUCCESS_TAG)
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_24dp)))
 
             LoadingButton(
                 onClick = onSubmit,
@@ -110,7 +110,7 @@ internal fun ForgotPasswordScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_16dp)))
 
             TextButton(onClick = onBack) {
                 Text(stringResource(R.string.navigate_back))

@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LightBlueContainer
 import com.cabral.lucrovarejo.ui.theme.LightGreenContainer
@@ -37,17 +37,17 @@ fun AlertPrice(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp)),
         color = state.color
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))) {
             Icon(
                 imageVector = state.icon,
                 contentDescription = null,
                 tint = ProfitGreen,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(dimensionResource(R.dimen.size_24dp))
             )
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
             Column {
                 Text(
                     text = stringResource(id = state.textId),
@@ -61,7 +61,7 @@ fun AlertPrice(
                     color = ProfitGreen
                 )
                 if (price == 0.0) {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_16dp)))
                     Text(
                         text = stringResource(R.string.alert_no_products),
                         style = MaterialTheme.typography.labelSmall,

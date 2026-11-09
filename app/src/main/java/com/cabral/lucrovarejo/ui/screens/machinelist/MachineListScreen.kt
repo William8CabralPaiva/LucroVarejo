@@ -33,9 +33,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentTerminalModel
@@ -103,7 +103,7 @@ fun MachineListContent(
             }
 
             state.items.isEmpty() -> Box(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(dimensionResource(R.dimen.spacing_16dp)),
                 contentAlignment = Alignment.Center
             ) {
                 EmptyList(
@@ -115,9 +115,9 @@ fun MachineListContent(
             }
 
             else -> LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxSize().padding(innerPadding).padding(horizontal = dimensionResource(R.dimen.spacing_16dp)),
+                contentPadding = PaddingValues(top = dimensionResource(R.dimen.spacing_16dp), bottom = dimensionResource(R.dimen.size_88dp)),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))
             ) {
                 items(state.items, key = { it.key ?: it.name }) { terminal ->
                     PaymentTerminalItem(
@@ -161,15 +161,15 @@ private fun PaymentTerminalItem(
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_12dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(dimensionResource(R.dimen.spacing_16dp)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
                 Text(text = terminal.name, style = MaterialTheme.typography.titleMedium)
                 if (!terminal.active) {
                     AssistChip(onClick = {}, label = { Text(stringResource(R.string.terminals_archived_badge)) })

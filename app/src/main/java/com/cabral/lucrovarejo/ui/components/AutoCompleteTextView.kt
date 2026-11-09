@@ -33,12 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -111,7 +111,7 @@ fun AutoCompleteTextViewContent(
             )
         }
     }
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val borderColor = if (isError) MaterialTheme.colorScheme.error
     else MaterialTheme.colorScheme.outlineVariant
     val accentColor = formFieldAccentColor(
@@ -138,10 +138,10 @@ fun AutoCompleteTextViewContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (required) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_4dp))
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         ExposedDropdownMenuBox(
             expanded = expanded && enabled,
             onExpandedChange = { expanded = it && enabled }
@@ -151,8 +151,8 @@ fun AutoCompleteTextViewContent(
                     .fillMaxWidth()
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.surfaceVariant, shape)
-                    .border(1.dp, borderColor, shape)
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .border(dimensionResource(R.dimen.border_width_1dp), borderColor, shape)
+                    .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_16dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -178,7 +178,7 @@ fun AutoCompleteTextViewContent(
                     cursorBrush = SolidColor(accentColor),
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp)
+                        .padding(start = dimensionResource(R.dimen.spacing_16dp))
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled)
                         .testTag(AUTO_COMPLETE_TEXT_FIELD_TAG),
                     decorationBox = { innerTextField ->
@@ -227,7 +227,7 @@ private fun AutoCompleteTextViewPreview() {
             placeholderResId = R.string.product_placeholder,
             items = persistentListOf("Bolsa", "Mochila", "AcessÃ³rio"),
             initialValue = "Bolsa",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))
         )
     }
 }

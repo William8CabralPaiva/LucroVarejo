@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -109,6 +110,7 @@ internal fun LoggedFlow(
     var machineTourActive by remember { mutableStateOf(false) }
     var showSwitchStoreDialog by remember { mutableStateOf(false) }
     var showCreateStoreDialog by remember { mutableStateOf(false) }
+
     // Sair do formulario por outro caminho (ex.: seta de voltar) encerra o tour.
     LaunchedEffect(currentRoute) {
         if (currentRoute != LoggedRoutes.ADD_MACHINE) {
@@ -171,7 +173,7 @@ internal fun LoggedFlow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = innerPadding.calculateTopPadding())
-                    .height(20.dp)
+                    .height(dimensionResource(R.dimen.spacing_20dp))
                     .background(scaffoldContainerColor)
             )
 
@@ -182,11 +184,11 @@ internal fun LoggedFlow(
                     .consumeWindowInsets(innerPadding)
                     .imePadding(),
                 shape = RoundedCornerShape(
-                    topStart = 20.dp,
-                    topEnd = 20.dp
+                    topStart = dimensionResource(R.dimen.radius_20dp),
+                    topEnd = dimensionResource(R.dimen.radius_20dp)
                 ),
                 color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 4.dp
+                shadowElevation = dimensionResource(R.dimen.spacing_4dp)
             ) {
                 LoggedDestinationNavHost(
                     navController = navController,

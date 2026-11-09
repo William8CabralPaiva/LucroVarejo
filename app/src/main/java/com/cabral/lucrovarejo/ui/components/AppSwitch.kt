@@ -8,8 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
 /**
@@ -64,14 +65,14 @@ private fun AppSwitchDarkPreview() {
 
 @Composable
 private fun AppSwitchPreviewContent() {
-    Row(modifier = Modifier.padding(16.dp)) {
+    Row(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))) {
         AppSwitch(checked = true, onCheckedChange = {})
-        AppSwitch(checked = false, onCheckedChange = {}, modifier = Modifier.padding(start = 16.dp))
+        AppSwitch(checked = false, onCheckedChange = {}, modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_16dp)))
         AppSwitch(
             checked = true,
             onCheckedChange = {},
             enabled = false,
-            modifier = Modifier.padding(start = 16.dp)
+            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_16dp))
         )
     }
 }

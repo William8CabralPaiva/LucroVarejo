@@ -30,9 +30,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -86,7 +86,7 @@ fun MachineHistoryContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onShowAddDialog) {
                 Icon(imageVector = Icons.Outlined.Add, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_8dp)))
                 Text(stringResource(R.string.machine_history_add))
             }
         }
@@ -118,8 +118,8 @@ fun MachineHistoryContent(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                        .padding(dimensionResource(R.dimen.spacing_16dp)),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))
                 ) {
                     items(state.tariffs, key = { it.historyKey() }) { tariff ->
                         MachineHistoryItem(tariff = tariff, isCurrent = tariff.historyKey() == state.currentTariffKey)
@@ -144,10 +144,10 @@ fun MachineHistoryContent(
 private fun MachineHistoryItem(tariff: PaymentMachineModel, isCurrent: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_12dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -158,7 +158,7 @@ private fun MachineHistoryItem(tariff: PaymentMachineModel, isCurrent: Boolean) 
                     AssistChip(onClick = {}, label = { Text(stringResource(R.string.machine_history_current_badge)) })
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
             Text(
                 text = stringResource(
                     R.string.machine_history_effective_from,
@@ -183,7 +183,7 @@ private fun AddTariffDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.machine_history_add)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))) {
                 IconTextFieldContent(
                     value = state.rateText,
                     onValueChange = onRateChange,

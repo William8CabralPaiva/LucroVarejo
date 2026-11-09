@@ -26,9 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.BuildConfig
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.StoreNameDialog
@@ -59,8 +59,8 @@ fun ConfigScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_24dp)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
         ) {
             SettingsItem(
                 icon = Icons.Outlined.Storefront,

@@ -30,10 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
@@ -95,16 +95,16 @@ fun HomeContent(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(dimensionResource(R.dimen.spacing_16dp)),
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
         ) {
             // A borda agrupa o que muda com o mês; as últimas vendas ficam fora, sem filtro.
             OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                 Column(
                     modifier = Modifier
                         .animateContentSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(dimensionResource(R.dimen.spacing_16dp)),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
                 ) {
                     MonthYearSelector(
                         year = state.year,
@@ -130,7 +130,7 @@ fun HomeContent(
                             animationSpec = tween(durationMillis = 300),
                             label = "monthly-summary"
                         ) { summary ->
-                            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))) {
                                 MonthlySummaryContent(summary)
                             }
                         }
@@ -174,7 +174,7 @@ private fun MonthlySummaryContent(summary: MonthlyPurchaseSummary) {
     }
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
     ) {
         AlertPrice(
             price = summary.totalCost.toCurrencyAmount(),
@@ -197,7 +197,7 @@ private fun LatestSalesSection(
     onShowAll: () -> Unit,
     onEditPurchase: (PurchaseModel) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,

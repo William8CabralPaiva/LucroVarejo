@@ -35,9 +35,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
@@ -73,7 +73,7 @@ fun QuantityFieldContent(
     @StringRes labelResId: Int = R.string.product_quantity_label,
 ) {
     val quantity = value.coerceIn(MIN_QUANTITY, MAX_QUANTITY)
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val borderColor = MaterialTheme.colorScheme.outlineVariant
     val accentColor = formFieldAccentColor(
         colorScheme = MaterialTheme.colorScheme,
@@ -88,20 +88,20 @@ fun QuantityFieldContent(
             color = accentColor,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))
         ) {
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.surfaceVariant, shape)
-                    .border(1.dp, borderColor, shape)
-                    .padding(start = 12.dp, end = 4.dp),
+                    .border(dimensionResource(R.dimen.border_width_1dp), borderColor, shape)
+                    .padding(start = dimensionResource(R.dimen.spacing_12dp), end = dimensionResource(R.dimen.spacing_4dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -109,7 +109,7 @@ fun QuantityFieldContent(
                     contentDescription = null,
                     tint = accentColor
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(dimensionResource(R.dimen.spacing_8dp)))
                 TextField(
                     value = quantity.toString(),
                     onValueChange = { input ->
@@ -171,10 +171,10 @@ private fun QuantityButton(
         onClick = onClick,
         enabled = enabled,
         modifier = Modifier
-            .size(48.dp)
+            .size(dimensionResource(R.dimen.size_48dp))
             .clip(shape)
             .background(MaterialTheme.colorScheme.surface, shape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+            .border(dimensionResource(R.dimen.border_width_1dp), MaterialTheme.colorScheme.outlineVariant, shape)
     ) {
         Icon(
             imageVector = icon,
@@ -189,7 +189,7 @@ private fun QuantityButton(
 private fun QuantityFieldPreview() {
     LucroVarejoTheme {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))
         ) {
             QuantityField(initialValue = 1)
         }

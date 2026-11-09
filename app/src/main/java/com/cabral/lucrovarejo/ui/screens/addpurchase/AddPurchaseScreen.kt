@@ -39,7 +39,6 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
@@ -346,7 +345,7 @@ fun AddPurchaseScreenContent(
                 }
 
                 if (state.isEditing) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))) {
                         SaveProductButtonContent(
                             label = stringResource(R.string.purchase_delete_submit),
                             enabled = !state.isSaving,
@@ -375,7 +374,7 @@ fun AddPurchaseScreenContent(
                         onClick = onSave
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
             }
         }
         SnackbarHost(
@@ -409,9 +408,9 @@ private fun ProfitCard(
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(dimensionResource(R.dimen.radius_12dp))
             )
-            .padding(16.dp)
+            .padding(dimensionResource(R.dimen.spacing_16dp))
     ) {
         Text(
             text = stringResource(R.string.purchase_profit_title),
@@ -425,7 +424,7 @@ private fun ProfitCard(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         Text(
             text = stringResource(R.string.purchase_profit_calculation, salePrice, cost),
             color = MaterialTheme.colorScheme.onSecondaryContainer,

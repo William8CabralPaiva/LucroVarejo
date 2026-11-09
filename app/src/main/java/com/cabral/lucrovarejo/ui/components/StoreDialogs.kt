@@ -22,8 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.store.StoreSummary
 import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
@@ -52,14 +52,14 @@ fun SwitchStoreDialog(
                                 role = Role.RadioButton,
                                 onClick = { onSelect(store.id) }
                             )
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = dimensionResource(R.dimen.spacing_8dp))
                     ) {
                         RadioButton(selected = store.id == activeStoreId, onClick = null)
                         Text(
                             text = store.displayName.ifBlank {
                                 stringResource(R.string.settings_store_unnamed)
                             },
-                            modifier = Modifier.padding(start = 12.dp)
+                            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_12dp))
                         )
                     }
                 }

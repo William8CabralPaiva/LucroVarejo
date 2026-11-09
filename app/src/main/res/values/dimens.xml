@@ -1,4 +1,41 @@
 <resources>
+    <!-- General Spacings -->
+    <dimen name="spacing_2dp">2dp</dimen>
+    <dimen name="spacing_4dp">4dp</dimen>
+    <dimen name="spacing_6dp">6dp</dimen>
+    <dimen name="spacing_8dp">8dp</dimen>
+    <dimen name="spacing_12dp">12dp</dimen>
+    <dimen name="spacing_16dp">16dp</dimen>
+    <dimen name="spacing_20dp">20dp</dimen>
+    <dimen name="spacing_24dp">24dp</dimen>
+    <dimen name="spacing_32dp">32dp</dimen>
+
+    <!-- Corner Radii -->
+    <dimen name="radius_6dp">6dp</dimen>
+    <dimen name="radius_8dp">8dp</dimen>
+    <dimen name="radius_12dp">12dp</dimen>
+    <dimen name="radius_16dp">16dp</dimen>
+    <dimen name="radius_20dp">20dp</dimen>
+
+    <!-- Border Widths -->
+    <dimen name="border_width_1dp">1dp</dimen>
+    <dimen name="border_width_1_5dp">1.5dp</dimen>
+    <dimen name="border_width_2dp">2dp</dimen>
+
+    <!-- Sizes (Icons, Images, Buttons, etc.) -->
+    <dimen name="size_12dp">12dp</dimen>
+    <dimen name="size_16dp">16dp</dimen>
+    <dimen name="size_18dp">18dp</dimen>
+    <dimen name="size_22dp">22dp</dimen>
+    <dimen name="size_24dp">24dp</dimen>
+    <dimen name="size_40dp">40dp</dimen>
+    <dimen name="size_48dp">48dp</dimen>
+    <dimen name="size_56dp">56dp</dimen>
+    <dimen name="size_88dp">88dp</dimen>
+    <dimen name="size_120dp">120dp</dimen>
+    <dimen name="size_160dp">160dp</dimen>
+
+    <!-- Existing Specific Semantic Dimens -->
     <dimen name="register_screen_padding">24dp</dimen>
     <dimen name="coach_mark_padding">24dp</dimen>
     <dimen name="coach_mark_radius">20dp</dimen>
@@ -27,4 +64,15 @@
     <dimen name="month_year_selector_icon_size">22dp</dimen>
     <dimen name="month_year_selector_radius">12dp</dimen>
     <dimen name="month_year_selector_border_width">1dp</dimen>
+    <dimen name="sales_list_bottom_padding">88dp</dimen>
+
+    <!-- Typography / Text Sizes (.sp) -->
+    <dimen name="text_size_11sp">11sp</dimen>
+    <dimen name="text_size_16sp">16sp</dimen>
+    <dimen name="text_size_22sp">22sp</dimen>
+    <dimen name="line_height_16sp">16sp</dimen>
+    <dimen name="line_height_24sp">24sp</dimen>
+    <dimen name="line_height_28sp">28sp</dimen>
+    <dimen name="letter_spacing_0sp">0sp</dimen>
+    <dimen name="letter_spacing_0_5sp">0.5sp</dimen>
 </resources>

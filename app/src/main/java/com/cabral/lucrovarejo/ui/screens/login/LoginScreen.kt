@@ -28,10 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.LoadingButton
@@ -80,18 +80,18 @@ internal fun LoginScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(dimensionResource(R.dimen.spacing_24dp)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
                 painter = painterResource(R.drawable.ic_varejo),
                 contentDescription = "Logo do app",
-                modifier = Modifier.size(160.dp),
+                modifier = Modifier.size(dimensionResource(R.dimen.size_160dp)),
                 contentScale = ContentScale.Fit
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_32dp)))
 
             OutlinedTextField(
                 value = state.email,
@@ -104,7 +104,7 @@ internal fun LoginScreenContent(
                     .testTag(LOGIN_EMAIL_FIELD_TAG)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_16dp)))
 
             PasswordTextField(
                 value = state.password,
@@ -119,11 +119,11 @@ internal fun LoginScreenContent(
             )
 
             state.errorMessage?.let {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_12dp)))
                 Text(it, color = MaterialTheme.colorScheme.error)
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_24dp)))
 
             LoadingButton(
                 onClick = onSubmit,
@@ -134,7 +134,7 @@ internal fun LoginScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_16dp)))
 
             TextButton(
                 onClick = onForgotPassword,

@@ -32,9 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.R
@@ -75,7 +75,7 @@ fun DateTextFieldContent(
     required: Boolean = true,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val label = stringResource(labelResId)
     val accentColor = formFieldAccentColor(
         colorScheme = MaterialTheme.colorScheme,
@@ -98,18 +98,18 @@ fun DateTextFieldContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (required) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_4dp))
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape)
                 .background(MaterialTheme.colorScheme.surfaceVariant, shape)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
+                .border(dimensionResource(R.dimen.border_width_1dp), MaterialTheme.colorScheme.outlineVariant, shape)
                 .clickable { showDatePicker = true }
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_16dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -127,13 +127,13 @@ fun DateTextFieldContent(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 16.dp)
+                    .padding(start = dimensionResource(R.dimen.spacing_16dp))
             )
             Icon(
                 imageVector = Icons.Outlined.CalendarMonth,
                 contentDescription = stringResource(R.string.date_select_description),
                 tint = accentColor,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(dimensionResource(R.dimen.size_24dp))
             )
         }
     }
