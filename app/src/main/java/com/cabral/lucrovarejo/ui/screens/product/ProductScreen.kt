@@ -103,8 +103,8 @@ fun ProductContent(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .padding(horizontal = dimensionResource(R.dimen.spacing_16dp)),
-                contentPadding = PaddingValues(top = dimensionResource(R.dimen.spacing_16dp), bottom = dimensionResource(R.dimen.size_88dp)),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))
+                contentPadding = PaddingValues(top = dimensionResource(R.dimen.product_list_top_padding), bottom = dimensionResource(R.dimen.size_88dp)),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.product_list_item_spacing))
             ) {
                 item {
                     AppOutlinedTextField(

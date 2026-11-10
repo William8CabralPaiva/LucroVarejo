@@ -23,7 +23,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.size
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
@@ -64,7 +70,12 @@ fun BottomNavBar(
         NavigationBar(
             containerColor = MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp,
-            modifier = modifier.drawBehind {
+            modifier = modifier
+                .height(
+                    dimensionResource(R.dimen.nav_bar_height) +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                )
+                .drawBehind {
                 drawLine(
                     color = dividerColor,
                     start = Offset(0f, 0f),
@@ -81,7 +92,8 @@ fun BottomNavBar(
                     icon = {
                         Icon(
                             imageVector = item.icon,
-                            contentDescription = label
+                            contentDescription = label,
+                            modifier = Modifier.size(dimensionResource(R.dimen.nav_bar_icon_size))
                         )
                     },
                     label = { Text(label) },

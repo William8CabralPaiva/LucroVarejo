@@ -55,6 +55,7 @@ import com.cabral.lucrovarejo.ui.components.QuantityFieldContent
 import com.cabral.lucrovarejo.ui.components.SaveProductButtonContent
 import com.cabral.lucrovarejo.ui.components.SpinnerContent
 import com.cabral.lucrovarejo.ui.payment.PaymentMethodsUi
+import com.cabral.lucrovarejo.ui.theme.DestructiveRed
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import kotlinx.collections.immutable.toImmutableList
@@ -353,7 +354,7 @@ fun AddPurchaseScreenContent(
                             onClick = onDelete,
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.Delete,
-                            containerColor = MaterialTheme.colorScheme.error,
+                            containerColor = DestructiveRed,
                             testTag = DELETE_PRODUCT_BUTTON_TAG
                         )
                         SaveProductButtonContent(

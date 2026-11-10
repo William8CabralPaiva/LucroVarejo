@@ -51,28 +51,60 @@
     <dimen name="last_sale_image_size">56dp</dimen>
     <dimen name="last_sale_image_radius">6dp</dimen>
     <dimen name="last_sale_text_spacing">2dp</dimen>
-    <dimen name="product_submit_button_height">56dp</dimen>
     <dimen name="product_submit_button_radius">12dp</dimen>
-    <dimen name="product_submit_button_horizontal_padding">24dp</dimen>
-    <dimen name="product_submit_button_content_spacing">16dp</dimen>
     <dimen name="product_submit_progress_size">16dp</dimen>
     <dimen name="product_submit_progress_stroke">1.5dp</dimen>
     <dimen name="product_snackbar_horizontal_padding">16dp</dimen>
     <dimen name="product_snackbar_vertical_padding">16dp</dimen>
-    <dimen name="month_year_selector_height">56dp</dimen>
     <dimen name="month_year_selector_padding">8dp</dimen>
     <dimen name="month_year_selector_icon_size">22dp</dimen>
     <dimen name="month_year_selector_radius">12dp</dimen>
     <dimen name="month_year_selector_border_width">1dp</dimen>
     <dimen name="sales_list_bottom_padding">88dp</dimen>
 
-    <!-- Typography / Text Sizes (.sp) -->
-    <dimen name="text_size_11sp">11sp</dimen>
-    <dimen name="text_size_16sp">16sp</dimen>
-    <dimen name="text_size_22sp">22sp</dimen>
-    <dimen name="line_height_16sp">16sp</dimen>
-    <dimen name="line_height_24sp">24sp</dimen>
-    <dimen name="line_height_28sp">28sp</dimen>
-    <dimen name="letter_spacing_0sp">0sp</dimen>
-    <dimen name="letter_spacing_0_5sp">0.5sp</dimen>
+    <!-- Responsive values (telas pequenas, < 360dp). Sobrescritos em values-sw360dp (compactas),
+         values-sw411dp (padrão) e values-sw600dp (tablets). -->
+    <dimen name="text_display_large">50sp</dimen>
+    <dimen name="line_display_large">58sp</dimen>
+    <dimen name="text_display_medium">40sp</dimen>
+    <dimen name="line_display_medium">46sp</dimen>
+    <dimen name="text_display_small">32sp</dimen>
+    <dimen name="line_display_small">38sp</dimen>
+    <dimen name="text_headline_large">28sp</dimen>
+    <dimen name="line_headline_large">36sp</dimen>
+    <dimen name="text_headline_medium">24sp</dimen>
+    <dimen name="line_headline_medium">30sp</dimen>
+    <dimen name="text_headline_small">20sp</dimen>
+    <dimen name="line_headline_small">26sp</dimen>
+    <dimen name="text_title_large">18sp</dimen>
+    <dimen name="line_title_large">24sp</dimen>
+    <dimen name="text_title_medium">14sp</dimen>
+    <dimen name="line_title_medium">20sp</dimen>
+    <dimen name="text_title_small">12sp</dimen>
+    <dimen name="line_title_small">18sp</dimen>
+    <dimen name="text_body_large">14sp</dimen>
+    <dimen name="line_body_large">20sp</dimen>
+    <dimen name="text_body_medium">12sp</dimen>
+    <dimen name="line_body_medium">18sp</dimen>
+    <dimen name="text_body_small">11sp</dimen>
+    <dimen name="line_body_small">15sp</dimen>
+    <dimen name="text_label_large">12sp</dimen>
+    <dimen name="line_label_large">18sp</dimen>
+    <dimen name="text_label_medium">11sp</dimen>
+    <dimen name="line_label_medium">15sp</dimen>
+    <dimen name="text_label_small">10sp</dimen>
+    <dimen name="line_label_small">14sp</dimen>
+
+    <dimen name="nav_bar_height">64dp</dimen>
+    <dimen name="nav_bar_icon_size">22dp</dimen>
+
+    <dimen name="product_submit_button_height">48dp</dimen>
+    <dimen name="month_year_selector_height">48dp</dimen>
+
+    <dimen name="product_submit_button_horizontal_padding">12dp</dimen>
+    <dimen name="product_submit_button_content_spacing">8dp</dimen>
+    <dimen name="product_submit_icon_size">20dp</dimen>
+
+    <dimen name="product_list_item_spacing">8dp</dimen>
+    <dimen name="product_list_top_padding">12dp</dimen>
 </resources>

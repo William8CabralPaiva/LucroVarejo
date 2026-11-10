@@ -40,7 +40,7 @@ fun AboutItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = dimensionResource(R.dimen.spacing_20dp), vertical = dimensionResource(R.dimen.spacing_20dp)),
+                .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_12dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -52,16 +52,16 @@ fun AboutItem(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = dimensionResource(R.dimen.spacing_20dp), top = dimensionResource(R.dimen.spacing_2dp), bottom = dimensionResource(R.dimen.spacing_2dp))
+                    .padding(start = dimensionResource(R.dimen.spacing_16dp), top = dimensionResource(R.dimen.spacing_2dp), bottom = dimensionResource(R.dimen.spacing_2dp))
             ) {
                 Text(
                     text = stringResource(R.string.settings_about),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.slightlySmaller(),
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
                     text = stringResource(R.string.settings_about_version, version),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.slightlySmaller(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

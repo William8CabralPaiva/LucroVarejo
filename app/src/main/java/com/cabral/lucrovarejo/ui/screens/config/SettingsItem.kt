@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.config
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -91,6 +92,10 @@ fun SettingsItem(
     }
 }
 
+// Redução leve (~8%) só para os cards de Configurações.
+internal fun TextStyle.slightlySmaller(): TextStyle =
+    copy(fontSize = fontSize * 0.92f, lineHeight = lineHeight * 0.92f)
+
 @Composable
 private fun SettingsItemContent(
     icon: ImageVector,
@@ -104,7 +109,7 @@ private fun SettingsItemContent(
             .fillMaxWidth()
             .padding(horizontal = dimensionResource(R.dimen.spacing_20dp), vertical = dimensionResource(R.dimen.spacing_20dp)),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_20dp))
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
     ) {
         Icon(
             imageVector = icon,
@@ -119,12 +124,12 @@ private fun SettingsItemContent(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.slightlySmaller(),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.slightlySmaller(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

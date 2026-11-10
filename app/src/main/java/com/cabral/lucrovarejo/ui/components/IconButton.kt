@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.DarkSurfaceVariant
@@ -137,13 +138,17 @@ fun SaveProductButtonContent(
                 Icon(
                     imageVector = icon,
                     contentDescription = iconContentDescription,
-                    tint = LocalContentColor.current
+                    tint = LocalContentColor.current,
+                    modifier = Modifier.size(dimensionResource(R.dimen.product_submit_icon_size))
                 )
             }
             Text(
                 text = if (isLoading) loadingLabel else label,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
             )
         }
     }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -112,11 +113,14 @@ fun LucroVarejoTheme(
         }
     }
 
+    val typography = responsiveTypography()
     CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
-            content = content
-        )
+            typography = typography
+        ) {
+            // Text sem style usa LocalTextStyle (14sp fixo por padrão); aqui ele passa a seguir o tema.
+            ProvideTextStyle(typography.bodyMedium, content)
+        }
     }
 }
