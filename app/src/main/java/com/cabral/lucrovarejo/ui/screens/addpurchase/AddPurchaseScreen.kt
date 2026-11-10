@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Snackbar
@@ -316,12 +317,13 @@ fun AddPurchaseScreenContent(
                 }
 
                 form.selectedProduct?.let { product ->
+                    val quantity = form.quantity.toLong().let(java.math.BigDecimal::valueOf)
                     ProfitCard(
                         profit = profitText,
-                        salePrice = parseSalePrice(form.salePrice)?.let { currencyFormat.format(it) }
-                            ?: form.salePrice,
-                        cost = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
-                            .format(product.cost.multiply(java.math.BigDecimal.valueOf(form.quantity.toLong())))
+                        quantity = form.quantity,
+                        soldTotal = parseSalePrice(form.salePrice)
+                            ?.let { currencyFormat.format(it.multiply(quantity)) },
+                        costTotal = currencyFormat.format(product.cost.multiply(quantity))
                     )
                 }
 
@@ -402,9 +404,11 @@ fun AddPurchaseScreenContent(
 @Composable
 private fun ProfitCard(
     profit: String?,
-    salePrice: String,
-    cost: String
+    quantity: Int,
+    soldTotal: String?,
+    costTotal: String
 ) {
+    val contentColor = MaterialTheme.colorScheme.onSecondaryContainer
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -412,25 +416,43 @@ private fun ProfitCard(
                 MaterialTheme.colorScheme.secondaryContainer,
                 RoundedCornerShape(dimensionResource(R.dimen.radius_12dp))
             )
-            .padding(dimensionResource(R.dimen.spacing_16dp))
+            .padding(dimensionResource(R.dimen.spacing_16dp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_4dp))
     ) {
         Text(
             text = stringResource(R.string.purchase_profit_title),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = contentColor,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Medium
         )
         Text(
             text = profit ?: stringResource(R.string.purchase_profit_placeholder),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = contentColor,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = dimensionResource(R.dimen.spacing_4dp)),
+            color = contentColor.copy(alpha = 0.2f)
+        )
+        ProfitCardRow(stringResource(R.string.purchase_profit_sold, quantity), soldTotal ?: "—")
+        ProfitCardRow(stringResource(R.string.purchase_profit_cost, quantity), costTotal)
+    }
+}
+
+@Composable
+private fun ProfitCardRow(label: String, value: String) {
+    val contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, color = contentColor, style = MaterialTheme.typography.bodyMedium)
         Text(
-            text = stringResource(R.string.purchase_profit_calculation, salePrice, cost),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodySmall
+            text = value,
+            color = contentColor,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
         )
     }
 }

@@ -99,6 +99,30 @@ class AddPurchaseScreenUiTest {
     }
 
     @Test
+    fun profitCardShowsSoldAndCostTotalsMultipliedByQuantity() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AddPurchaseScreenContent(
+                    state = AddPurchaseUiState(
+                        products = listOf(product),
+                        form = PurchaseFormState(
+                            selectedProduct = product,
+                            salePrice = "120,00",
+                            quantity = 3
+                        ),
+                        isLoadingProducts = false
+                    )
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Vendido (3×)").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Custo (3×)").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("360,00", substring = true).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("150,00", substring = true).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
     fun editModeHidesRegisterButtonAndShowsDeleteConfirmation() {
         composeRule.setContent {
             LucroVarejoTheme {
