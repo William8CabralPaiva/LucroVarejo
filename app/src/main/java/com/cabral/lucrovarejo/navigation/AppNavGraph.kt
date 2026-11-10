@@ -1,5 +1,10 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -97,9 +102,16 @@ internal fun AppNavGraphContent(
     loggedFlowScreen: @Composable (() -> Unit) -> Unit,
     forgotPasswordScreen: @Composable (() -> Unit) -> Unit = {},
 ) {
+    val focusManager = LocalFocusManager.current
+    val backgroundTapInteraction = remember { MutableInteractionSource() }
+
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        modifier = Modifier.clickable(
+            interactionSource = backgroundTapInteraction,
+            indication = null
+        ) { focusManager.clearFocus() }
     ) {
         composable(NotLoggedRoutes.SPLASH) {
             splashScreen {
