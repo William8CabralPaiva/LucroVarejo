@@ -96,8 +96,11 @@ fun AutoCompleteTextView(
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onTextChange: (String) -> Unit = {},
+    itemKeys: ImmutableList<String>? = null,
+    onItemKeySelect: (String) -> Unit = {},
     itemContent: (@Composable (String) -> Unit)? = null,
 ) {
+    // Com itemKeys (paralelo a items), a selecao e o itemContent usam a chave, nao o texto.
     var expanded by remember { mutableStateOf(false) }
     var query by remember {
         val initialQuery = selectedItem.orEmpty()
@@ -125,7 +128,10 @@ fun AutoCompleteTextView(
     )
     val label = stringResource(textId)
     val placeholder = stringResource(placeholderResId)
-    val filteredItems = filterAutoCompleteItems(items, query.text)
+    val trimmedQuery = query.text.trim()
+    val filteredIndices = items.indices.filter {
+        trimmedQuery.isEmpty() || items[it].contains(trimmedQuery, ignoreCase = true)
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
@@ -202,19 +208,21 @@ fun AutoCompleteTextView(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             }
             ExposedDropdownMenu(
-                expanded = expanded && enabled && filteredItems.isNotEmpty(),
+                expanded = expanded && enabled && filteredIndices.isNotEmpty(),
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                filteredItems.forEach { item ->
+                filteredIndices.forEach { index ->
+                    val item = items[index]
+                    val key = itemKeys?.getOrNull(index)
                     DropdownMenuItem(
-                        text = { itemContent?.invoke(item) ?: Text(item) },
+                        text = { itemContent?.invoke(key ?: item) ?: Text(item) },
                         onClick = {
                             query = TextFieldValue(
                                 text = item,
                                 selection = TextRange(item.length)
                             )
-                            onItemSelect(item)
+                            if (key != null) onItemKeySelect(key) else onItemSelect(item)
                             expanded = false
                         }
                     )

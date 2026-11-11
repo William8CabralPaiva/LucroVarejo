@@ -88,7 +88,7 @@ fun AddPurchaseScreen(
     AddPurchaseScreenContent(
         state = state,
         snackBarHostState = snackBarHostState,
-        onProductSelect = viewModel::onProductSelected,
+        onProductKeySelect = viewModel::onProductKeySelected,
         onProductTextChange = viewModel::onProductTextChanged,
         onSalePriceChange = viewModel::onSalePriceChanged,
         onQuantityChange = viewModel::onQuantityChanged,
@@ -109,7 +109,7 @@ fun AddPurchaseScreenContent(
     state: AddPurchaseUiState,
     modifier: Modifier = Modifier,
     snackBarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onProductSelect: (String) -> Unit = {},
+    onProductKeySelect: (String) -> Unit = {},
     onProductTextChange: (String) -> Unit = {},
     onSalePriceChange: (String) -> Unit = {},
     onQuantityChange: (Int) -> Unit = {},
@@ -153,7 +153,8 @@ fun AddPurchaseScreenContent(
     val paymentMethods = PaymentMethodsUi.entries
     val paymentLabels = remember { paymentMethods.map { it.displayName }.toImmutableList() }
     val productNames = remember(state.products) { state.products.map(::productDisplayName).toImmutableList() }
-    val productsByDisplayName = remember(state.products) { state.products.associateBy(::productDisplayName) }
+    val productsByKey = remember(state.products) { state.products.associateBy(::productOptionKey) }
+    val productKeys = remember(state.products) { state.products.map(::productOptionKey).toImmutableList() }
     val brandOptions = remember(state.brandOptions) { state.brandOptions.toImmutableList() }
     val form = state.form
     val selectedPaymentLabel = paymentMethods
@@ -194,19 +195,21 @@ fun AddPurchaseScreenContent(
                 AutoCompleteTextView(
                     selectedItem = form.selectedProduct?.let(::productDisplayName),
                     items = productNames,
-                    onItemSelect = onProductSelect,
+                    onItemSelect = {},
+                    itemKeys = productKeys,
+                    onItemKeySelect = onProductKeySelect,
                     onTextChange = onProductTextChange,
                     textId = R.string.product,
                     placeholderResId = R.string.product_placeholder,
                     required = true,
                     enabled = !state.isSaving,
-                    itemContent = { displayName ->
-                        productsByDisplayName[displayName]?.let { product ->
+                    itemContent = { optionKey ->
+                        productsByKey[optionKey]?.let { product ->
                             ProductOptionItem(
                                 product = product,
                                 formattedCost = currencyFormat.format(product.cost)
                             )
-                        } ?: Text(displayName)
+                        } ?: Text(optionKey)
                     }
                 )
 
