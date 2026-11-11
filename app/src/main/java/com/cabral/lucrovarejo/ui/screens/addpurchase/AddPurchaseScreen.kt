@@ -46,7 +46,7 @@ import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
-import com.cabral.lucrovarejo.ui.components.AutoCompleteTextViewContent
+import com.cabral.lucrovarejo.ui.components.AutoCompleteTextView
 import com.cabral.lucrovarejo.ui.components.DELETE_PRODUCT_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.DateTextField
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
@@ -190,7 +190,7 @@ fun AddPurchaseScreenContent(
                     dimensionResource(R.dimen.register_field_spacing)
                 )
             ) {
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = form.selectedProduct?.let(::productDisplayName),
                     items = productNames,
                     onItemSelect = onProductSelect,

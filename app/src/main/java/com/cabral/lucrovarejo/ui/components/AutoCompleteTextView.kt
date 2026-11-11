@@ -67,7 +67,7 @@ fun AutoCompleteTextView(
     onItemSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(initialValue) }
-    AutoCompleteTextViewContent(
+    AutoCompleteTextView(
         selectedItem = selectedItem,
         items = items,
         onItemSelect = {
@@ -84,7 +84,7 @@ fun AutoCompleteTextView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AutoCompleteTextViewContent(
+fun AutoCompleteTextView(
     selectedItem: String?,
     items: ImmutableList<String>,
     onItemSelect: (String) -> Unit,

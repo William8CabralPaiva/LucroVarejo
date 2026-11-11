@@ -42,7 +42,7 @@ class AutoCompleteTextViewUiTest {
     fun displaysLabelAndPlaceholder() {
         composeRule.setContent {
             LucroVarejoTheme {
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = null,
                     items = persistentListOf("Bolsa"),
                     onItemSelect = {},
@@ -62,7 +62,7 @@ class AutoCompleteTextViewUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 var current by remember { mutableStateOf<String?>(null) }
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = current,
                     items = persistentListOf("Bolsa", "Mochila"),
                     onItemSelect = {
