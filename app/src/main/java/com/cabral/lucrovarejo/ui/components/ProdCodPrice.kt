@@ -87,7 +87,7 @@ fun ProdCodPriceContent(
                 dimensionResource(R.dimen.last_sale_text_spacing)
             )
         ) {
-            Text(
+            EllipsizedNameWithTooltip(
                 text = name,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,

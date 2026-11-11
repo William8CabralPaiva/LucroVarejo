@@ -113,7 +113,7 @@ fun PurchaseItemContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_text_spacing))
         ) {
-            Text(
+            EllipsizedNameWithTooltip(
                 text = productName,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
