@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "238907142650",
+    "firebase_url": "https://lucro-varejo-default-rtdb.firebaseio.com",
     "project_id": "lucro-varejo",
     "storage_bucket": "lucro-varejo.firebasestorage.app"
   },
@@ -12,7 +13,28 @@
           "package_name": "com.cabral.lucrovarejo"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "238907142650-dpng2dn1r13okksu4im6omm1o6u25ngg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cabral.lucrovarejo",
+            "certificate_hash": "fdae2a2ae2e68ac82853dcceb2bef5876a33b317"
+          }
+        },
+        {
+          "client_id": "238907142650-eqgn7a7ksercklajiucuftb3leff7t8b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cabral.lucrovarejo",
+            "certificate_hash": "4516b6b6d891ac8daa8e69ad9675f37d597180f5"
+          }
+        },
+        {
+          "client_id": "238907142650-lgrs35kj9k169bmdqaorm49ti5ajnjj3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBpzm2aYjUL00WX08unRecmj8kmpKjl4iA"
@@ -20,7 +42,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "238907142650-lgrs35kj9k169bmdqaorm49ti5ajnjj3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

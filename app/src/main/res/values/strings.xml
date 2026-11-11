@@ -288,4 +288,12 @@
     <string name="machine_history_current_badge">Atual</string>
     <string name="machine_history_effective_from">Vigência: %1$s</string>
     <string name="machine_history_add">Nova tarifa</string>
+    <string name="google_sign_in">Entrar com Google</string>
+    <string name="google_sign_up">Cadastrar com Google</string>
+    <string name="google_store_name_title">Nome da loja</string>
+    <string name="google_store_name_message">Informe o nome da sua loja para concluir o cadastro com a conta Google.</string>
+    <string name="google_store_name_confirm">Concluir</string>
+    <string name="google_store_name_cancel">Cancelar</string>
+    <string name="google_sign_up_hint">Informe o nome da loja acima para cadastrar com Google.</string>
+    <string name="google_error_generic">Não foi possível continuar com o Google. Tente novamente.</string>
 </resources>

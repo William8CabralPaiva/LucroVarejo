@@ -31,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.AppKeyboardDefaults
 import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
+import com.cabral.lucrovarejo.ui.components.GoogleSignInButton
 import com.cabral.lucrovarejo.ui.components.LoadingButton
 import com.cabral.lucrovarejo.ui.components.PasswordTextField
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -55,6 +56,8 @@ fun RegisterScreen(
         onPasswordChange = viewModel::onPasswordChanged,
         onConfirmPasswordChange = viewModel::onConfirmPasswordChanged,
         onSubmit = viewModel::register,
+        onGoogleIdToken = viewModel::onGoogleIdToken,
+        onGoogleError = viewModel::onGoogleFailure,
         onBackPress = onBackPress
     )
 }
@@ -68,6 +71,8 @@ internal fun RegisterScreenContent(
     onConfirmPasswordChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onBackPress: () -> Unit,
+    onGoogleIdToken: (String) -> Unit = {},
+    onGoogleError: () -> Unit = {},
 ) {
     Surface(
         modifier = Modifier
@@ -177,6 +182,27 @@ internal fun RegisterScreenContent(
 
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
 
+            GoogleSignInButton(
+                onIdToken = onGoogleIdToken,
+                onError = onGoogleError,
+                enabled = !state.isLoading &&
+                        RegisterValidator.validateDisplayName(state.displayName) == null,
+                textId = R.string.google_sign_up,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(REGISTER_GOOGLE_BUTTON_TAG)
+            )
+
+            if (RegisterValidator.validateDisplayName(state.displayName) != null) {
+                Text(
+                    text = stringResource(R.string.google_sign_up_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
+
             TextButton(
                 onClick = onBackPress,
                 enabled = !state.isLoading,
@@ -194,6 +220,7 @@ internal const val REGISTER_EMAIL_FIELD_TAG = "register-email-field"
 internal const val REGISTER_PASSWORD_FIELD_TAG = "register-password-field"
 internal const val REGISTER_CONFIRM_PASSWORD_FIELD_TAG = "register-confirm-password-field"
 internal const val REGISTER_BACK_BUTTON_TAG = "register-back-button"
+internal const val REGISTER_GOOGLE_BUTTON_TAG = "register-google-button"
 
 @Preview(showBackground = true, name = "Cadastro da loja")
 @Composable

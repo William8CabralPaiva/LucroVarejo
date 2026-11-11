@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -26,6 +28,23 @@ android {
         testInstrumentationRunner = "com.cabral.lucrovarejo.HiltTestRunner"
     }
 
+    // Credenciais e keystore em /keystore (fora do git). Sem o arquivo, o release fica sem assinatura.
+    val keystoreDir = rootProject.file("keystore")
+    val keystoreProperties = Properties().apply {
+        val file = File(keystoreDir, "keystore.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+    val releaseSigning = if (keystoreProperties.containsKey("storePassword")) {
+        signingConfigs.create("release") {
+            storeFile = File(keystoreDir, keystoreProperties.getProperty("storeFile", "lucro_varejo"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+        }
+    } else {
+        null
+    }
+
     buildTypes {
         debug {
             enableUnitTestCoverage = true
@@ -35,6 +54,7 @@ android {
         release {
             buildConfigField("String", "STORES_COLLECTION", "\"stores\"")
             buildConfigField("String", "USERS_COLLECTION", "\"users\"")
+            signingConfig = releaseSigning
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -98,6 +118,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     implementation(libs.kotlinx.coroutines.play.services)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
