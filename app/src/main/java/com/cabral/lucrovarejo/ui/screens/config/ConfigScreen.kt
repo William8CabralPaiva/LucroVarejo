@@ -60,7 +60,7 @@ fun ConfigScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_24dp)),
-            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
+            verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))
         ) {
             SettingsItem(
                 icon = Icons.Outlined.Storefront,
