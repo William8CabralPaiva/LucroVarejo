@@ -96,6 +96,7 @@ fun AutoCompleteTextView(
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onTextChange: (String) -> Unit = {},
+    itemContent: (@Composable (String) -> Unit)? = null,
 ) {
     var expanded by remember { mutableStateOf(false) }
     var query by remember {
@@ -207,7 +208,7 @@ fun AutoCompleteTextView(
             ) {
                 filteredItems.forEach { item ->
                     DropdownMenuItem(
-                        text = { Text(item) },
+                        text = { itemContent?.invoke(item) ?: Text(item) },
                         onClick = {
                             query = TextFieldValue(
                                 text = item,

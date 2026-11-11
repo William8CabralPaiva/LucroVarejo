@@ -153,6 +153,7 @@ fun AddPurchaseScreenContent(
     val paymentMethods = PaymentMethodsUi.entries
     val paymentLabels = remember { paymentMethods.map { it.displayName }.toImmutableList() }
     val productNames = remember(state.products) { state.products.map(::productDisplayName).toImmutableList() }
+    val productsByDisplayName = remember(state.products) { state.products.associateBy(::productDisplayName) }
     val brandOptions = remember(state.brandOptions) { state.brandOptions.toImmutableList() }
     val form = state.form
     val selectedPaymentLabel = paymentMethods
@@ -198,7 +199,15 @@ fun AddPurchaseScreenContent(
                     textId = R.string.product,
                     placeholderResId = R.string.product_placeholder,
                     required = true,
-                    enabled = !state.isSaving
+                    enabled = !state.isSaving,
+                    itemContent = { displayName ->
+                        productsByDisplayName[displayName]?.let { product ->
+                            ProductOptionItem(
+                                product = product,
+                                formattedCost = currencyFormat.format(product.cost)
+                            )
+                        } ?: Text(displayName)
+                    }
                 )
 
                 if (state.products.isEmpty() && state.errorMessage == null) {
@@ -453,6 +462,27 @@ private fun ProfitCardRow(label: String, value: String) {
             color = contentColor,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun ProductOptionItem(product: ProductModel, formattedCost: String) {
+    Column {
+        Text(
+            text = product.name,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        val details = buildList {
+            if (product.cod.isNotBlank()) add(stringResource(R.string.product_code_value, product.cod))
+            add(stringResource(R.string.product_cost_value, formattedCost))
+        }.joinToString("  •  ")
+        Text(
+            text = details,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

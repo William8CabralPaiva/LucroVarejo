@@ -1,5 +1,7 @@
 package com.cabral.lucrovarejo.ui.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,5 +86,36 @@ class AutoCompleteTextViewUiTest {
             assertEquals("Mochila", selectedItem)
         }
         composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).assertTextEquals("Mochila X")
+    }
+
+    @Test
+    fun customItemContentShowsNameCodeAndCost() {
+        var selectedItem = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = null,
+                    items = persistentListOf("Bolsa (A-1)"),
+                    onItemSelect = { selectedItem = it },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    itemContent = {
+                        Column {
+                            Text("Bolsa")
+                            Text("Código: A-1  •  Custo: R$ 10,00")
+                        }
+                    }
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("bol")
+        composeRule.onNodeWithText("Código: A-1  •  Custo: R$ 10,00").assertIsDisplayed()
+        composeRule.onNodeWithText("Bolsa").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals("Bolsa (A-1)", selectedItem)
+        }
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).assertTextEquals("Bolsa (A-1)")
     }
 }

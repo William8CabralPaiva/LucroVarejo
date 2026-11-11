@@ -91,6 +91,7 @@
     <string name="products_retry">Tentar novamente</string>
     <string name="products_add">Novo produto</string>
     <string name="product_code_value">Código: %1$s</string>
+    <string name="product_cost_value">Custo: %1$s</string>
     <string name="summary_title">Resumo</string>
     <string name="summary_month_sales">Vendas do mês</string>
     <string name="summary_total_cost">Custo total</string>
