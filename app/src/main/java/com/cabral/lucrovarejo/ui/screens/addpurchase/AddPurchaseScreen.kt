@@ -52,6 +52,8 @@ import com.cabral.lucrovarejo.ui.components.DateTextField
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldType
 import com.cabral.lucrovarejo.ui.components.LoadingFullScreen
+import com.cabral.lucrovarejo.ui.components.ProductOptionDetails
+import com.cabral.lucrovarejo.ui.components.ProductOptionItem
 import com.cabral.lucrovarejo.ui.components.QuantityFieldContent
 import com.cabral.lucrovarejo.ui.components.SaveProductButtonContent
 import com.cabral.lucrovarejo.ui.components.SpinnerContent
@@ -206,7 +208,8 @@ fun AddPurchaseScreenContent(
                     itemContent = { optionKey ->
                         productsByKey[optionKey]?.let { product ->
                             ProductOptionItem(
-                                product = product,
+                                name = product.name,
+                                code = product.cod,
                                 formattedCost = currencyFormat.format(product.cost)
                             )
                         } ?: Text(optionKey)
@@ -214,7 +217,7 @@ fun AddPurchaseScreenContent(
                     selectedItemContent = form.selectedProduct?.let { product ->
                         {
                             ProductOptionDetails(
-                                product = product,
+                                code = product.cod,
                                 formattedCost = currencyFormat.format(product.cost)
                             )
                         }
@@ -477,32 +480,6 @@ private fun ProfitCardRow(label: String, value: String) {
     }
 }
 
-@Composable
-private fun ProductOptionItem(product: ProductModel, formattedCost: String) {
-    Column {
-        Text(
-            text = product.name,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        ProductOptionDetails(product, formattedCost)
-    }
-}
-
-@Composable
-private fun ProductOptionDetails(product: ProductModel, formattedCost: String) {
-    val details = buildList {
-        if (product.cod.isNotBlank()) add(stringResource(R.string.product_code_value, product.cod))
-        add(stringResource(R.string.product_cost_value, formattedCost))
-    }.joinToString("  •  ")
-    Text(
-        text = details,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun AddPurchaseScreenPreview() {
@@ -516,6 +493,30 @@ private fun AddPurchaseScreenPreview() {
 private fun EditPurchaseScreenPreview() {
     LucroVarejoTheme {
         AddPurchaseScreenContent(state = editPreviewState())
+    }
+}
+
+@Preview(showBackground = true, heightDp = 1000, name = "Produto selecionado")
+@Composable
+private fun SelectedProductPreview() {
+    val umbrella = ProductModel(
+        key = "guarda-chuva-34",
+        cod = "001",
+        name = "Guarda-chuva",
+        cost = java.math.BigDecimal("34.00"),
+        description = ""
+    )
+    LucroVarejoTheme {
+        AddPurchaseScreenContent(
+            state = AddPurchaseUiState(
+                isLoadingProducts = false,
+                products = listOf(
+                    umbrella,
+                    umbrella.copy(key = "guarda-chuva-70", cost = java.math.BigDecimal("70.00"))
+                ),
+                form = PurchaseFormState(selectedProduct = umbrella)
+            )
+        )
     }
 }
 
