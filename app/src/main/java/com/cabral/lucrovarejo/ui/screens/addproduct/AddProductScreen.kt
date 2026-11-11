@@ -125,7 +125,8 @@ fun AddProductContent(
         )
     }
     Surface(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

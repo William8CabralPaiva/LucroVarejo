@@ -187,7 +187,7 @@ internal fun LoggedFlow(
                     topStart = dimensionResource(R.dimen.radius_20dp),
                     topEnd = dimensionResource(R.dimen.radius_20dp)
                 ),
-                color = MaterialTheme.colorScheme.surface,
+                color = MaterialTheme.colorScheme.background,
                 shadowElevation = dimensionResource(R.dimen.spacing_4dp)
             ) {
                 LoggedDestinationNavHost(

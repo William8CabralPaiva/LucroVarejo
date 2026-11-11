@@ -178,7 +178,10 @@ fun AddPurchaseScreenContent(
         }
     }
 
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoadingProducts) {
             LoadingFullScreen(

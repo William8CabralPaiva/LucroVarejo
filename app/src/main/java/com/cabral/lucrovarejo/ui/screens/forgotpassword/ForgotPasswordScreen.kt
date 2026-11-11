@@ -54,7 +54,8 @@ internal fun ForgotPasswordScreenContent(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
