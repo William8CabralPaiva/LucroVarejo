@@ -32,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -188,10 +187,10 @@ fun AutoCompleteTextView(
                     enabled = enabled,
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = if (showSelectedContent) Color.Transparent
-                        else MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = if (showSelectedContent) FontWeight.Bold else null
                     ),
-                    cursorBrush = SolidColor(if (showSelectedContent) Color.Transparent else accentColor),
+                    cursorBrush = SolidColor(accentColor),
                     keyboardOptions = keyboardOptions,
                     modifier = Modifier
                         .weight(1f)
@@ -199,15 +198,16 @@ fun AutoCompleteTextView(
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled)
                         .testTag(AUTO_COMPLETE_TEXT_FIELD_TAG),
                     decorationBox = { innerTextField ->
-                        Box(contentAlignment = Alignment.CenterStart) {
-                            if (query.text.isEmpty()) {
-                                Text(
-                                    text = placeholder,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                        Column {
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (query.text.isEmpty()) {
+                                    Text(
+                                        text = placeholder,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                innerTextField()
                             }
-                            // O campo segue ativo (foco/teclado), mas com texto transparente atras do item selecionado.
-                            innerTextField()
                             if (showSelectedContent) selectedItemContent?.invoke()
                         }
                     }

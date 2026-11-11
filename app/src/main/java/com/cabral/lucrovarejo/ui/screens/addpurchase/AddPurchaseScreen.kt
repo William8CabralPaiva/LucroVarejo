@@ -213,7 +213,7 @@ fun AddPurchaseScreenContent(
                     },
                     selectedItemContent = form.selectedProduct?.let { product ->
                         {
-                            ProductOptionItem(
+                            ProductOptionDetails(
                                 product = product,
                                 formattedCost = currencyFormat.format(product.cost)
                             )
@@ -486,16 +486,21 @@ private fun ProductOptionItem(product: ProductModel, formattedCost: String) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        val details = buildList {
-            if (product.cod.isNotBlank()) add(stringResource(R.string.product_code_value, product.cod))
-            add(stringResource(R.string.product_cost_value, formattedCost))
-        }.joinToString("  •  ")
-        Text(
-            text = details,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        ProductOptionDetails(product, formattedCost)
     }
+}
+
+@Composable
+private fun ProductOptionDetails(product: ProductModel, formattedCost: String) {
+    val details = buildList {
+        if (product.cod.isNotBlank()) add(stringResource(R.string.product_code_value, product.cod))
+        add(stringResource(R.string.product_cost_value, formattedCost))
+    }.joinToString("  •  ")
+    Text(
+        text = details,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Preview(showBackground = true)

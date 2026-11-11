@@ -118,4 +118,51 @@ class AutoCompleteTextViewUiTest {
         }
         composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).assertTextEquals("Bolsa (A-1)")
     }
+
+    @Test
+    fun itemsWithSameTextAreSelectedByKey() {
+        var selectedKey = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = null,
+                    items = persistentListOf("Guarda-chuva", "Guarda-chuva"),
+                    onItemSelect = {},
+                    itemKeys = persistentListOf("k34", "k70"),
+                    onItemKeySelect = { selectedKey = it },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    itemContent = { key -> Text("Custo $key") }
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("guarda")
+        composeRule.onNodeWithText("Custo k34").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo k70").assertIsDisplayed().performClick()
+
+        composeRule.runOnIdle {
+            assertEquals("k70", selectedKey)
+        }
+    }
+
+    @Test
+    fun selectedItemContentShowsBelowEditableNameOnlyWhileSelected() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = "Bolsa",
+                    items = persistentListOf("Bolsa"),
+                    onItemSelect = {},
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    selectedItemContent = { Text("Código: A-1") }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Código: A-1", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("x")
+        composeRule.onAllNodesWithText("Código: A-1").assertCountEquals(0)
+    }
 }
