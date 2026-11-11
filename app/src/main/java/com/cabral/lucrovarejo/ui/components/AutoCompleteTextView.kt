@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -99,6 +100,7 @@ fun AutoCompleteTextView(
     itemKeys: ImmutableList<String>? = null,
     onItemKeySelect: (String) -> Unit = {},
     itemContent: (@Composable (String) -> Unit)? = null,
+    selectedItemContent: (@Composable () -> Unit)? = null,
 ) {
     // Com itemKeys (paralelo a items), a selecao e o itemContent usam a chave, nao o texto.
     var expanded by remember { mutableStateOf(false) }
@@ -132,6 +134,8 @@ fun AutoCompleteTextView(
     val filteredIndices = items.indices.filter {
         trimmedQuery.isEmpty() || items[it].contains(trimmedQuery, ignoreCase = true)
     }
+    val showSelectedContent = selectedItemContent != null &&
+        selectedItem != null && selectedItem == query.text
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
@@ -184,9 +188,10 @@ fun AutoCompleteTextView(
                     enabled = enabled,
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = if (showSelectedContent) Color.Transparent
+                        else MaterialTheme.colorScheme.onSurface
                     ),
-                    cursorBrush = SolidColor(accentColor),
+                    cursorBrush = SolidColor(if (showSelectedContent) Color.Transparent else accentColor),
                     keyboardOptions = keyboardOptions,
                     modifier = Modifier
                         .weight(1f)
@@ -195,13 +200,15 @@ fun AutoCompleteTextView(
                         .testTag(AUTO_COMPLETE_TEXT_FIELD_TAG),
                     decorationBox = { innerTextField ->
                         Box(contentAlignment = Alignment.CenterStart) {
-                        if (query.text.isEmpty()) {
+                            if (query.text.isEmpty()) {
                                 Text(
                                     text = placeholder,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+                            // O campo segue ativo (foco/teclado), mas com texto transparente atras do item selecionado.
                             innerTextField()
+                            if (showSelectedContent) selectedItemContent?.invoke()
                         }
                     }
                 )

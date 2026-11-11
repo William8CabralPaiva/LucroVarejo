@@ -210,6 +210,14 @@ fun AddPurchaseScreenContent(
                                 formattedCost = currencyFormat.format(product.cost)
                             )
                         } ?: Text(optionKey)
+                    },
+                    selectedItemContent = form.selectedProduct?.let { product ->
+                        {
+                            ProductOptionItem(
+                                product = product,
+                                formattedCost = currencyFormat.format(product.cost)
+                            )
+                        }
                     }
                 )
 

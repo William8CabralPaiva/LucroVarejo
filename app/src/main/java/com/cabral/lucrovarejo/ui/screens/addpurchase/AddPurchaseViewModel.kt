@@ -447,8 +447,7 @@ class AddPurchaseViewModel @Inject constructor(
 internal fun productOptionKey(product: ProductModel): String =
     product.key ?: productDisplayName(product)
 
-internal fun productDisplayName(product: ProductModel): String =
-    if (product.cod.isBlank()) product.name else "${product.name} (${product.cod})"
+internal fun productDisplayName(product: ProductModel): String = product.name
 
 private fun AddPurchaseUiState.toPurchase(product: ProductModel, salePrice: BigDecimal) = PurchaseModel(
     key = key,

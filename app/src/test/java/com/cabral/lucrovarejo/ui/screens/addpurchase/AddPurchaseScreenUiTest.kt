@@ -63,9 +63,9 @@ class AddPurchaseScreenUiTest {
         }
 
         composeRule.onAllNodesWithText("Buscando produtos...").assertCountEquals(0)
-        composeRule.onNodeWithText("Bolsa Feminina (A-1)").assertIsDisplayed()
+        composeRule.onNodeWithText("Código: A-1", substring = true).assertIsDisplayed()
         composeRule.onNodeWithText("Valor vendido").assertIsDisplayed()
-        composeRule.onNodeWithText("Pagamento").assertIsDisplayed()
+        composeRule.onNodeWithText("Pagamento").performScrollTo().assertIsDisplayed()
     }
 
     @Test
