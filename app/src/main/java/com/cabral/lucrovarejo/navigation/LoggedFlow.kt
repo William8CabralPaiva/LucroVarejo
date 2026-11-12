@@ -91,6 +91,7 @@ internal fun LoggedFlow(
     showTips: Boolean = false,
     onDismissTips: () -> Unit = {},
     onUpdateStoreName: (String, (Boolean) -> Unit) -> Unit = { _, _ -> },
+    storeNameRequired: Boolean = false,
 ) {
     val navController = rememberNavController()
     val navigator = remember(navController) {
@@ -235,6 +236,18 @@ internal fun LoggedFlow(
                 )
             }
         }
+    }
+
+    if (storeNameRequired) {
+        // Obrigatorio: sem nome da loja nao da para usar o app (ex.: cadastro Google interrompido).
+        StoreNameDialog(
+            initialName = "",
+            title = R.string.google_store_name_title,
+            errorMessage = R.string.settings_store_name_error,
+            onSave = onUpdateStoreName,
+            onDismiss = {},
+            cancelable = false
+        )
     }
 
     if (showSwitchStoreDialog) {

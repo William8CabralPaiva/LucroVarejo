@@ -56,8 +56,21 @@ class FirebaseAuthStoreClientImpl @Inject constructor(
     override suspend fun updateDisplayName(displayName: String) {
         val uid = auth.currentUser?.uid ?: error("No active session.")
         val storeKey = activeStore.currentStoreKey() ?: error("No active session.")
-        firestore.collection(FirestoreCollections.STORES)
-            .document(storeKey)
+        val storeRef = firestore.collection(FirestoreCollections.STORES).document(storeKey)
+        // Conta Google interrompida antes de criar a loja: cria agora em vez de atualizar.
+        if (storeKey == uid && !storeRef.get().await().exists()) {
+            val email = auth.currentUser?.email?.takeIf { it.isNotBlank() }
+                ?: error("Account without e-mail.")
+            StoreFirestore.newStoreBatch(
+                firestore = firestore,
+                storeId = uid,
+                uid = uid,
+                email = email,
+                displayName = displayName
+            ).commit().await()
+            return
+        }
+        storeRef
             .update(FIELD_DISPLAY_NAME, displayName)
             .await()
         // Copia do nome usada na lista de lojas; se falhar, a loja continua com o nome atualizado.

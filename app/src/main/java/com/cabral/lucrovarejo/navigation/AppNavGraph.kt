@@ -69,6 +69,9 @@ fun AppNavGraph(
                     salesViewModel = salesViewModel,
                     productViewModel = productViewModel,
                     storeName = storeState?.displayName,
+                    storeNameRequired = storeState?.let {
+                        it.nameLoaded && it.displayName.isNullOrBlank()
+                    } == true,
                     stores = storeState?.stores.orEmpty(),
                     activeStoreId = storeState?.activeStoreId,
                     onSwitchStore = { storeViewModel?.selectStore(it) },

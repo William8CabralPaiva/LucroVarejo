@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.window.DialogProperties
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.store.StoreSummary
 import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
@@ -84,6 +85,7 @@ fun StoreNameDialog(
     @StringRes errorMessage: Int,
     onSave: (String, (Boolean) -> Unit) -> Unit,
     onDismiss: () -> Unit,
+    cancelable: Boolean = true,
 ) {
     var name by remember { mutableStateOf(initialName) }
     var isSaving by remember { mutableStateOf(false) }
@@ -91,7 +93,11 @@ fun StoreNameDialog(
     val validationError = RegisterValidator.validateDisplayName(name)
 
     AlertDialog(
-        onDismissRequest = { if (!isSaving) onDismiss() },
+        onDismissRequest = { if (cancelable && !isSaving) onDismiss() },
+        properties = DialogProperties(
+            dismissOnBackPress = cancelable,
+            dismissOnClickOutside = cancelable
+        ),
         title = { Text(stringResource(title)) },
         text = {
             AppOutlinedTextField(
@@ -128,11 +134,13 @@ fun StoreNameDialog(
                 Text(stringResource(R.string.dialog_save))
             }
         },
-        dismissButton = {
-            TextButton(enabled = !isSaving, onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_cancel))
+        dismissButton = if (cancelable) {
+            {
+                TextButton(enabled = !isSaving, onClick = onDismiss) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
             }
-        }
+        } else null
     )
 }
 
