@@ -24,12 +24,7 @@ internal class GoogleSignInException(cause: Throwable? = null) : Exception(cause
 
 // Abre o seletor de contas Google e devolve o ID token. Retorna null se o usuario cancelar.
 internal suspend fun fetchGoogleIdToken(context: Context): String? {
-    // default_web_client_id so existe depois que o google-services.json tem o cliente OAuth web.
-    val webClientId = context.resources
-        .getIdentifier("default_web_client_id", "string", context.packageName)
-        .takeIf { it != 0 }
-        ?.let(context::getString)
-        ?: throw GoogleSignInException()
+    val webClientId = context.getString(R.string.default_web_client_id)
     val request = GetCredentialRequest.Builder()
         .addCredentialOption(GetSignInWithGoogleOption.Builder(webClientId).build())
         .build()
