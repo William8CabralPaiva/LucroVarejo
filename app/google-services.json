@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "238907142650-tqf4tci6c17p5uu4h8jf29mfsimm4fvo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cabral.lucrovarejo",
+            "certificate_hash": "18d16bde93d12105674b360a232f2c144ab18154"
+          }
+        },
+        {
           "client_id": "238907142650-lgrs35kj9k169bmdqaorm49ti5ajnjj3.apps.googleusercontent.com",
           "client_type": 3
         }
