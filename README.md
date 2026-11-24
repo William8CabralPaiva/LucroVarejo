@@ -87,6 +87,15 @@ Os valores monetarios persistidos sao inteiros em centavos e as tarifas, inteiro
 
 As regras em `firestore.rules` restringem o acesso aos dados da loja a uma sessao autenticada cujo UID corresponda ao `storeId`. Lotes de compra (estoque/FIFO) e relatorios ainda nao possuem colecoes implementadas.
 
+## Backup e restauracao no Android
+
+O manifesto habilita o backup do app (`android:allowBackup="true"`) e referencia dois arquivos de regras, para cobrir os mecanismos de backup das diferentes versoes do Android:
+
+- `app/src/main/res/xml/backup_rules.xml` define as regras do backup tradicional, usado em versoes anteriores ao Android 12.
+- `app/src/main/res/xml/data_extraction_rules.xml` define as regras no Android 12 ou superior, separando o backup na nuvem (`cloud-backup`) da transferencia direta entre dispositivos (`device-transfer`).
+
+Em ambos os arquivos, `<exclude domain="sharedpref" path="." />` exclui todas as preferencias compartilhadas do app do backup ou da transferencia. Isso evita restaurar a sessao local do Firebase Authentication e abrir o app na area logada depois de uma reinstalacao ou migracao. Tambem significa que preferencias como o tema e a loja selecionada nao sao restauradas. A regra nao apaga dados do dispositivo nem dados armazenados no Firestore; apenas controla o que o Android copia e restaura.
+
 
 ## Atualizacao reativa das telas
 
