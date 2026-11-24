@@ -56,9 +56,11 @@ fun ProductContent(
     state: ProductUiState,
     onQueryChange: (String) -> Unit,
     onAddProduct: () -> Unit,
+    modifier: Modifier = Modifier,
     onEditProduct: (ProductModel) -> Unit = {},
 ) {
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             FloatingActionButton(

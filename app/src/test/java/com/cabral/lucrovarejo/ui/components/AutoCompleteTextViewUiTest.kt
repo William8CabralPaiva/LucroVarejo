@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +31,7 @@ class AutoCompleteTextViewUiTest {
 
     @Test
     fun filterIgnoresCaseAndReturnsAllWhenQueryIsBlank() {
-        val items = listOf("Bolsa (A-1)", "Mochila (B-2)")
+        val items = persistentListOf("Bolsa (A-1)", "Mochila (B-2)")
 
         assertEquals(items, filterAutoCompleteItems(items, "  "))
         assertEquals(listOf("Mochila (B-2)"), filterAutoCompleteItems(items, "moch"))
@@ -43,8 +44,8 @@ class AutoCompleteTextViewUiTest {
             LucroVarejoTheme {
                 AutoCompleteTextViewContent(
                     selectedItem = null,
-                    items = listOf("Bolsa"),
-                    onItemSelected = {},
+                    items = persistentListOf("Bolsa"),
+                    onItemSelect = {},
                     textId = R.string.product,
                     placeholderResId = R.string.product_placeholder
                 )
@@ -63,8 +64,8 @@ class AutoCompleteTextViewUiTest {
                 var current by remember { mutableStateOf<String?>(null) }
                 AutoCompleteTextViewContent(
                     selectedItem = current,
-                    items = listOf("Bolsa", "Mochila"),
-                    onItemSelected = {
+                    items = persistentListOf("Bolsa", "Mochila"),
+                    onItemSelect = {
                         current = it
                         selectedItem = it
                     },

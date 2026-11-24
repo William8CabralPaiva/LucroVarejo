@@ -12,6 +12,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -31,8 +32,8 @@ class SpinnerInstrumentedTest {
                 var currentItem by remember { mutableStateOf<String?>(null) }
                 SpinnerContent(
                     selectedItem = currentItem,
-                    items = listOf("Bolsa", "Acessório"),
-                    onItemSelected = {
+                    items = persistentListOf("Bolsa", "Acessório"),
+                    onItemSelect = {
                         currentItem = it
                         selectedItem = it
                     },

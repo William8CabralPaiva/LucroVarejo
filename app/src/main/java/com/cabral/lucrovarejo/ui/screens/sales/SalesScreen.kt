@@ -38,6 +38,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +58,8 @@ import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import java.util.Calendar
 import java.util.TimeZone
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 private const val LOAD_MORE_THRESHOLD = 3
 
@@ -72,7 +75,7 @@ fun SalesScreen(
     SalesContent(
         state = state,
         onQueryChange = resolvedViewModel::onQueryChange,
-        onDateSelected = resolvedViewModel::onDateSelected,
+        onDateSelect = resolvedViewModel::onDateSelected,
         onLoadMore = resolvedViewModel::loadNextPage,
         onRetry = resolvedViewModel::retry,
         onAddPurchase = onAddPurchase,
@@ -85,15 +88,16 @@ fun SalesScreen(
 fun SalesContent(
     state: SalesUiState,
     onQueryChange: (String) -> Unit,
-    onDateSelected: (Long?) -> Unit,
+    onDateSelect: (Long?) -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
     onAddPurchase: (() -> Unit)? = null,
     onEditPurchase: ((PurchaseModel) -> Unit)? = null,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
-    val entries = remember(state.items) { buildSalesEntries(state.items) }
+    val entries = remember(state.items) { buildSalesEntries(state.items).toImmutableList() }
     val shouldLoadMore by remember {
         derivedStateOf {
             val info = listState.layoutInfo
@@ -101,11 +105,13 @@ fun SalesContent(
             lastVisible >= info.totalItemsCount - LOAD_MORE_THRESHOLD
         }
     }
+    val currentOnLoadMore by rememberUpdatedState(onLoadMore)
     LaunchedEffect(shouldLoadMore, state.items.size) {
-        if (shouldLoadMore) onLoadMore()
+        if (shouldLoadMore) currentOnLoadMore()
     }
 
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = {
@@ -158,7 +164,7 @@ fun SalesContent(
 
             state.selectedDateMillis?.let { dateMillis ->
                 AssistChip(
-                    onClick = { onDateSelected(null) },
+                    onClick = { onDateSelect(null) },
                     label = {
                         Text(
                             stringResource(
@@ -196,7 +202,7 @@ fun SalesContent(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onDateSelected(pickerState.selectedDateMillis)
+                        onDateSelect(pickerState.selectedDateMillis)
                         showDatePicker = false
                     }
                 ) {
@@ -217,7 +223,7 @@ fun SalesContent(
 @Composable
 private fun SalesList(
     state: SalesUiState,
-    entries: List<SalesEntry>,
+    entries: ImmutableList<SalesEntry>,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onRetry: () -> Unit,
     onAddPurchase: (() -> Unit)?,
@@ -356,7 +362,7 @@ private fun SalesContentPreview() {
                 )
             ),
             onQueryChange = {},
-            onDateSelected = {},
+            onDateSelect = {},
             onLoadMore = {},
             onRetry = {},
             onAddPurchase = {}

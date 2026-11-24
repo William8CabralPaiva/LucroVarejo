@@ -13,6 +13,7 @@ import com.cabral.lucrovarejo.ui.screens.home.HomeContent
 import com.cabral.lucrovarejo.ui.screens.home.HomeUiState
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import java.util.Date
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -90,7 +91,7 @@ class HomeScreenUiTest {
             LucroVarejoTheme {
                 HomeContent(
                     state = HomeUiState(year = 2026, month = 10, isLoading = false),
-                    latestPurchases = listOf(
+                    latestPurchases = persistentListOf(
                         PurchaseModel(
                             cod = "A-1",
                             name = "Bolsa Feminina",

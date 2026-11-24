@@ -32,7 +32,7 @@ class ConfigScreenInstrumentedTest {
             LucroVarejoTheme(themeMode = currentTheme) {
                 ConfigScreen(
                     currentThemeMode = currentTheme,
-                    onThemeModeChanged = {
+                    onThemeModeChange = {
                         selectedTheme = it
                         currentTheme = it
                     },

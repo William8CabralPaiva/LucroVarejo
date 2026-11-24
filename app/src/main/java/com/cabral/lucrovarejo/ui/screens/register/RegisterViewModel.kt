@@ -89,9 +89,8 @@ class RegisterViewModel @Inject constructor(
             current.password,
             current.confirmPassword
         )
-        if (storeError != null || emailError != null || passwordError != null ||
-            confirmPasswordError != null
-        ) {
+        val errors = listOfNotNull(storeError, emailError, passwordError, confirmPasswordError)
+        if (errors.isNotEmpty()) {
             _uiState.update {
                 it.copy(
                     storeNameError = storeError,

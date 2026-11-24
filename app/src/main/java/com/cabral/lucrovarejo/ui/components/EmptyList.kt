@@ -61,7 +61,7 @@ fun EmptyList(
 
 @Preview(showBackground = true)
 @Composable
-fun EmptyListPreview() {
+private fun EmptyListPreview() {
     LucroVarejoTheme {
         EmptyList(onAddPurchase = {})
     }

@@ -65,7 +65,7 @@ class MainActivity : ComponentActivity() {
                         isUserAuthenticated = isUserAuthenticated,
                         onSignOut = { signOut() },
                         currentThemeMode = themeMode,
-                        onThemeModeChanged = { newMode ->
+                        onThemeModeChange = { newMode ->
                             themeMode = newMode
                             themePreferences.edit {
                                 putString(THEME_MODE_KEY, newMode.name)

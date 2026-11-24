@@ -61,7 +61,8 @@ class SalesViewModel @Inject constructor(
 
     fun loadNextPage() {
         val state = _uiState.value
-        if (state.isLoading || state.isLoadingMore || state.endReached || state.hasError) return
+        val busy = state.isLoading || state.isLoadingMore
+        if (busy || state.endReached || state.hasError) return
         _uiState.update { it.copy(isLoadingMore = true) }
         loadPage()
     }

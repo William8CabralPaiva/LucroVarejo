@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.components
+﻿package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,8 +43,8 @@ fun LastSaleItem(
     productName: String,
     priceInCents: Long,
     saleDate: Date,
-    onClick: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     image: Painter? = null
 ) {
     val todayLabel = stringResource(R.string.last_sale_today)
@@ -53,7 +52,7 @@ fun LastSaleItem(
     val formattedDate = formatLastSaleTimestamp(saleDate, todayLabel, yesterdayLabel)
     LastSaleItemContent(
         productName = productName,
-        formattedPrice = formatAlertPrice(priceInCents / 100.0),
+        formattedPrice = formatAlertPrice(priceInCents / CENTS_PER_UNIT),
         formattedDate = formattedDate,
 
         onClick = onClick,
@@ -105,11 +104,7 @@ fun LastSaleItemContent(
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Icon(
-                    imageVector = Icons.Outlined.ShoppingBag,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                ProductIcon(text = productName)
             }
         }
 
@@ -178,7 +173,7 @@ private fun isPreviousDay(saleDay: Calendar, currentDay: Calendar): Boolean {
 
 @Composable
 @Preview(showBackground = true, name = "Última venda")
-fun LastSaleItemPreview() {
+private fun LastSaleItemPreview() {
     LucroVarejoTheme {
         LastSaleItem(
             productName = "Bolsa Feminina",

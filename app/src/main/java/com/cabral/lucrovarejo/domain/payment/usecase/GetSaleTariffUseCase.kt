@@ -46,10 +46,10 @@ fun PaymentMethods.toTerminalType(): TerminalPaymentType = when (this) {
  */
 fun Date.endOfLocalDay(): Date = Calendar.getInstance().apply {
     time = this@endOfLocalDay
-    set(Calendar.HOUR_OF_DAY, 23)
-    set(Calendar.MINUTE, 59)
-    set(Calendar.SECOND, 59)
-    set(Calendar.MILLISECOND, 999)
+    set(Calendar.HOUR_OF_DAY, LAST_HOUR_OF_DAY)
+    set(Calendar.MINUTE, LAST_MINUTE_OR_SECOND)
+    set(Calendar.SECOND, LAST_MINUTE_OR_SECOND)
+    set(Calendar.MILLISECOND, LAST_MILLISECOND)
 }.time
 
 /** Taxa em centavos inteiros: `totalCents * rateBps / 10_000`, arredondando `HALF_UP`. */
@@ -60,3 +60,6 @@ fun calculateTariffAmountCents(saleTotalCents: Long, rateBps: Int): Long =
         .longValueExact()
 
 private const val BPS_DIVISOR = 10_000L
+private const val LAST_HOUR_OF_DAY = 23
+private const val LAST_MINUTE_OR_SECOND = 59
+private const val LAST_MILLISECOND = 999

@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.cabral.lucrovarejo.ui.components
 
 import androidx.annotation.StringRes

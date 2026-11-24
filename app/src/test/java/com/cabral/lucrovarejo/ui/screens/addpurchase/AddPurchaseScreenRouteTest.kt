@@ -99,7 +99,7 @@ class AddPurchaseScreenRouteTest {
         var finished = 0
         composeRule.setContent {
             LucroVarejoTheme {
-                AddPurchaseScreen(purchase = purchase, onFinished = { finished++ }, viewModel = viewModel)
+                AddPurchaseScreen(purchase = purchase, onFinish = { finished++ }, viewModel = viewModel)
             }
         }
 
@@ -114,7 +114,7 @@ class AddPurchaseScreenRouteTest {
         var finished = 0
         composeRule.setContent {
             LucroVarejoTheme {
-                AddPurchaseScreen(purchase = purchase, onFinished = { finished++ }, viewModel = viewModel)
+                AddPurchaseScreen(purchase = purchase, onFinish = { finished++ }, viewModel = viewModel)
             }
         }
 

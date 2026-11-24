@@ -42,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 const val AUTO_COMPLETE_TEXT_FIELD_TAG = "auto_complete_text_field"
 
@@ -54,21 +56,21 @@ fun filterAutoCompleteItems(items: List<String>, query: String): List<String> {
 
 @Composable
 fun AutoCompleteTextView(
-    items: List<String>,
-    modifier: Modifier = Modifier,
-    initialValue: String? = null,
+    items: ImmutableList<String>,
     @StringRes textId: Int,
     @StringRes placeholderResId: Int,
+    modifier: Modifier = Modifier,
+    initialValue: String? = null,
     required: Boolean = false,
-    onItemSelected: (String) -> Unit = {},
+    onItemSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(initialValue) }
     AutoCompleteTextViewContent(
         selectedItem = selectedItem,
         items = items,
-        onItemSelected = {
+        onItemSelect = {
             selectedItem = it
-            onItemSelected(it)
+            onItemSelect(it)
         },
         modifier = modifier,
         textId = textId,
@@ -81,15 +83,15 @@ fun AutoCompleteTextView(
 @Composable
 fun AutoCompleteTextViewContent(
     selectedItem: String?,
-    items: List<String>,
-    onItemSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    items: ImmutableList<String>,
+    onItemSelect: (String) -> Unit,
     @StringRes textId: Int,
     @StringRes placeholderResId: Int,
+    modifier: Modifier = Modifier,
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
-    onTextChanged: (String) -> Unit = {},
+    onTextChange: (String) -> Unit = {},
 ) {
     var expanded by remember { mutableStateOf(false) }
     var query by remember {
@@ -165,7 +167,7 @@ fun AutoCompleteTextViewContent(
                         query = it
                         if (textChanged) {
                             expanded = true
-                            onTextChanged(it.text)
+                            onTextChange(it.text)
                         }
                     },
                     enabled = enabled,
@@ -206,7 +208,7 @@ fun AutoCompleteTextViewContent(
                                 text = item,
                                 selection = TextRange(item.length)
                             )
-                            onItemSelected(item)
+                            onItemSelect(item)
                             expanded = false
                         }
                     )
@@ -223,7 +225,7 @@ private fun AutoCompleteTextViewPreview() {
         AutoCompleteTextView(
             textId = R.string.product,
             placeholderResId = R.string.product_placeholder,
-            items = listOf("Bolsa", "Mochila", "AcessÃ³rio"),
+            items = persistentListOf("Bolsa", "Mochila", "AcessÃ³rio"),
             initialValue = "Bolsa",
             modifier = Modifier.padding(16.dp)
         )

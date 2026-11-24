@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 
+private const val MONTHS_IN_YEAR = 12
+
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModel @Inject constructor(
@@ -44,7 +46,7 @@ class HomeViewModel @Inject constructor(
 
     fun onMonthYearChanged(year: Int, month: Int) {
         require(year > 0)
-        require(month in 1..12)
+        require(month in 1..MONTHS_IN_YEAR)
         _uiState.update { it.copy(year = year, month = month) }
         selectedMonth.value = year to month
     }

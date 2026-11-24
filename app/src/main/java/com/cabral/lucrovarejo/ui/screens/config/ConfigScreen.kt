@@ -33,14 +33,15 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 @Composable
 fun ConfigScreen(
     currentThemeMode: ThemeMode,
-    onThemeModeChanged: (ThemeMode) -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
+    modifier: Modifier = Modifier,
     onLogout: () -> Unit = {},
     onNavigateToTerminals: () -> Unit = {},
 ) {
     var showAboutDialog by remember { mutableStateOf(false) }
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
@@ -58,7 +59,7 @@ fun ConfigScreen(
                     ThemeMode.DARK -> true
                 },
                 onCheckedChange = { enabled ->
-                    onThemeModeChanged(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
+                    onThemeModeChange(if (enabled) ThemeMode.DARK else ThemeMode.LIGHT)
                 }
             )
 
@@ -116,11 +117,11 @@ private fun DarkModeItem(
 
 @Preview(name = "Configurações - claro")
 @Composable
-fun ConfigScreenLightPreview() {
+private fun ConfigScreenLightPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.LIGHT) {
         ConfigScreen(
             currentThemeMode = ThemeMode.LIGHT,
-            onThemeModeChanged = {},
+            onThemeModeChange = {},
             onLogout = {}
         )
     }
@@ -128,11 +129,11 @@ fun ConfigScreenLightPreview() {
 
 @Preview(name = "Configurações - escuro", uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun ConfigScreenDarkPreview() {
+private fun ConfigScreenDarkPreview() {
     LucroVarejoTheme(themeMode = ThemeMode.DARK) {
         ConfigScreen(
             currentThemeMode = ThemeMode.DARK,
-            onThemeModeChanged = {},
+            onThemeModeChange = {},
             onLogout = {}
         )
     }

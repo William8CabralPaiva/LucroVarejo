@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,23 +58,25 @@ import com.cabral.lucrovarejo.ui.components.SpinnerContent
 import com.cabral.lucrovarejo.ui.payment.PaymentMethodsUi
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
+import kotlinx.collections.immutable.toImmutableList
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
 fun AddPurchaseScreen(
     purchase: PurchaseModel? = null,
-    onFinished: () -> Unit = {},
+    onFinish: () -> Unit = {},
     viewModel: AddPurchaseViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
     val successMessage = stringResource(R.string.purchase_create_success)
+    val currentOnFinish by rememberUpdatedState(onFinish)
     LaunchedEffect(viewModel, purchase) {
         viewModel.loadPurchase(purchase)
     }
     LaunchedEffect(viewModel) {
-        viewModel.completions.collect { onFinished() }
+        viewModel.completions.collect { currentOnFinish() }
     }
     LaunchedEffect(viewModel, successMessage) {
         viewModel.effects.collect {
@@ -84,15 +87,15 @@ fun AddPurchaseScreen(
     AddPurchaseScreenContent(
         state = state,
         snackBarHostState = snackBarHostState,
-        onProductSelected = viewModel::onProductSelected,
-        onProductTextChanged = viewModel::onProductTextChanged,
-        onSalePriceChanged = viewModel::onSalePriceChanged,
-        onQuantityChanged = viewModel::onQuantityChanged,
-        onPaymentMethodSelected = viewModel::onPaymentMethodSelected,
-        onTerminalSelected = viewModel::onTerminalSelected,
-        onBrandSelected = viewModel::onBrandSelected,
-        onInstallmentsSelected = viewModel::onInstallmentsSelected,
-        onSaleDateChanged = viewModel::onSaleDateChanged,
+        onProductSelect = viewModel::onProductSelected,
+        onProductTextChange = viewModel::onProductTextChanged,
+        onSalePriceChange = viewModel::onSalePriceChanged,
+        onQuantityChange = viewModel::onQuantityChanged,
+        onPaymentMethodSelect = viewModel::onPaymentMethodSelected,
+        onTerminalSelect = viewModel::onTerminalSelected,
+        onBrandSelect = viewModel::onBrandSelected,
+        onInstallmentsSelect = viewModel::onInstallmentsSelected,
+        onSaleDateChange = viewModel::onSaleDateChanged,
         onSave = viewModel::savePurchase,
         onDelete = viewModel::onDeleteRequested,
         onDeleteConfirm = viewModel::confirmDelete,
@@ -103,16 +106,17 @@ fun AddPurchaseScreen(
 @Composable
 fun AddPurchaseScreenContent(
     state: AddPurchaseUiState,
+    modifier: Modifier = Modifier,
     snackBarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onProductSelected: (String) -> Unit = {},
-    onProductTextChanged: (String) -> Unit = {},
-    onSalePriceChanged: (String) -> Unit = {},
-    onQuantityChanged: (Int) -> Unit = {},
-    onPaymentMethodSelected: (PaymentMethods) -> Unit = {},
-    onTerminalSelected: (String) -> Unit = {},
-    onBrandSelected: (String) -> Unit = {},
-    onInstallmentsSelected: (Int) -> Unit = {},
-    onSaleDateChanged: (Long) -> Unit = {},
+    onProductSelect: (String) -> Unit = {},
+    onProductTextChange: (String) -> Unit = {},
+    onSalePriceChange: (String) -> Unit = {},
+    onQuantityChange: (Int) -> Unit = {},
+    onPaymentMethodSelect: (PaymentMethods) -> Unit = {},
+    onTerminalSelect: (String) -> Unit = {},
+    onBrandSelect: (String) -> Unit = {},
+    onInstallmentsSelect: (Int) -> Unit = {},
+    onSaleDateChange: (Long) -> Unit = {},
     onSave: () -> Unit = {},
     onDelete: () -> Unit = {},
     onDeleteConfirm: () -> Unit = {},
@@ -146,7 +150,9 @@ fun AddPurchaseScreenContent(
         )
     }
     val paymentMethods = PaymentMethodsUi.entries
-    val paymentLabels = paymentMethods.map { it.displayName }
+    val paymentLabels = remember { paymentMethods.map { it.displayName }.toImmutableList() }
+    val productNames = remember(state.products) { state.products.map(::productDisplayName).toImmutableList() }
+    val brandOptions = remember(state.brandOptions) { state.brandOptions.toImmutableList() }
     val form = state.form
     val selectedPaymentLabel = paymentMethods
         .firstOrNull { it.method == form.paymentMethod }
@@ -156,8 +162,10 @@ fun AddPurchaseScreenContent(
     val tariffNotice = state.tariffNotice?.let { stringResource(it) }
     val installmentLabels = state.installmentOptions.map {
         stringResource(R.string.purchase_installments_option, it)
+    }.toImmutableList()
+    val terminalNames = remember(state.terminalOptions) {
+        state.terminalOptions.map { it.name }.toImmutableList()
     }
-    val terminalNames = state.terminalOptions.map { it.name }
     val currencyFormat = remember { NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")) }
     val profitText = state.profit?.let { profit ->
         remember(profit) {
@@ -165,7 +173,7 @@ fun AddPurchaseScreenContent(
         }
     }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoadingProducts) {
             LoadingFullScreen(
@@ -183,9 +191,9 @@ fun AddPurchaseScreenContent(
             ) {
                 AutoCompleteTextViewContent(
                     selectedItem = form.selectedProduct?.let(::productDisplayName),
-                    items = state.products.map(::productDisplayName),
-                    onItemSelected = onProductSelected,
-                    onTextChanged = onProductTextChanged,
+                    items = productNames,
+                    onItemSelect = onProductSelect,
+                    onTextChange = onProductTextChange,
                     textId = R.string.product,
                     placeholderResId = R.string.product_placeholder,
                     required = true,
@@ -201,7 +209,7 @@ fun AddPurchaseScreenContent(
 
                 IconTextFieldContent(
                     value = form.salePrice,
-                    onValueChange = onSalePriceChanged,
+                    onValueChange = onSalePriceChange,
                     labelResId = R.string.purchase_sale_price_label,
                     placeholderResId = R.string.product_paid_value_placeholder,
                     icon = Icons.Outlined.MonetizationOn,
@@ -216,16 +224,16 @@ fun AddPurchaseScreenContent(
 
                 QuantityFieldContent(
                     value = form.quantity,
-                    onValueChange = onQuantityChanged
+                    onValueChange = onQuantityChange
                 )
 
                 SpinnerContent(
                     selectedItem = selectedPaymentLabel,
                     items = paymentLabels,
-                    onItemSelected = { selectedLabel ->
+                    onItemSelect = { selectedLabel ->
                         paymentMethods.firstOrNull { it.displayName == selectedLabel }
                             ?.method
-                            ?.let(onPaymentMethodSelected)
+                            ?.let(onPaymentMethodSelect)
                     },
                     textId = R.string.purchase_payment_method_label,
                     placeholderResId = R.string.purchase_payment_method_placeholder,
@@ -237,7 +245,7 @@ fun AddPurchaseScreenContent(
                     SpinnerContent(
                         selectedItem = form.terminalName,
                         items = terminalNames,
-                        onItemSelected = onTerminalSelected,
+                        onItemSelect = onTerminalSelect,
                         textId = R.string.purchase_terminal_label,
                         placeholderResId = R.string.purchase_terminal_placeholder,
                         required = true,
@@ -254,8 +262,8 @@ fun AddPurchaseScreenContent(
                 if (state.showBrand) {
                     SpinnerContent(
                         selectedItem = form.brand,
-                        items = state.brandOptions,
-                        onItemSelected = onBrandSelected,
+                        items = brandOptions,
+                        onItemSelect = onBrandSelect,
                         textId = R.string.purchase_brand_label,
                         placeholderResId = R.string.purchase_brand_placeholder,
                         required = true,
@@ -278,10 +286,10 @@ fun AddPurchaseScreenContent(
                             stringResource(R.string.purchase_installments_option, it)
                         },
                         items = installmentLabels,
-                        onItemSelected = { label ->
+                        onItemSelect = { label ->
                             state.installmentOptions
                                 .getOrNull(installmentLabels.indexOf(label))
-                                ?.let(onInstallmentsSelected)
+                                ?.let(onInstallmentsSelect)
                         },
                         textId = R.string.purchase_installments_label,
                         placeholderResId = R.string.purchase_installments_placeholder,
@@ -297,7 +305,7 @@ fun AddPurchaseScreenContent(
 
                 DateTextField(
                     initialDateMillis = form.saleDateMillis,
-                    onDateChange = onSaleDateChanged
+                    onDateChange = onSaleDateChange
                 )
 
                 form.selectedProduct?.let { product ->
@@ -421,7 +429,7 @@ private fun ProfitCard(
 
 @Preview(showBackground = true)
 @Composable
-fun AddPurchaseScreenPreview() {
+private fun AddPurchaseScreenPreview() {
     LucroVarejoTheme {
         AddPurchaseScreenContent(state = AddPurchaseUiState(isLoadingProducts = false))
     }

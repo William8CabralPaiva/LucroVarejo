@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,8 +41,9 @@ fun LoginScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val currentGoToLoggedFlow by rememberUpdatedState(goToLoggedFlow)
     LaunchedEffect(state.isLoggedIn) {
-        if (state.isLoggedIn) goToLoggedFlow()
+        if (state.isLoggedIn) currentGoToLoggedFlow()
     }
 
     LoginScreenContent(

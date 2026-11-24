@@ -60,12 +60,14 @@ fun MachineListScreen(
 fun MachineListContent(
     state: MachineListUiState,
     onAddTerminal: () -> Unit,
-    onEditTerminal: (PaymentTerminalModel) -> Unit = {},
     onArchive: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onEditTerminal: (PaymentTerminalModel) -> Unit = {},
 ) {
     var terminalToArchive by remember { mutableStateOf<PaymentTerminalModel?>(null) }
 
     Scaffold(
+        modifier = modifier,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             FloatingActionButton(

@@ -157,10 +157,12 @@ internal data class SaveProductButtonPalette(
     val disabledContent: Color
 )
 
+private val DisabledContainerLight = Color(0xFFDCE8E2)
+
 internal fun saveProductButtonPalette(isDarkTheme: Boolean) = SaveProductButtonPalette(
     container = ForestGreenHeader,
     content = Color.White,
-    disabledContainer = if (isDarkTheme) DarkSurfaceVariant else Color(0xFFDCE8E2),
+    disabledContainer = if (isDarkTheme) DarkSurfaceVariant else DisabledContainerLight,
     disabledContent = if (isDarkTheme) TextSecondaryDark else TextSecondaryLight
 )
 

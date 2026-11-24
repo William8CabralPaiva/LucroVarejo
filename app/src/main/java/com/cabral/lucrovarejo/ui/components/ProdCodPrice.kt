@@ -1,4 +1,4 @@
-package com.cabral.lucrovarejo.ui.components
+﻿package com.cabral.lucrovarejo.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -81,11 +80,7 @@ fun ProdCodPriceContent(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Outlined.ShoppingBag,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            ProductIcon(text = name)
         }
         Column(
             modifier = Modifier.weight(1f),
@@ -99,11 +94,13 @@ fun ProdCodPriceContent(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = stringResource(R.string.product_code_value, code),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if(code.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.product_code_value, code),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
                 text = formattedCost,
                 style = MaterialTheme.typography.bodyMedium,
@@ -120,7 +117,7 @@ fun ProdCodPriceContent(
 
 @Preview(showBackground = true)
 @Composable
-fun ProdCodPricePreview() {
+private fun ProdCodPricePreview() {
     LucroVarejoTheme {
         ProdCodPrice(
             name = "Bolsa Feminina",

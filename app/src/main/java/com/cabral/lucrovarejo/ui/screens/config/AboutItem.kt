@@ -26,10 +26,11 @@ import com.cabral.lucrovarejo.ui.theme.ThemeMode
 @Composable
 fun AboutItem(
     version: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(

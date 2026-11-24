@@ -11,6 +11,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
@@ -21,6 +22,7 @@ import com.cabral.lucrovarejo.ui.theme.LightMintContainer
 fun LoggedRouteTopBar(
     route: String,
     onBackPress: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
 
     val titleId = when (route) {
@@ -40,6 +42,7 @@ fun LoggedRouteTopBar(
         else -> return
     }
     TopAppBar(
+        modifier = modifier,
         title = {
             Text(
                 text = stringResource(titleId),

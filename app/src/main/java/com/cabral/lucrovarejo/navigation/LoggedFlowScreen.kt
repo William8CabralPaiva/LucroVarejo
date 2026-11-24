@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun LoggedFlowScreen(
     currentThemeMode: ThemeMode,
-    onThemeModeChanged: (ThemeMode) -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     homeViewModel: HomeViewModel?,
     salesViewModel: SalesViewModel?,
@@ -103,7 +103,7 @@ internal fun LoggedFlowScreen(
                 navController = navController,
                 navigator = navigator,
                 currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
+                onThemeModeChange = onThemeModeChange,
                 onLogout = onLogout,
                 onShowMessage = showMessage,
                 homeViewModel = homeViewModel,
@@ -119,7 +119,7 @@ private fun LoggedDestinationNavHost(
     navController: NavHostController,
     navigator: LoggedNavigator,
     currentThemeMode: ThemeMode,
-    onThemeModeChanged: (ThemeMode) -> Unit,
+    onThemeModeChange: (ThemeMode) -> Unit,
     onLogout: () -> Unit,
     onShowMessage: (String) -> Unit,
     homeViewModel: HomeViewModel?,
@@ -151,7 +151,7 @@ private fun LoggedDestinationNavHost(
                 product = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<ProductModel>(LoggedNavigator.PRODUCT_TO_EDIT_KEY),
-                onFinished = navigator::navigateBack
+                onFinish = navigator::navigateBack
             )
         }
 
@@ -180,7 +180,7 @@ private fun LoggedDestinationNavHost(
                 purchase = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<PurchaseModel>(LoggedNavigator.PURCHASE_TO_EDIT_KEY),
-                onFinished = navigator::navigateBack
+                onFinish = navigator::navigateBack
             )
         }
 
@@ -192,7 +192,7 @@ private fun LoggedDestinationNavHost(
         composable(LoggedRoutes.CONFIG) {
             ConfigScreen(
                 currentThemeMode = currentThemeMode,
-                onThemeModeChanged = onThemeModeChanged,
+                onThemeModeChange = onThemeModeChange,
                 onLogout = onLogout,
                 onNavigateToTerminals = { navigator.navigateTo(LoggedRoutes.MACHINE_LIST) }
             )
@@ -207,7 +207,7 @@ private fun LoggedDestinationNavHost(
 
         composable(LoggedRoutes.ADD_MACHINE) {
             MachineSaleScreen(
-                onFinished = navigator::navigateBackToConfig,
+                onFinish = navigator::navigateBackToConfig,
                 onShowMessage = onShowMessage,
                 onOpenMachineHistory = navigator::navigateToMachineHistory
             )
@@ -218,7 +218,7 @@ private fun LoggedDestinationNavHost(
                 terminal = navController.previousBackStackEntry
                     ?.savedStateHandle
                     ?.get<PaymentTerminalModel>(LoggedNavigator.TERMINAL_TO_EDIT_KEY),
-                onFinished = navigator::navigateBackToConfig,
+                onFinish = navigator::navigateBackToConfig,
                 onShowMessage = onShowMessage,
                 onOpenMachineHistory = navigator::navigateToMachineHistory
             )

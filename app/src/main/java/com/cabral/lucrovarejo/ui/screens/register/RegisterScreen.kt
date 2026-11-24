@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -43,8 +44,9 @@ fun RegisterScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
+    val currentOnRegisterSuccess by rememberUpdatedState(onRegisterSuccess)
     LaunchedEffect(state.isRegistered) {
-        if (state.isRegistered) onRegisterSuccess()
+        if (state.isRegistered) currentOnRegisterSuccess()
     }
 
     RegisterScreenContent(

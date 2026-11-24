@@ -74,6 +74,9 @@ fun AlertPrice(
     }
 }
 
+internal const val CENTS_PER_UNIT = 100.0
+private const val PREVIEW_PRICE = 50.90
+
 internal fun formatAlertPrice(price: Double): String {
     val formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("pt-BR")).apply {
         minimumFractionDigits = 2
@@ -94,23 +97,23 @@ enum class AlertPriceState(
 
 @Composable
 @Preview(showBackground = true)
-fun AlertPriceProfitPreview() {
+private fun AlertPriceProfitPreview() {
     LucroVarejoTheme {
-        AlertPrice(50.90, AlertPriceState.PROFIT)
+        AlertPrice(PREVIEW_PRICE, AlertPriceState.PROFIT)
     }
 }
 
 @Composable
 @Preview(showBackground = true)
-fun AlertPricePurchasePreview() {
+private fun AlertPricePurchasePreview() {
     LucroVarejoTheme {
-        AlertPrice(50.90, AlertPriceState.PURCHASE)
+        AlertPrice(PREVIEW_PRICE, AlertPriceState.PURCHASE)
     }
 }
 
 @Composable
 @Preview(showBackground = true, name = "Lucro sem vendas")
-fun AlertPriceProfitEmptyPreview() {
+private fun AlertPriceProfitEmptyPreview() {
     LucroVarejoTheme {
         AlertPrice(0.0, AlertPriceState.PROFIT)
     }
@@ -118,7 +121,7 @@ fun AlertPriceProfitEmptyPreview() {
 
 @Composable
 @Preview(showBackground = true, name = "Custo sem vendas")
-fun AlertPricePurchaseEmptyPreview() {
+private fun AlertPricePurchaseEmptyPreview() {
     LucroVarejoTheme {
         AlertPrice(0.0, AlertPriceState.PURCHASE)
     }

@@ -117,7 +117,7 @@ class AppNavGraphUiTest {
                     isUserAuthenticated = true,
                     onSignOut = {},
                     currentThemeMode = ThemeMode.LIGHT,
-                    onThemeModeChanged = {},
+                    onThemeModeChange = {},
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
                         ObserveSalesChangesUseCase(EmptySalesRepository())
