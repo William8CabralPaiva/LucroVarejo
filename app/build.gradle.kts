@@ -23,7 +23,7 @@ android {
         applicationId = "com.cabral.lucrovarejo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 8
+        versionCode = 10
         versionName = "2.4"
 
         testInstrumentationRunner = "com.cabral.lucrovarejo.HiltTestRunner"
