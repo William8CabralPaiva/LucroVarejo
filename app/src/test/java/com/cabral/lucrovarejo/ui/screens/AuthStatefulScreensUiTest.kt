@@ -6,8 +6,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
+import com.cabral.lucrovarejo.domain.auth.usecase.CancelGoogleRegistrationUseCase
+import com.cabral.lucrovarejo.domain.auth.usecase.CompleteGoogleRegistrationUseCase
 import com.cabral.lucrovarejo.domain.auth.usecase.RegisterStoreUseCase
 import com.cabral.lucrovarejo.domain.auth.usecase.SignInUseCase
+import com.cabral.lucrovarejo.domain.auth.usecase.SignInWithGoogleUseCase
 import com.cabral.lucrovarejo.ui.screens.login.LOGIN_EMAIL_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.login.LOGIN_PASSWORD_FIELD_TAG
 import com.cabral.lucrovarejo.ui.screens.login.LoginScreen
@@ -62,7 +65,12 @@ class AuthStatefulScreensUiTest {
                     goToRegisterScreen = { registers++ },
                     goToLoggedFlow = { loggedIn++ },
                     goToForgotPassword = { forgot++ },
-                    viewModel = LoginViewModel(SignInUseCase(auth))
+                    viewModel = LoginViewModel(
+                        SignInUseCase(auth),
+                        SignInWithGoogleUseCase(FakeGoogleAuthRepository()),
+                        CompleteGoogleRegistrationUseCase(FakeGoogleAuthRepository()),
+                        CancelGoogleRegistrationUseCase(FakeGoogleAuthRepository())
+                    )
                 )
             }
         }
@@ -89,7 +97,10 @@ class AuthStatefulScreensUiTest {
                 RegisterScreen(
                     onBackPress = { back++ },
                     onRegisterSuccess = { success++ },
-                    viewModel = RegisterViewModel(RegisterStoreUseCase(auth))
+                    viewModel = RegisterViewModel(
+                        RegisterStoreUseCase(auth),
+                        SignInWithGoogleUseCase(FakeGoogleAuthRepository())
+                    )
                 )
             }
         }

@@ -1,5 +1,7 @@
 package com.cabral.lucrovarejo.ui.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,7 +44,7 @@ class AutoCompleteTextViewUiTest {
     fun displaysLabelAndPlaceholder() {
         composeRule.setContent {
             LucroVarejoTheme {
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = null,
                     items = persistentListOf("Bolsa"),
                     onItemSelect = {},
@@ -62,7 +64,7 @@ class AutoCompleteTextViewUiTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 var current by remember { mutableStateOf<String?>(null) }
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = current,
                     items = persistentListOf("Bolsa", "Mochila"),
                     onItemSelect = {
@@ -84,5 +86,83 @@ class AutoCompleteTextViewUiTest {
             assertEquals("Mochila", selectedItem)
         }
         composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).assertTextEquals("Mochila X")
+    }
+
+    @Test
+    fun customItemContentShowsNameCodeAndCost() {
+        var selectedItem = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = null,
+                    items = persistentListOf("Bolsa (A-1)"),
+                    onItemSelect = { selectedItem = it },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    itemContent = {
+                        Column {
+                            Text("Bolsa")
+                            Text("Código: A-1  •  Custo: R$ 10,00")
+                        }
+                    }
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("bol")
+        composeRule.onNodeWithText("Código: A-1  •  Custo: R$ 10,00").assertIsDisplayed()
+        composeRule.onNodeWithText("Bolsa").performClick()
+
+        composeRule.runOnIdle {
+            assertEquals("Bolsa (A-1)", selectedItem)
+        }
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).assertTextEquals("Bolsa (A-1)")
+    }
+
+    @Test
+    fun itemsWithSameTextAreSelectedByKey() {
+        var selectedKey = ""
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = null,
+                    items = persistentListOf("Guarda-chuva", "Guarda-chuva"),
+                    onItemSelect = {},
+                    itemKeys = persistentListOf("k34", "k70"),
+                    onItemKeySelect = { selectedKey = it },
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    itemContent = { key -> Text("Custo $key") }
+                )
+            }
+        }
+
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("guarda")
+        composeRule.onNodeWithText("Custo k34").assertIsDisplayed()
+        composeRule.onNodeWithText("Custo k70").assertIsDisplayed().performClick()
+
+        composeRule.runOnIdle {
+            assertEquals("k70", selectedKey)
+        }
+    }
+
+    @Test
+    fun selectedItemContentShowsBelowEditableNameOnlyWhileSelected() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AutoCompleteTextView(
+                    selectedItem = "Bolsa",
+                    items = persistentListOf("Bolsa"),
+                    onItemSelect = {},
+                    textId = R.string.product,
+                    placeholderResId = R.string.product_placeholder,
+                    selectedItemContent = { Text("Código: A-1") }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Código: A-1", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithTag(AUTO_COMPLETE_TEXT_FIELD_TAG).performTextInput("x")
+        composeRule.onAllNodesWithText("Código: A-1").assertCountEquals(0)
     }
 }

@@ -36,7 +36,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
@@ -126,7 +125,8 @@ fun AddProductContent(
         )
     }
     Surface(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -153,7 +153,7 @@ fun AddProductContent(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
 
                 IconTextFieldContent(
                     value = state.cod,
@@ -166,7 +166,7 @@ fun AddProductContent(
                     enabled = !state.isLoading
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
 
                 IconTextFieldContent(
                     value = state.cost,
@@ -183,7 +183,7 @@ fun AddProductContent(
                     }
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
 
                 AreaTextFieldContent(
                     value = state.description,
@@ -201,7 +201,7 @@ fun AddProductContent(
                 }
                 Spacer(modifier = Modifier.height(dimensionResource(R.dimen.register_field_spacing)))
                 if (state.isEditing) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))) {
                         IconButton(
                             enabled = !state.isLoading,
                             onClick = onDelete,

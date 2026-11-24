@@ -16,9 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
@@ -32,7 +32,7 @@ fun AboutItem(
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_16dp)),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
@@ -40,28 +40,28 @@ fun AboutItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 20.dp),
+                .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_12dp)),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(40.dp)
+                modifier = Modifier.size(dimensionResource(R.dimen.size_40dp))
             )
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 20.dp, top = 2.dp, bottom = 2.dp)
+                    .padding(start = dimensionResource(R.dimen.spacing_16dp), top = dimensionResource(R.dimen.spacing_2dp), bottom = dimensionResource(R.dimen.spacing_2dp))
             ) {
                 Text(
                     text = stringResource(R.string.settings_about),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMedium.slightlySmaller(),
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
                     text = stringResource(R.string.settings_about_version, version),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyMedium.slightlySmaller(),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

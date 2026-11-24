@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.MonetizationOn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Snackbar
@@ -39,23 +40,25 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.payment.bpsToRate
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
-import com.cabral.lucrovarejo.ui.components.AutoCompleteTextViewContent
+import com.cabral.lucrovarejo.ui.components.AutoCompleteTextView
 import com.cabral.lucrovarejo.ui.components.DELETE_PRODUCT_BUTTON_TAG
 import com.cabral.lucrovarejo.ui.components.DateTextField
 import com.cabral.lucrovarejo.ui.components.IconTextFieldContent
 import com.cabral.lucrovarejo.ui.components.IconTextFieldType
 import com.cabral.lucrovarejo.ui.components.LoadingFullScreen
+import com.cabral.lucrovarejo.ui.components.ProductOptionDetails
+import com.cabral.lucrovarejo.ui.components.ProductOptionItem
 import com.cabral.lucrovarejo.ui.components.QuantityFieldContent
 import com.cabral.lucrovarejo.ui.components.SaveProductButtonContent
 import com.cabral.lucrovarejo.ui.components.SpinnerContent
 import com.cabral.lucrovarejo.ui.payment.PaymentMethodsUi
+import com.cabral.lucrovarejo.ui.theme.DestructiveRed
 import com.cabral.lucrovarejo.ui.theme.ForestGreenHeader
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import kotlinx.collections.immutable.toImmutableList
@@ -87,7 +90,7 @@ fun AddPurchaseScreen(
     AddPurchaseScreenContent(
         state = state,
         snackBarHostState = snackBarHostState,
-        onProductSelect = viewModel::onProductSelected,
+        onProductKeySelect = viewModel::onProductKeySelected,
         onProductTextChange = viewModel::onProductTextChanged,
         onSalePriceChange = viewModel::onSalePriceChanged,
         onQuantityChange = viewModel::onQuantityChanged,
@@ -108,7 +111,7 @@ fun AddPurchaseScreenContent(
     state: AddPurchaseUiState,
     modifier: Modifier = Modifier,
     snackBarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onProductSelect: (String) -> Unit = {},
+    onProductKeySelect: (String) -> Unit = {},
     onProductTextChange: (String) -> Unit = {},
     onSalePriceChange: (String) -> Unit = {},
     onQuantityChange: (Int) -> Unit = {},
@@ -152,6 +155,8 @@ fun AddPurchaseScreenContent(
     val paymentMethods = PaymentMethodsUi.entries
     val paymentLabels = remember { paymentMethods.map { it.displayName }.toImmutableList() }
     val productNames = remember(state.products) { state.products.map(::productDisplayName).toImmutableList() }
+    val productsByKey = remember(state.products) { state.products.associateBy(::productOptionKey) }
+    val productKeys = remember(state.products) { state.products.map(::productOptionKey).toImmutableList() }
     val brandOptions = remember(state.brandOptions) { state.brandOptions.toImmutableList() }
     val form = state.form
     val selectedPaymentLabel = paymentMethods
@@ -173,7 +178,10 @@ fun AddPurchaseScreenContent(
         }
     }
 
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoadingProducts) {
             LoadingFullScreen(
@@ -189,15 +197,34 @@ fun AddPurchaseScreenContent(
                     dimensionResource(R.dimen.register_field_spacing)
                 )
             ) {
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = form.selectedProduct?.let(::productDisplayName),
                     items = productNames,
-                    onItemSelect = onProductSelect,
+                    onItemSelect = {},
+                    itemKeys = productKeys,
+                    onItemKeySelect = onProductKeySelect,
                     onTextChange = onProductTextChange,
                     textId = R.string.product,
                     placeholderResId = R.string.product_placeholder,
                     required = true,
-                    enabled = !state.isSaving
+                    enabled = !state.isSaving,
+                    itemContent = { optionKey ->
+                        productsByKey[optionKey]?.let { product ->
+                            ProductOptionItem(
+                                name = product.name,
+                                code = product.cod,
+                                formattedCost = currencyFormat.format(product.cost)
+                            )
+                        } ?: Text(optionKey)
+                    },
+                    selectedItemContent = form.selectedProduct?.let { product ->
+                        {
+                            ProductOptionDetails(
+                                code = product.cod,
+                                formattedCost = currencyFormat.format(product.cost)
+                            )
+                        }
+                    }
                 )
 
                 if (state.products.isEmpty() && state.errorMessage == null) {
@@ -316,11 +343,13 @@ fun AddPurchaseScreenContent(
                 }
 
                 form.selectedProduct?.let { product ->
+                    val quantity = form.quantity.toLong().let(java.math.BigDecimal::valueOf)
                     ProfitCard(
                         profit = profitText,
-                        salePrice = form.salePrice,
-                        cost = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR"))
-                            .format(product.cost.multiply(java.math.BigDecimal.valueOf(form.quantity.toLong())))
+                        quantity = form.quantity,
+                        soldTotal = parseSalePrice(form.salePrice)
+                            ?.let { currencyFormat.format(it.multiply(quantity)) },
+                        costTotal = currencyFormat.format(product.cost.multiply(quantity))
                     )
                 }
 
@@ -346,14 +375,14 @@ fun AddPurchaseScreenContent(
                 }
 
                 if (state.isEditing) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_12dp))) {
                         SaveProductButtonContent(
                             label = stringResource(R.string.purchase_delete_submit),
                             enabled = !state.isSaving,
                             onClick = onDelete,
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.Delete,
-                            containerColor = MaterialTheme.colorScheme.error,
+                            containerColor = DestructiveRed,
                             testTag = DELETE_PRODUCT_BUTTON_TAG
                         )
                         SaveProductButtonContent(
@@ -375,7 +404,7 @@ fun AddPurchaseScreenContent(
                         onClick = onSave
                     )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
             }
         }
         SnackbarHost(
@@ -401,35 +430,55 @@ fun AddPurchaseScreenContent(
 @Composable
 private fun ProfitCard(
     profit: String?,
-    salePrice: String,
-    cost: String
+    quantity: Int,
+    soldTotal: String?,
+    costTotal: String
 ) {
+    val contentColor = MaterialTheme.colorScheme.onSecondaryContainer
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
                 MaterialTheme.colorScheme.secondaryContainer,
-                RoundedCornerShape(12.dp)
+                RoundedCornerShape(dimensionResource(R.dimen.radius_12dp))
             )
-            .padding(16.dp)
+            .padding(dimensionResource(R.dimen.spacing_16dp)),
+        verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_4dp))
     ) {
         Text(
             text = stringResource(R.string.purchase_profit_title),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = contentColor,
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Medium
         )
         Text(
             text = profit ?: stringResource(R.string.purchase_profit_placeholder),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+            color = contentColor,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = dimensionResource(R.dimen.spacing_4dp)),
+            color = contentColor.copy(alpha = 0.2f)
+        )
+        ProfitCardRow(stringResource(R.string.purchase_profit_sold, quantity), soldTotal ?: "—")
+        ProfitCardRow(stringResource(R.string.purchase_profit_cost, quantity), costTotal)
+    }
+}
+
+@Composable
+private fun ProfitCardRow(label: String, value: String) {
+    val contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(text = label, color = contentColor, style = MaterialTheme.typography.bodyMedium)
         Text(
-            text = stringResource(R.string.purchase_profit_calculation, salePrice, cost),
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
-            style = MaterialTheme.typography.bodySmall
+            text = value,
+            color = contentColor,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium
         )
     }
 }
@@ -447,6 +496,30 @@ private fun AddPurchaseScreenPreview() {
 private fun EditPurchaseScreenPreview() {
     LucroVarejoTheme {
         AddPurchaseScreenContent(state = editPreviewState())
+    }
+}
+
+@Preview(showBackground = true, heightDp = 1000, name = "Produto selecionado")
+@Composable
+private fun SelectedProductPreview() {
+    val umbrella = ProductModel(
+        key = "guarda-chuva-34",
+        cod = "001",
+        name = "Guarda-chuva",
+        cost = java.math.BigDecimal("34.00"),
+        description = ""
+    )
+    LucroVarejoTheme {
+        AddPurchaseScreenContent(
+            state = AddPurchaseUiState(
+                isLoadingProducts = false,
+                products = listOf(
+                    umbrella,
+                    umbrella.copy(key = "guarda-chuva-70", cost = java.math.BigDecimal("70.00"))
+                ),
+                form = PurchaseFormState(selectedProduct = umbrella)
+            )
+        )
     }
 }
 

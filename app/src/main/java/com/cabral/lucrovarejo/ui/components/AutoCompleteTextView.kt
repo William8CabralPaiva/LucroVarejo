@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material3.DropdownMenuItem
@@ -33,12 +34,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -62,10 +63,11 @@ fun AutoCompleteTextView(
     modifier: Modifier = Modifier,
     initialValue: String? = null,
     required: Boolean = false,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onItemSelect: (String) -> Unit = {},
 ) {
     var selectedItem by remember { mutableStateOf(initialValue) }
-    AutoCompleteTextViewContent(
+    AutoCompleteTextView(
         selectedItem = selectedItem,
         items = items,
         onItemSelect = {
@@ -75,13 +77,14 @@ fun AutoCompleteTextView(
         modifier = modifier,
         textId = textId,
         placeholderResId = placeholderResId,
-        required = required
+        required = required,
+        keyboardOptions = keyboardOptions
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AutoCompleteTextViewContent(
+fun AutoCompleteTextView(
     selectedItem: String?,
     items: ImmutableList<String>,
     onItemSelect: (String) -> Unit,
@@ -91,8 +94,14 @@ fun AutoCompleteTextViewContent(
     required: Boolean = false,
     enabled: Boolean = true,
     isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = AppKeyboardDefaults.common,
     onTextChange: (String) -> Unit = {},
+    itemKeys: ImmutableList<String>? = null,
+    onItemKeySelect: (String) -> Unit = {},
+    itemContent: (@Composable (String) -> Unit)? = null,
+    selectedItemContent: (@Composable () -> Unit)? = null,
 ) {
+    // Com itemKeys (paralelo a items), a selecao e o itemContent usam a chave, nao o texto.
     var expanded by remember { mutableStateOf(false) }
     var query by remember {
         val initialQuery = selectedItem.orEmpty()
@@ -111,7 +120,7 @@ fun AutoCompleteTextViewContent(
             )
         }
     }
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(dimensionResource(R.dimen.radius_8dp))
     val borderColor = if (isError) MaterialTheme.colorScheme.error
     else MaterialTheme.colorScheme.outlineVariant
     val accentColor = formFieldAccentColor(
@@ -120,7 +129,12 @@ fun AutoCompleteTextViewContent(
     )
     val label = stringResource(textId)
     val placeholder = stringResource(placeholderResId)
-    val filteredItems = filterAutoCompleteItems(items, query.text)
+    val trimmedQuery = query.text.trim()
+    val filteredIndices = items.indices.filter {
+        trimmedQuery.isEmpty() || items[it].contains(trimmedQuery, ignoreCase = true)
+    }
+    val showSelectedContent = selectedItemContent != null &&
+        selectedItem != null && selectedItem == query.text
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row {
@@ -138,10 +152,10 @@ fun AutoCompleteTextViewContent(
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (required) MaterialTheme.colorScheme.error
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp)
+                modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_4dp))
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
         ExposedDropdownMenuBox(
             expanded = expanded && enabled,
             onExpandedChange = { expanded = it && enabled }
@@ -151,8 +165,8 @@ fun AutoCompleteTextViewContent(
                     .fillMaxWidth()
                     .clip(shape)
                     .background(MaterialTheme.colorScheme.surfaceVariant, shape)
-                    .border(1.dp, borderColor, shape)
-                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                    .border(dimensionResource(R.dimen.border_width_1dp), borderColor, shape)
+                    .padding(horizontal = dimensionResource(R.dimen.spacing_16dp), vertical = dimensionResource(R.dimen.spacing_16dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -173,42 +187,49 @@ fun AutoCompleteTextViewContent(
                     enabled = enabled,
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = if (showSelectedContent) FontWeight.Bold else null
                     ),
                     cursorBrush = SolidColor(accentColor),
+                    keyboardOptions = keyboardOptions,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp)
+                        .padding(start = dimensionResource(R.dimen.spacing_16dp))
                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, enabled)
                         .testTag(AUTO_COMPLETE_TEXT_FIELD_TAG),
                     decorationBox = { innerTextField ->
-                        Box(contentAlignment = Alignment.CenterStart) {
-                        if (query.text.isEmpty()) {
-                                Text(
-                                    text = placeholder,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                        Column {
+                            Box(contentAlignment = Alignment.CenterStart) {
+                                if (query.text.isEmpty()) {
+                                    Text(
+                                        text = placeholder,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                innerTextField()
                             }
-                            innerTextField()
+                            if (showSelectedContent) selectedItemContent?.invoke()
                         }
                     }
                 )
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             }
             ExposedDropdownMenu(
-                expanded = expanded && enabled && filteredItems.isNotEmpty(),
+                expanded = expanded && enabled && filteredIndices.isNotEmpty(),
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                filteredItems.forEach { item ->
+                filteredIndices.forEach { index ->
+                    val item = items[index]
+                    val key = itemKeys?.getOrNull(index)
                     DropdownMenuItem(
-                        text = { Text(item) },
+                        text = { itemContent?.invoke(key ?: item) ?: Text(item) },
                         onClick = {
                             query = TextFieldValue(
                                 text = item,
                                 selection = TextRange(item.length)
                             )
-                            onItemSelect(item)
+                            if (key != null) onItemKeySelect(key) else onItemSelect(item)
                             expanded = false
                         }
                     )
@@ -227,7 +248,7 @@ private fun AutoCompleteTextViewPreview() {
             placeholderResId = R.string.product_placeholder,
             items = persistentListOf("Bolsa", "Mochila", "AcessÃ³rio"),
             initialValue = "Bolsa",
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))
         )
     }
 }

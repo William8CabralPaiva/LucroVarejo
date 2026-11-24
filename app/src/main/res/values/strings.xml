@@ -91,6 +91,7 @@
     <string name="products_retry">Tentar novamente</string>
     <string name="products_add">Novo produto</string>
     <string name="product_code_value">Código: %1$s</string>
+    <string name="product_cost_value">Custo: %1$s</string>
     <string name="summary_title">Resumo</string>
     <string name="summary_month_sales">Vendas do mês</string>
     <string name="summary_total_cost">Custo total</string>
@@ -125,7 +126,8 @@
     <string name="purchase_terminals_load_error">Não foi possível carregar as maquininhas.</string>
     <string name="purchase_profit_title">Lucro desta venda</string>
     <string name="purchase_profit_placeholder">Informe o valor vendido</string>
-    <string name="purchase_profit_calculation">(Vendido: %1$s - Custo: %2$s)</string>
+    <string name="purchase_profit_sold">Vendido (%1$d×)</string>
+    <string name="purchase_profit_cost">Custo (%1$d×)</string>
     <string name="edit_purchase_title">Editar Venda</string>
     <string name="purchase_edit_submit">EDITAR</string>
     <string name="purchase_edit_loading">EDITANDO...</string>
@@ -286,4 +288,12 @@
     <string name="machine_history_current_badge">Atual</string>
     <string name="machine_history_effective_from">Vigência: %1$s</string>
     <string name="machine_history_add">Nova tarifa</string>
+    <string name="google_sign_in">Entrar com Google</string>
+    <string name="google_sign_up">Cadastrar com Google</string>
+    <string name="google_store_name_title">Nome da loja</string>
+    <string name="google_store_name_message">Informe o nome da sua loja para concluir o cadastro com a conta Google.</string>
+    <string name="google_store_name_confirm">Concluir</string>
+    <string name="google_store_name_cancel">Cancelar</string>
+    <string name="google_sign_up_hint">Informe o nome da loja acima para cadastrar com Google.</string>
+    <string name="google_error_generic">Não foi possível continuar com o Google. Tente novamente.</string>
 </resources>

@@ -247,6 +247,22 @@ class AddPurchaseViewModelTest {
     }
 
     @Test
+    fun productKeySelectionDistinguishesProductsWithSameName() = runTest {
+        val cheap = product.copy(key = "cheap", cost = BigDecimal("34.00"))
+        val expensive = product.copy(key = "expensive", cost = BigDecimal("70.00"))
+        viewModel = createViewModel(FakeProductRepository(flowOf(listOf(expensive, cheap))))
+        advanceUntilIdle()
+
+        viewModel.onProductKeySelected(productOptionKey(cheap))
+        viewModel.onSalePriceChanged("100")
+        viewModel.onPaymentMethodSelected(PaymentMethods.CASH)
+        viewModel.savePurchase()
+        advanceUntilIdle()
+
+        assertEquals(3400, purchaseRepository.createdPurchase?.cost)
+    }
+
+    @Test
     fun invalidSalePriceAndMissingSelectionBlockSaving() = runTest {
         advanceUntilIdle()
         viewModel.onProductSelected("inexistente")

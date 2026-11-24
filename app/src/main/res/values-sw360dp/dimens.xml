@@ -1,0 +1,47 @@
+<resources>
+    <!-- Telas compactas (smallest width >= 360dp e < 411dp). -->
+
+    <dimen name="text_display_large">54sp</dimen>
+    <dimen name="line_display_large">62sp</dimen>
+    <dimen name="text_display_medium">43sp</dimen>
+    <dimen name="line_display_medium">50sp</dimen>
+    <dimen name="text_display_small">34sp</dimen>
+    <dimen name="line_display_small">42sp</dimen>
+    <dimen name="text_headline_large">30sp</dimen>
+    <dimen name="line_headline_large">38sp</dimen>
+    <dimen name="text_headline_medium">26sp</dimen>
+    <dimen name="line_headline_medium">32sp</dimen>
+    <dimen name="text_headline_small">22sp</dimen>
+    <dimen name="line_headline_small">28sp</dimen>
+    <dimen name="text_title_large">19sp</dimen>
+    <dimen name="line_title_large">25sp</dimen>
+    <dimen name="text_title_medium">15sp</dimen>
+    <dimen name="line_title_medium">22sp</dimen>
+    <dimen name="text_title_small">13sp</dimen>
+    <dimen name="line_title_small">19sp</dimen>
+    <dimen name="text_body_large">15sp</dimen>
+    <dimen name="line_body_large">22sp</dimen>
+    <dimen name="text_body_medium">13sp</dimen>
+    <dimen name="line_body_medium">19sp</dimen>
+    <dimen name="text_body_small">11sp</dimen>
+    <dimen name="line_body_small">16sp</dimen>
+    <dimen name="text_label_large">13sp</dimen>
+    <dimen name="line_label_large">19sp</dimen>
+    <dimen name="text_label_medium">11sp</dimen>
+    <dimen name="line_label_medium">16sp</dimen>
+    <dimen name="text_label_small">10sp</dimen>
+    <dimen name="line_label_small">14sp</dimen>
+
+    <dimen name="nav_bar_height">72dp</dimen>
+    <dimen name="nav_bar_icon_size">24dp</dimen>
+
+    <dimen name="product_submit_button_height">52dp</dimen>
+    <dimen name="month_year_selector_height">52dp</dimen>
+
+    <dimen name="product_submit_button_horizontal_padding">16dp</dimen>
+    <dimen name="product_submit_button_content_spacing">12dp</dimen>
+    <dimen name="product_submit_icon_size">22dp</dimen>
+
+    <dimen name="product_list_item_spacing">10dp</dimen>
+    <dimen name="product_list_top_padding">14dp</dimen>
+</resources>

@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,8 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.store.StoreSummary
 import com.cabral.lucrovarejo.ui.screens.register.RegisterValidator
@@ -52,14 +52,14 @@ fun SwitchStoreDialog(
                                 role = Role.RadioButton,
                                 onClick = { onSelect(store.id) }
                             )
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = dimensionResource(R.dimen.spacing_8dp))
                     ) {
                         RadioButton(selected = store.id == activeStoreId, onClick = null)
                         Text(
                             text = store.displayName.ifBlank {
                                 stringResource(R.string.settings_store_unnamed)
                             },
-                            modifier = Modifier.padding(start = 12.dp)
+                            modifier = Modifier.padding(start = dimensionResource(R.dimen.spacing_12dp))
                         )
                     }
                 }
@@ -85,6 +85,7 @@ fun StoreNameDialog(
     @StringRes errorMessage: Int,
     onSave: (String, (Boolean) -> Unit) -> Unit,
     onDismiss: () -> Unit,
+    cancelable: Boolean = true,
 ) {
     var name by remember { mutableStateOf(initialName) }
     var isSaving by remember { mutableStateOf(false) }
@@ -92,10 +93,14 @@ fun StoreNameDialog(
     val validationError = RegisterValidator.validateDisplayName(name)
 
     AlertDialog(
-        onDismissRequest = { if (!isSaving) onDismiss() },
+        onDismissRequest = { if (cancelable && !isSaving) onDismiss() },
+        properties = DialogProperties(
+            dismissOnBackPress = cancelable,
+            dismissOnClickOutside = cancelable
+        ),
         title = { Text(stringResource(title)) },
         text = {
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = name,
                 onValueChange = {
                     name = it.take(MAX_STORE_NAME_LENGTH)
@@ -129,11 +134,13 @@ fun StoreNameDialog(
                 Text(stringResource(R.string.dialog_save))
             }
         },
-        dismissButton = {
-            TextButton(enabled = !isSaving, onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_cancel))
+        dismissButton = if (cancelable) {
+            {
+                TextButton(enabled = !isSaving, onClick = onDismiss) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
             }
-        }
+        } else null
     )
 }
 

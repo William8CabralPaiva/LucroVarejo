@@ -36,14 +36,18 @@ class StoreViewModel @Inject constructor(
     fun load() {
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
+            var loaded = true
             val name = try {
                 getStoreDisplayName()
             } catch (cancellation: CancellationException) {
                 throw cancellation
             } catch (_: Exception) {
+                loaded = false
                 null
             }
-            _uiState.update { it.copy(displayName = name) }
+            _uiState.update {
+                it.copy(displayName = name?.takeIf { n -> n.isNotBlank() }, nameLoaded = loaded)
+            }
 
             val selection = try {
                 getStoreSelection()
@@ -141,6 +145,8 @@ class StoreViewModel @Inject constructor(
 data class StoreUiState(
     // Nulo para contas antigas, sem nome da loja cadastrado.
     val displayName: String? = null,
+    // Verdadeiro apos ler o nome com sucesso; evita exigir o nome antes de saber se existe.
+    val nameLoaded: Boolean = false,
     // Dicas (coachmark) abertas apos o login manual ou pela opcao Dicas em Configuracoes.
     val showTips: Boolean = false,
     val stores: List<StoreSummary> = emptyList(),

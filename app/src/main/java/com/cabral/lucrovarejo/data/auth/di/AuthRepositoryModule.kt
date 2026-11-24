@@ -1,7 +1,9 @@
 package com.cabral.lucrovarejo.data.auth.di
 
 import com.cabral.lucrovarejo.data.auth.AuthRepositoryImpl
+import com.cabral.lucrovarejo.data.auth.GoogleAuthRepositoryImpl
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
+import com.cabral.lucrovarejo.domain.auth.GoogleAuthRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,4 +16,10 @@ abstract class AuthRepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(implementation: AuthRepositoryImpl): AuthRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGoogleAuthRepository(
+        implementation: GoogleAuthRepositoryImpl
+    ): GoogleAuthRepository
 }

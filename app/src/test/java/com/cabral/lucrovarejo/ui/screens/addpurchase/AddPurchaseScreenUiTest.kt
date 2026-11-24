@@ -63,9 +63,9 @@ class AddPurchaseScreenUiTest {
         }
 
         composeRule.onAllNodesWithText("Buscando produtos...").assertCountEquals(0)
-        composeRule.onNodeWithText("Bolsa Feminina (A-1)").assertIsDisplayed()
+        composeRule.onNodeWithText("Código: A-1", substring = true).assertIsDisplayed()
         composeRule.onNodeWithText("Valor vendido").assertIsDisplayed()
-        composeRule.onNodeWithText("Pagamento").assertIsDisplayed()
+        composeRule.onNodeWithText("Pagamento").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -96,6 +96,30 @@ class AddPurchaseScreenUiTest {
         composeRule.runOnIdle {
             assertEquals(1, saveCount)
         }
+    }
+
+    @Test
+    fun profitCardShowsSoldAndCostTotalsMultipliedByQuantity() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                AddPurchaseScreenContent(
+                    state = AddPurchaseUiState(
+                        products = listOf(product),
+                        form = PurchaseFormState(
+                            selectedProduct = product,
+                            salePrice = "120,00",
+                            quantity = 3
+                        ),
+                        isLoadingProducts = false
+                    )
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Vendido (3×)").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Custo (3×)").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("360,00", substring = true).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("150,00", substring = true).performScrollTo().assertIsDisplayed()
     }
 
     @Test

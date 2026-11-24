@@ -33,7 +33,7 @@ class AutoCompleteTextViewInstrumentedTest {
         composeRule.setContent {
             LucroVarejoTheme {
                 var current by remember { mutableStateOf<String?>(null) }
-                AutoCompleteTextViewContent(
+                AutoCompleteTextView(
                     selectedItem = current,
                     items = persistentListOf("Bolsa", "Acessório"),
                     onItemSelect = {

@@ -1,5 +1,10 @@
 package com.cabral.lucrovarejo.navigation
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,6 +69,9 @@ fun AppNavGraph(
                     salesViewModel = salesViewModel,
                     productViewModel = productViewModel,
                     storeName = storeState?.displayName,
+                    storeNameRequired = storeState?.let {
+                        it.nameLoaded && it.displayName.isNullOrBlank()
+                    } == true,
                     stores = storeState?.stores.orEmpty(),
                     activeStoreId = storeState?.activeStoreId,
                     onSwitchStore = { storeViewModel?.selectStore(it) },
@@ -97,9 +105,16 @@ internal fun AppNavGraphContent(
     loggedFlowScreen: @Composable (() -> Unit) -> Unit,
     forgotPasswordScreen: @Composable (() -> Unit) -> Unit = {},
 ) {
+    val focusManager = LocalFocusManager.current
+    val backgroundTapInteraction = remember { MutableInteractionSource() }
+
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = startDestination,
+        modifier = Modifier.clickable(
+            interactionSource = backgroundTapInteraction,
+            indication = null
+        ) { focusManager.clearFocus() }
     ) {
         composable(NotLoggedRoutes.SPLASH) {
             splashScreen {

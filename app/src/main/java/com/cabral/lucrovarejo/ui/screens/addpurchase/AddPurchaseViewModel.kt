@@ -100,6 +100,17 @@ class AddPurchaseViewModel @Inject constructor(
         val product = _uiState.value.products.firstOrNull {
             productDisplayName(it) == displayName
         } ?: return
+        selectProduct(product)
+    }
+
+    fun onProductKeySelected(optionKey: String) {
+        val product = _uiState.value.products.firstOrNull {
+            productOptionKey(it) == optionKey
+        } ?: return
+        selectProduct(product)
+    }
+
+    private fun selectProduct(product: ProductModel) {
         _uiState.update {
             it.copy(form = it.form.copy(selectedProduct = product), errorMessage = null)
         }
@@ -433,8 +444,10 @@ class AddPurchaseViewModel @Inject constructor(
     }
 }
 
-internal fun productDisplayName(product: ProductModel): String =
-    if (product.cod.isBlank()) product.name else "${product.name} (${product.cod})"
+internal fun productOptionKey(product: ProductModel): String =
+    product.key ?: productDisplayName(product)
+
+internal fun productDisplayName(product: ProductModel): String = product.name
 
 private fun AddPurchaseUiState.toPurchase(product: ProductModel, salePrice: BigDecimal) = PurchaseModel(
     key = key,

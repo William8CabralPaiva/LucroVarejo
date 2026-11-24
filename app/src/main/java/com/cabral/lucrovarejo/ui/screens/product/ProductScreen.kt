@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
@@ -17,7 +18,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,12 +26,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
 import com.cabral.lucrovarejo.ui.components.EmptyList
 import com.cabral.lucrovarejo.ui.components.ProdCodPrice
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -102,16 +103,17 @@ fun ProductContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp),
-                contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                    .padding(horizontal = dimensionResource(R.dimen.spacing_16dp)),
+                contentPadding = PaddingValues(top = dimensionResource(R.dimen.product_list_top_padding), bottom = dimensionResource(R.dimen.size_88dp)),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.product_list_item_spacing))
             ) {
                 item {
-                    OutlinedTextField(
+                    AppOutlinedTextField(
                         value = state.query,
                         onValueChange = onQueryChange,
                         modifier = Modifier.fillParentMaxWidth(),
                         singleLine = true,
+                        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_12dp)),
                         leadingIcon = {
                             Icon(imageVector = Icons.Filled.Search, contentDescription = null)
                         },
@@ -133,7 +135,7 @@ fun ProductContent(
                         } else {
                             Text(
                                 text = stringResource(R.string.products_empty),
-                                modifier = Modifier.padding(top = 24.dp)
+                                modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_24dp))
                             )
                         }
                     }

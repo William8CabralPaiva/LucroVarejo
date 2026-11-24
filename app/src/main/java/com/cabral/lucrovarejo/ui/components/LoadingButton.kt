@@ -9,9 +9,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
@@ -36,9 +36,9 @@ fun LoadingButton(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(dimensionResource(R.dimen.product_submit_progress_size))
                     .testTag(LOADING_INDICATOR_TAG),
-                strokeWidth = 2.dp
+                strokeWidth = dimensionResource(R.dimen.border_width_2dp)
             )
         } else {
             Text(stringResource(textId))

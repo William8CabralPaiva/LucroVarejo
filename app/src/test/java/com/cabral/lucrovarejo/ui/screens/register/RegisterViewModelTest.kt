@@ -6,6 +6,8 @@ import com.cabral.lucrovarejo.domain.auth.AuthFailureReason
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import com.cabral.lucrovarejo.domain.auth.StoreAlreadyRegisteredException
 import com.cabral.lucrovarejo.domain.auth.usecase.RegisterStoreUseCase
+import com.cabral.lucrovarejo.domain.auth.usecase.SignInWithGoogleUseCase
+import com.cabral.lucrovarejo.ui.screens.FakeGoogleAuthRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -27,13 +29,49 @@ class RegisterViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private val auth = FakeAuth()
 
+    private val google = FakeGoogleAuthRepository()
+
     @Before
     fun setUp() = Dispatchers.setMain(dispatcher)
 
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = RegisterViewModel(RegisterStoreUseCase(auth))
+    private fun viewModel() = RegisterViewModel(RegisterStoreUseCase(auth), SignInWithGoogleUseCase(google))
+
+    @Test
+    fun googleSignUpUsesStoreNameFromForm() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.onDisplayNameChanged(" Loja Google ")
+        vm.onGoogleIdToken("token")
+        advanceUntilIdle()
+
+        assertEquals(listOf("token" to "Loja Google"), google.signInCalls)
+        assertTrue(vm.uiState.value.isRegistered)
+    }
+
+    @Test
+    fun googleSignUpWithoutStoreNameIsRejected() = runTest(dispatcher) {
+        val vm = viewModel()
+        vm.onGoogleIdToken("token")
+        advanceUntilIdle()
+
+        assertEquals(R.string.register_display_name_required, vm.uiState.value.displayNameError)
+        assertTrue(google.signInCalls.isEmpty())
+        assertFalse(vm.uiState.value.isRegistered)
+    }
+
+    @Test
+    fun googleFailureShowsError() = runTest(dispatcher) {
+        google.failure = true
+        val vm = viewModel()
+        vm.onDisplayNameChanged("Loja")
+        vm.onGoogleIdToken("token")
+        advanceUntilIdle()
+
+        assertEquals(R.string.register_error_generic, vm.uiState.value.errorMessage)
+        assertFalse(vm.uiState.value.isLoading)
+    }
 
     private fun RegisterViewModel.fillValid() {
         onDisplayNameChanged(" Loja ")

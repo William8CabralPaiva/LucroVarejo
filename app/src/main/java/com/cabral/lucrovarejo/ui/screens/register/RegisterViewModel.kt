@@ -8,6 +8,7 @@ import com.cabral.lucrovarejo.domain.auth.AuthFailure
 import com.cabral.lucrovarejo.domain.auth.AuthFailureReason
 import com.cabral.lucrovarejo.domain.auth.StoreAlreadyRegisteredException
 import com.cabral.lucrovarejo.domain.auth.usecase.RegisterStoreUseCase
+import com.cabral.lucrovarejo.domain.auth.usecase.SignInWithGoogleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,10 +20,38 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RegisterViewModel @Inject constructor(
-    private val registerStore: RegisterStoreUseCase
+    private val registerStore: RegisterStoreUseCase,
+    private val signInWithGoogle: SignInWithGoogleUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
+
+    fun onGoogleIdToken(idToken: String) {
+        val current = _uiState.value
+        val displayNameError = RegisterValidator.validateDisplayName(current.displayName)
+        if (displayNameError != null) {
+            _uiState.update { it.copy(displayNameError = displayNameError) }
+            return
+        }
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        viewModelScope.launch {
+            try {
+                signInWithGoogle(idToken, current.displayName)
+                _uiState.update { it.copy(isLoading = false, isRegistered = true) }
+            } catch (exception: Exception) {
+                onGoogleFailure(exception)
+            }
+        }
+    }
+
+    fun onGoogleFailure(exception: Exception? = null) {
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                errorMessage = exception?.let(::registerErrorMessage) ?: R.string.google_error_generic
+            )
+        }
+    }
 
     fun onDisplayNameChanged(value: String) {
         _uiState.update {

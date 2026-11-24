@@ -39,10 +39,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -181,12 +181,12 @@ fun MachineSaleContent(
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (!state.isLoading) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp))) {
                         state.saveError?.let { error ->
                             Text(
                                 text = stringResource(error),
                                 color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                modifier = Modifier.padding(bottom = dimensionResource(R.dimen.spacing_8dp))
                             )
                         }
                         IconButton(
@@ -201,7 +201,7 @@ fun MachineSaleContent(
                         IconButton(
                             enabled = !state.isSaving,
                             onClick = { onSave(true) },
-                            modifier = Modifier.padding(top = 8.dp),
+                            modifier = Modifier.padding(top = dimensionResource(R.dimen.spacing_8dp)),
                             isLoading = state.isSaving && state.closeAfterSave,
                             isBorderButton = true,
                             icon = Icons.Default.Save,
@@ -232,8 +232,8 @@ fun MachineSaleContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(dimensionResource(R.dimen.spacing_16dp)),
+                verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
             ) {
                 item {
                     Box(modifier = Modifier.coachTarget(coach, CoachTarget.NAME_FIELD)) {
@@ -257,13 +257,13 @@ fun MachineSaleContent(
                             text = stringResource(R.string.terminal_form_methods_label),
                             style = MaterialTheme.typography.titleSmall
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                         SecondaryTabRow(
                             selectedTabIndex = selectedTabIndex,
                             containerColor = MaterialTheme.colorScheme.surfaceVariant,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(dimensionResource(R.dimen.radius_12dp)))
                         ) {
                             methods.forEachIndexed { index, (method, labelResId) ->
                                 Tab(
@@ -302,7 +302,7 @@ fun MachineSaleContent(
                         }
 
                         if (methodEnabled) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                             when (currentMethod) {
                                 TerminalPaymentType.CASH -> {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -318,7 +318,7 @@ fun MachineSaleContent(
                                         )
                                     }
                                     if (state.cashChargesTariff && cashEntry != null) {
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                                         TariffEntryFields(
                                             entry = cashEntry,
                                             onRateChange = { onTariffRateChange(cashEntry.id, it) },
@@ -345,14 +345,14 @@ fun MachineSaleContent(
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
                                     BrandAddRow(
                                         name = brandDraft,
                                         onNameChange = { brandDraft = it },
                                         onAddBrand = onAddBrand
                                     )
                                     if (state.availableBrands.isEmpty()) {
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
                                         Text(
                                             text = stringResource(R.string.terminal_form_brands_empty),
                                             style = MaterialTheme.typography.bodySmall,
@@ -371,8 +371,8 @@ fun MachineSaleContent(
                                                 debitPendingScroll = null
                                             }
                                         }
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
+                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
                                             state.availableBrands.forEach { brand ->
                                                 BrandChip(
                                                     name = brand,
@@ -390,7 +390,7 @@ fun MachineSaleContent(
                                                 it.method == TerminalPaymentType.DEBIT && it.brandId == brandId
                                             }
                                             if (entry != null) {
-                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                                                 NestedBrandBlock(
                                                     title = brandId,
                                                     modifier = debitBringIntoView[brandId]?.let {
@@ -415,7 +415,7 @@ fun MachineSaleContent(
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
                                     BrandAddRow(
                                         name = brandDraft,
                                         onNameChange = { brandDraft = it },
@@ -423,7 +423,7 @@ fun MachineSaleContent(
                                         modifier = Modifier.coachTarget(coach, CoachTarget.BRAND_FIELD)
                                     )
                                     if (state.availableBrands.isEmpty()) {
-                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_4dp)))
                                         Text(
                                             text = stringResource(R.string.terminal_form_brands_empty),
                                             style = MaterialTheme.typography.bodySmall,
@@ -442,8 +442,8 @@ fun MachineSaleContent(
                                                 creditPendingScroll = null
                                             }
                                         }
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
+                                        FlowRow(horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
                                             state.availableBrands.forEachIndexed { index, brand ->
                                                 BrandChip(
                                                     modifier = if (index == 0) {
@@ -460,7 +460,7 @@ fun MachineSaleContent(
                                             }
                                         }
                                         state.selectedCreditBrandIds.forEach { brandId ->
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                                             NestedBrandBlock(
                                                 title = brandId,
                                                 modifier = creditBringIntoView[brandId]?.let {
@@ -484,7 +484,7 @@ fun MachineSaleContent(
                                                             it.installments == installment
                                                     }
                                                     if (entry != null) {
-                                                        Spacer(modifier = Modifier.height(8.dp))
+                                                        Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
                                                         Text(
                                                             text = stringResource(
                                                                 R.string.terminal_form_installment_title,
@@ -570,10 +570,10 @@ private fun SectionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_16dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_16dp)), verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_4dp))) {
             Text(text = title, style = MaterialTheme.typography.titleMedium)
             subtitle?.let {
                 Text(
@@ -582,7 +582,7 @@ private fun SectionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
             content()
         }
     }
@@ -596,10 +596,10 @@ private fun NestedBrandBlock(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_12dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(dimensionResource(R.dimen.spacing_12dp)), verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
             Text(text = title, style = MaterialTheme.typography.titleSmall)
             content()
         }
@@ -613,7 +613,7 @@ private fun BrandAddRow(
     onAddBrand: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
         IconTextFieldContent(
             value = name,
             onValueChange = onNameChange,
@@ -651,7 +651,7 @@ private fun BrandChip(
         onClick = onToggle,
         label = { Text(name) },
         leadingIcon = if (selected) {
-            { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.height(18.dp)) }
+            { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.height(dimensionResource(R.dimen.size_18dp))) }
         } else null
     )
 }
@@ -707,7 +707,7 @@ private fun TariffEntryFields(
     onDateChange: (Long) -> Unit,
     onOpenHistory: () -> Unit,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp))) {
         Text(
             text = stringResource(
                 if (entry.currentRateBps != null) R.string.terminal_form_current_tariff

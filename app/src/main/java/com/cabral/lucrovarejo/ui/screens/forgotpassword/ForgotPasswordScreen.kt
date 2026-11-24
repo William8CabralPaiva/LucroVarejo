@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -21,11 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.ui.components.AppKeyboardDefaults
+import com.cabral.lucrovarejo.ui.components.AppOutlinedTextField
 import com.cabral.lucrovarejo.ui.components.LoadingButton
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 
@@ -53,12 +54,13 @@ internal fun ForgotPasswordScreenContent(
     Surface(
         modifier = Modifier
             .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.safeDrawing)
+            .windowInsetsPadding(WindowInsets.safeDrawing),
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(dimensionResource(R.dimen.spacing_24dp)),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -67,40 +69,41 @@ internal fun ForgotPasswordScreenContent(
                 style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_8dp)))
 
             Text(
                 stringResource(R.string.forgot_password_description),
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_24dp)))
 
-            OutlinedTextField(
+            AppOutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChange,
                 label = { Text(stringResource(R.string.login_email_label)) },
                 singleLine = true,
                 enabled = !state.isLoading,
+                keyboardOptions = AppKeyboardDefaults.email,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag(FORGOT_PASSWORD_EMAIL_FIELD_TAG)
             )
 
             state.errorMessage?.let {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_12dp)))
                 Text(stringResource(it), color = MaterialTheme.colorScheme.error)
             }
 
             if (state.isEmailSent) {
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_12dp)))
                 Text(
                     stringResource(R.string.forgot_password_success),
                     modifier = Modifier.testTag(FORGOT_PASSWORD_SUCCESS_TAG)
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_24dp)))
 
             LoadingButton(
                 onClick = onSubmit,
@@ -110,7 +113,7 @@ internal fun ForgotPasswordScreenContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_16dp)))
 
             TextButton(onClick = onBack) {
                 Text(stringResource(R.string.navigate_back))

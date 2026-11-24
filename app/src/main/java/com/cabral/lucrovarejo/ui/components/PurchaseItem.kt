@@ -31,7 +31,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.theme.LocalIsDarkTheme
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
@@ -82,7 +81,7 @@ fun PurchaseItemContent(
             .fillMaxWidth()
             .clip(cardShape)
             .background(MaterialTheme.colorScheme.surface, cardShape)
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, cardShape)
+            .border(dimensionResource(R.dimen.border_width_1dp), MaterialTheme.colorScheme.outlineVariant, cardShape)
             .clickable(onClick = onClick)
             .padding(dimensionResource(R.dimen.last_sale_card_padding)),
         horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_content_spacing)),
@@ -114,14 +113,14 @@ fun PurchaseItemContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.last_sale_text_spacing))
         ) {
-            Text(
+            EllipsizedNameWithTooltip(
                 text = productName,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_8dp)),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(

@@ -1,6 +1,7 @@
 package com.cabral.lucrovarejo.ui.screens.config
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,8 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.ui.components.appSwitchColors
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.theme.ThemeMode
@@ -41,9 +43,9 @@ fun SettingsItem(
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_16dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = BorderStroke(dimensionResource(R.dimen.border_width_1dp), MaterialTheme.colorScheme.outline)
     ) {
         SettingsItemContent(
             icon = icon,
@@ -67,9 +69,9 @@ fun SettingsItem(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(dimensionResource(R.dimen.radius_16dp)),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = BorderStroke(dimensionResource(R.dimen.border_width_1dp), MaterialTheme.colorScheme.outline)
     ) {
         SettingsItemContent(
             icon = icon,
@@ -90,6 +92,10 @@ fun SettingsItem(
     }
 }
 
+// Redução leve (~8%) só para os cards de Configurações.
+internal fun TextStyle.slightlySmaller(): TextStyle =
+    copy(fontSize = fontSize * 0.92f, lineHeight = lineHeight * 0.92f)
+
 @Composable
 private fun SettingsItemContent(
     icon: ImageVector,
@@ -101,29 +107,29 @@ private fun SettingsItemContent(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .padding(horizontal = dimensionResource(R.dimen.spacing_20dp), vertical = dimensionResource(R.dimen.spacing_20dp)),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        horizontalArrangement = Arrangement.spacedBy(dimensionResource(R.dimen.spacing_16dp))
     ) {
         Icon(
             imageVector = icon,
             tint = iconTint,
             contentDescription = null,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(dimensionResource(R.dimen.size_40dp))
         )
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(vertical = 2.dp)
+                .padding(vertical = dimensionResource(R.dimen.spacing_2dp))
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.slightlySmaller(),
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyMedium.slightlySmaller(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
