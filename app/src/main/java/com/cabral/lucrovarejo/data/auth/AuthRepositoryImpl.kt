@@ -5,7 +5,6 @@ import com.cabral.lucrovarejo.data.auth.datasource.StoreProfile
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
 import javax.inject.Singleton
 import javax.inject.Inject
-import java.util.Locale
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
@@ -17,29 +16,38 @@ class AuthRepositoryImpl @Inject constructor(
     override val storeKey: String?
         get() = remoteDataSource.storeKey
 
-    override suspend fun registerStore(storeName: String, email: String, password: String) {
-        val normalizedStoreName = storeName.trim().lowercase(Locale.ROOT)
+    override suspend fun registerStore(
+        email: String,
+        password: String,
+        displayName: String
+    ) {
+        val normalizedEmail = email.trim()
         remoteDataSource.createAccount(
-            technicalEmail = technicalEmail(normalizedStoreName),
+            email = normalizedEmail,
             password = password,
             profile = StoreProfile(
-                storeName = normalizedStoreName,
-                contactEmail = email.trim()
+                contactEmail = normalizedEmail,
+                displayName = displayName.trim()
             )
         )
     }
 
-    override suspend fun signIn(storeName: String, password: String) {
-        remoteDataSource.signIn(
-            technicalEmail = technicalEmail(storeName.trim().lowercase(Locale.ROOT)),
-            password = password
-        )
+    override suspend fun getStoreDisplayName(): String? =
+        remoteDataSource.fetchDisplayName()?.trim()?.takeIf { it.isNotEmpty() }
+
+    override suspend fun updateStoreDisplayName(displayName: String) {
+        remoteDataSource.updateDisplayName(displayName.trim())
+    }
+
+    override suspend fun signIn(email: String, password: String) {
+        remoteDataSource.signIn(email = email.trim(), password = password)
+    }
+
+    override suspend fun requestPasswordReset(email: String) {
+        remoteDataSource.requestPasswordReset(email.trim())
     }
 
     override fun signOut() {
         remoteDataSource.signOut()
     }
-
-    private fun technicalEmail(storeName: String) =
-        "$storeName@auth.lucrovarejo.invalid"
 }

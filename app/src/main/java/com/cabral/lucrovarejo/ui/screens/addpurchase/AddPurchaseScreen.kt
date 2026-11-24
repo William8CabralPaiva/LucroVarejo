@@ -213,7 +213,7 @@ fun AddPurchaseScreenContent(
                     labelResId = R.string.purchase_sale_price_label,
                     placeholderResId = R.string.product_paid_value_placeholder,
                     icon = Icons.Outlined.MonetizationOn,
-                    type = IconTextFieldType.MONEY,
+                    type = IconTextFieldType.CURRENCY,
                     required = true,
                     enabled = !state.isSaving,
                     isError = form.salePriceError != null,
@@ -307,6 +307,13 @@ fun AddPurchaseScreenContent(
                     initialDateMillis = form.saleDateMillis,
                     onDateChange = onSaleDateChange
                 )
+
+                if (state.hasLoss && form.isPaymentSelectionComplete && !state.isLoadingTariffs) {
+                    Text(
+                        text = stringResource(R.string.purchase_loss_error),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
 
                 form.selectedProduct?.let { product ->
                     ProfitCard(

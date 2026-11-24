@@ -8,6 +8,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.cabral.lucrovarejo.R
+import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.domain.product.ProductRepository
+import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
@@ -42,7 +45,8 @@ class AppNavGraphInstrumentedTest {
                     startDestination = LoggedRoutes.HOME,
                     salesViewModel = SalesViewModel(
                         GetSalesPageUseCase(EmptySalesRepository()),
-                        ObserveSalesChangesUseCase(EmptySalesRepository())
+                        ObserveSalesChangesUseCase(EmptySalesRepository()),
+                        GetProductsUseCase(EmptyProductRepository())
                     ),
                     homeViewModel = HomeViewModel(
                         getMonthlySummary = GetMonthlyPurchaseSummaryUseCase(FakePurchaseRepository()),
@@ -72,6 +76,13 @@ class AppNavGraphInstrumentedTest {
             SalesPage(emptyList(), null)
 
         override fun observeSalesChanges(filter: SalesFilter) = flowOf(Unit)
+    }
+
+    private class EmptyProductRepository : ProductRepository {
+        override suspend fun updateProduct(product: ProductModel): ProductModel = product
+        override suspend fun deleteProduct(key: String) = Unit
+        override suspend fun createProduct(product: ProductModel): ProductModel = product
+        override fun observeProducts() = flowOf(emptyList<ProductModel>())
     }
 
     private class FakePurchaseRepository : PurchaseRepository {

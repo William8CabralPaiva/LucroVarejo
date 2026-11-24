@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -180,8 +180,8 @@ class PurchaseRepositoryImplTest {
             PurchaseRepositoryImpl(dataSource).observeLatestPurchases(4).first()
         }.exceptionOrNull()
 
-        assertTrue(failure is PurchaseFailure)
-        assertEquals(PurchaseFailure.Reason.UNKNOWN, (failure as PurchaseFailure).reason)
+        assertTrue(failure is DataFailure)
+        assertEquals(DataFailure.Reason.UNKNOWN, (failure as DataFailure).reason)
     }
 
     @Test

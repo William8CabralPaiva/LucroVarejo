@@ -4,7 +4,7 @@ import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseSummaryRecord
 import com.cabral.lucrovarejo.domain.auth.AuthRepository
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import java.util.Date
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -36,5 +36,5 @@ class FirebasePurchaseRemoteDataSource @Inject constructor(
     }
 
     private fun requireStoreKey(): String = authRepository.storeKey
-        ?: throw PurchaseFailure(PurchaseFailure.Reason.UNAUTHENTICATED)
+        ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
 }

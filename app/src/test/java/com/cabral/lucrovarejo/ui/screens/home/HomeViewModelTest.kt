@@ -3,7 +3,7 @@ package com.cabral.lucrovarejo.ui.screens.home
 import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetLatestPurchasesUseCase
@@ -91,24 +91,24 @@ class HomeViewModelTest {
         assertEquals(listOf(purchase), viewModel.uiState.value.latestPurchases)
         assertFalse(viewModel.uiState.value.isLatestPurchasesLoading)
         assertEquals(requestCount, repository.summaryRequestCount)
-        assertEquals(4, repository.requestedLatestLimit)
+        assertEquals(5, repository.requestedLatestLimit)
     }
 
     @Test
     fun reportsPurchaseFailuresInUiState() = runTest {
         advanceUntilIdle()
-        repository.failure = PurchaseFailure(PurchaseFailure.Reason.NETWORK)
+        repository.failure = DataFailure(DataFailure.Reason.NETWORK)
 
         viewModel.onMonthYearChanged(2020, 1)
         advanceUntilIdle()
 
-        assertEquals(R.string.summary_load_error_network, viewModel.uiState.value.errorMessage)
+        assertEquals(R.string.error_network, viewModel.uiState.value.errorMessage)
         assertFalse(viewModel.uiState.value.isLoading)
     }
 
     @Test
     fun reportsLatestPurchasesFailure() = runTest {
-        repository.latestFailure = PurchaseFailure(PurchaseFailure.Reason.NETWORK)
+        repository.latestFailure = DataFailure(DataFailure.Reason.NETWORK)
         val failingViewModel = HomeViewModel(
             GetMonthlyPurchaseSummaryUseCase(repository),
             GetLatestPurchasesUseCase(repository)
@@ -143,8 +143,8 @@ class HomeViewModelTest {
     override suspend fun deletePurchase(key: String) = Unit
         val summary = MutableStateFlow(MonthlyPurchaseSummary())
         val latestPurchases = MutableStateFlow<List<PurchaseModel>>(emptyList())
-        var failure: PurchaseFailure? = null
-        var latestFailure: PurchaseFailure? = null
+        var failure: DataFailure? = null
+        var latestFailure: DataFailure? = null
         var requestedRange: Pair<Date, Date>? = null
         var requestedLatestLimit: Int? = null
         var summaryRequestCount = 0

@@ -1,5 +1,10 @@
 <resources>
     <dimen name="register_screen_padding">24dp</dimen>
+    <dimen name="coach_mark_padding">24dp</dimen>
+    <dimen name="coach_mark_radius">20dp</dimen>
+    <dimen name="coach_mark_hole_padding">6dp</dimen>
+    <dimen name="coach_mark_spacing">12dp</dimen>
+    <dimen name="coach_mark_hole_border">2dp</dimen>
     <dimen name="register_title_spacing">28dp</dimen>
     <dimen name="register_field_spacing">12dp</dimen>
     <dimen name="register_section_spacing">24dp</dimen>

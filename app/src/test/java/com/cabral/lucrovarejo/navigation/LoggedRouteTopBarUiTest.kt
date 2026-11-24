@@ -71,6 +71,36 @@ class LoggedRouteTopBarUiTest {
     }
 
     @Test
+    fun homeShowsStoreNameAndSwitchStoreAction() {
+        var switched = false
+        composeRule.setContent {
+            LucroVarejoTheme {
+                LoggedRouteTopBar(
+                    route = LoggedRoutes.HOME,
+                    homeTitle = "Loja Centro",
+                    onBackPress = {},
+                    onSwitchStore = { switched = true }
+                )
+            }
+        }
+
+        composeRule.onNodeWithText("Loja Centro").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Trocar loja").performClick()
+        composeRule.runOnIdle { assertTrue(switched) }
+    }
+
+    @Test
+    fun switchStoreActionIsOnlyOnHome() {
+        composeRule.setContent {
+            LucroVarejoTheme {
+                LoggedRouteTopBar(route = LoggedRoutes.PRODUCTS, onBackPress = {})
+            }
+        }
+
+        composeRule.onAllNodesWithContentDescription("Trocar loja").assertCountEquals(0)
+    }
+
+    @Test
     fun doesNotRenderForAnUnknownRoute() {
         composeRule.setContent {
             LucroVarejoTheme {

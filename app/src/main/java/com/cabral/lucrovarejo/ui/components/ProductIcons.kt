@@ -79,6 +79,25 @@ val SlipperIcon: ImageVector by lazy {
 
 
 
+val UmbrellaIcon: ImageVector by lazy {
+    outlinedIcon("Umbrella") {
+        moveTo(2.5f, 12f)
+        curveTo(2.5f, 6.8f, 6.8f, 3f, 12f, 3f)
+        curveTo(17.2f, 3f, 21.5f, 6.8f, 21.5f, 12f)
+        curveTo(20.2f, 10.8f, 18.4f, 10.8f, 17f, 12f)
+        curveTo(15.6f, 10.8f, 13.4f, 10.8f, 12f, 12f)
+        curveTo(10.6f, 10.8f, 8.4f, 10.8f, 7f, 12f)
+        curveTo(5.6f, 10.8f, 3.8f, 10.8f, 2.5f, 12f)
+        close()
+        moveTo(12f, 3f)
+        lineTo(12f, 2f)
+        moveTo(12f, 12f)
+        lineTo(12f, 19f)
+        curveTo(12f, 20.8f, 10.8f, 21.5f, 9.8f, 21.5f)
+        curveTo(8.8f, 21.5f, 8f, 20.8f, 8f, 19.8f)
+    }
+}
+
 val BackpackIcon: ImageVector by lazy {
     outlinedIcon("Backpack") {
         moveTo(6f, 21f)

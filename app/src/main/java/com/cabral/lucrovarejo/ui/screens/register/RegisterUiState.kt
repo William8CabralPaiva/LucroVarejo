@@ -3,11 +3,11 @@ package com.cabral.lucrovarejo.ui.screens.register
 import androidx.annotation.StringRes
 
 data class RegisterUiState(
-    val storeName: String = "",
+    val displayName: String = "",
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
-    @param:StringRes val storeNameError: Int? = null,
+    @param:StringRes val displayNameError: Int? = null,
     @param:StringRes val emailError: Int? = null,
     @param:StringRes val passwordError: Int? = null,
     @param:StringRes val confirmPasswordError: Int? = null,
@@ -16,7 +16,7 @@ data class RegisterUiState(
     val isRegistered: Boolean = false,
 ) {
     val isFormValid: Boolean
-        get() = StoreNameValidator.validate(storeName) == null &&
+        get() = RegisterValidator.validateDisplayName(displayName) == null &&
                 RegisterValidator.validateEmail(email) == null &&
                 RegisterValidator.validatePassword(password) == null &&
                 confirmPassword == password

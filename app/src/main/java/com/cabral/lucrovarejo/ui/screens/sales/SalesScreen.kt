@@ -14,24 +14,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -44,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -52,8 +46,8 @@ import com.cabral.lucrovarejo.R
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.ui.components.EmptyList
+import com.cabral.lucrovarejo.ui.components.MonthYearSelector
 import com.cabral.lucrovarejo.ui.components.PurchaseItem
-import com.cabral.lucrovarejo.ui.components.formatSaleDatePtBr
 import com.cabral.lucrovarejo.ui.theme.LucroVarejoTheme
 import com.cabral.lucrovarejo.ui.utils.DateUtils
 import java.util.Calendar
@@ -66,6 +60,7 @@ private const val LOAD_MORE_THRESHOLD = 3
 @Composable
 fun SalesScreen(
     onAddPurchase: (() -> Unit)? = null,
+    onAddProduct: (() -> Unit)? = null,
     onEditPurchase: ((PurchaseModel) -> Unit)? = null,
     viewModel: SalesViewModel? = null,
 ) {
@@ -75,27 +70,51 @@ fun SalesScreen(
     SalesContent(
         state = state,
         onQueryChange = resolvedViewModel::onQueryChange,
-        onDateSelect = resolvedViewModel::onDateSelected,
         onLoadMore = resolvedViewModel::loadNextPage,
         onRetry = resolvedViewModel::retry,
+        onMonthYearChange = resolvedViewModel::onMonthYearChanged,
         onAddPurchase = onAddPurchase,
+        onAddProduct = onAddProduct,
         onEditPurchase = onEditPurchase
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesContent(
     state: SalesUiState,
     onQueryChange: (String) -> Unit,
-    onDateSelect: (Long?) -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    onMonthYearChange: (year: Int, month: Int) -> Unit = { _, _ -> },
     onAddPurchase: (() -> Unit)? = null,
+    onAddProduct: (() -> Unit)? = null,
     onEditPurchase: ((PurchaseModel) -> Unit)? = null,
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
+    var showNoProductsDialog by remember { mutableStateOf(false) }
+    val addPurchaseIfHasProducts: (() -> Unit)? = onAddPurchase?.let { add ->
+        { if (state.hasProducts == false) showNoProductsDialog = true else add() }
+    }
+    if (showNoProductsDialog) {
+        AlertDialog(
+            onDismissRequest = { showNoProductsDialog = false },
+            title = { Text(stringResource(R.string.sales_no_products_title)) },
+            text = { Text(stringResource(R.string.sales_no_products_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showNoProductsDialog = false
+                    onAddProduct?.invoke()
+                }) {
+                    Text(stringResource(R.string.sales_no_products_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNoProductsDialog = false }) {
+                    Text(stringResource(R.string.sales_no_products_dismiss))
+                }
+            }
+        )
+    }
     val listState = rememberLazyListState()
     val entries = remember(state.items) { buildSalesEntries(state.items).toImmutableList() }
     val shouldLoadMore by remember {
@@ -115,9 +134,9 @@ fun SalesContent(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = MaterialTheme.colorScheme.surface,
         floatingActionButton = {
-            if (onAddPurchase != null) {
+            if (addPurchaseIfHasProducts != null) {
                 FloatingActionButton(
-                    onClick = onAddPurchase,
+                    onClick = addPurchaseIfHasProducts,
                     containerColor = MaterialTheme.colorScheme.primary,
                 ) {
                     Icon(
@@ -153,69 +172,23 @@ fun SalesContent(
                     },
                     placeholder = { Text(stringResource(R.string.sales_search_placeholder)) }
                 )
-                IconButton(onClick = { showDatePicker = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.FilterList,
-                        contentDescription = stringResource(R.string.sales_filter_by_date),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
 
-            state.selectedDateMillis?.let { dateMillis ->
-                AssistChip(
-                    onClick = { onDateSelect(null) },
-                    label = {
-                        Text(
-                            stringResource(
-                                R.string.sales_date_filter_label,
-                                formatSaleDatePtBr(dateMillis)
-                            )
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.sales_date_filter_clear)
-                        )
-                    }
-                )
-            }
+            MonthYearSelector(
+                year = state.year,
+                month = state.month,
+                onMonthYearChange = onMonthYearChange
+            )
 
             SalesList(
                 state = state,
                 entries = entries,
                 listState = listState,
                 onRetry = onRetry,
-                onAddPurchase = onAddPurchase,
+                onAddPurchase = addPurchaseIfHasProducts,
                 onEditPurchase = onEditPurchase,
                 modifier = Modifier.weight(1f)
             )
-        }
-    }
-
-    if (showDatePicker) {
-        val pickerState =
-            rememberDatePickerState(initialSelectedDateMillis = state.selectedDateMillis)
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDateSelect(pickerState.selectedDateMillis)
-                        showDatePicker = false
-                    }
-                ) {
-                    Text(stringResource(R.string.date_picker_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(R.string.date_picker_cancel))
-                }
-            }
-        ) {
-            DatePicker(state = pickerState)
         }
     }
 }
@@ -250,6 +223,18 @@ private fun SalesList(
             OutlinedButton(onClick = onRetry) {
                 Text(stringResource(R.string.sales_retry))
             }
+        }
+
+        state.items.isEmpty() && state.query.isNotBlank() -> Box(
+            modifier = modifier.fillMaxSize().padding(horizontal = 24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.sales_search_empty, state.query.trim()),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         state.items.isEmpty() -> Box(
@@ -362,7 +347,6 @@ private fun SalesContentPreview() {
                 )
             ),
             onQueryChange = {},
-            onDateSelect = {},
             onLoadMore = {},
             onRetry = {},
             onAddPurchase = {}

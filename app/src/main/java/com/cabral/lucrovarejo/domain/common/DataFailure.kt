@@ -1,6 +1,7 @@
-package com.cabral.lucrovarejo.domain.purchase
+package com.cabral.lucrovarejo.domain.common
 
-class PurchaseFailure(
+/** Falha de acesso a dados, compartilhada por produtos, vendas e pagamentos. */
+class DataFailure(
     val reason: Reason,
     cause: Throwable? = null
 ) : Exception(cause) {
@@ -8,6 +9,7 @@ class PurchaseFailure(
         NETWORK,
         PERMISSION_DENIED,
         UNAUTHENTICATED,
+        DUPLICATE_EFFECTIVE_DATE,
         UNKNOWN
     }
 }

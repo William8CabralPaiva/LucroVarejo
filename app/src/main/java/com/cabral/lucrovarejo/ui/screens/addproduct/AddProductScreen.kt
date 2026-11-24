@@ -174,7 +174,7 @@ fun AddProductContent(
                     labelResId = R.string.product_paid_value_label,
                     placeholderResId = R.string.product_paid_value_placeholder,
                     icon = Icons.Outlined.MonetizationOn,
-                    type = IconTextFieldType.MONEY,
+                    type = IconTextFieldType.CURRENCY,
                     required = true,
                     enabled = !state.isLoading,
                     isError = state.costError != null,

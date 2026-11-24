@@ -1,9 +1,13 @@
 package com.cabral.lucrovarejo.ui.screens.sales
 
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
+import com.cabral.lucrovarejo.domain.product.ProductModel
+import com.cabral.lucrovarejo.domain.product.ProductRepository
+import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
 import com.cabral.lucrovarejo.domain.purchase.SalesFilter
+import com.cabral.lucrovarejo.ui.utils.DateUtils
 import com.cabral.lucrovarejo.domain.purchase.SalesPage
 import com.cabral.lucrovarejo.domain.purchase.SalesRepository
 import com.cabral.lucrovarejo.domain.purchase.usecase.GetSalesPageUseCase
@@ -13,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -72,16 +78,34 @@ class SalesViewModelTest {
     }
 
     @Test
-    fun dateFilterSendsOneDayRange() = runTest(dispatcher) {
+    fun defaultFilterCoversCurrentMonth() = runTest(dispatcher) {
         val repository = FakeRepository(pages = mutableListOf(page(1, false)))
+        createViewModel(repository)
+        advanceUntilIdle()
+
+        val filter = repository.filters.first()
+        val now = java.util.Calendar.getInstance()
+        val start = java.util.Calendar.getInstance().apply { time = filter.dateStart!! }
+        assertEquals(now.get(java.util.Calendar.YEAR), start.get(java.util.Calendar.YEAR))
+        assertEquals(now.get(java.util.Calendar.MONTH), start.get(java.util.Calendar.MONTH))
+        assertEquals(1, start.get(java.util.Calendar.DAY_OF_MONTH))
+    }
+
+    @Test
+    fun changingMonthSendsMonthRange() = runTest(dispatcher) {
+        val repository = FakeRepository(pages = mutableListOf(page(1, false), page(1, false)))
         val viewModel = createViewModel(repository)
         advanceUntilIdle()
 
-        viewModel.onDateSelected(1_759_708_800_000L)
+        viewModel.onMonthYearChanged(2026, 2)
         advanceUntilIdle()
 
         val filter = repository.filters.last()
-        assertEquals(24 * 60 * 60 * 1000L, filter.dateEnd!!.time - filter.dateStart!!.time)
+        assertEquals(2026, viewModel.uiState.value.year)
+        assertEquals(2, viewModel.uiState.value.month)
+        val (start, end) = DateUtils.localMonthRange(2026, 2)
+        assertEquals(start, filter.dateStart)
+        assertEquals(end, filter.dateEnd)
     }
 
     @Test
@@ -144,10 +168,6 @@ class SalesViewModelTest {
         viewModel.retry()
         advanceUntilIdle()
         assertEquals(10, viewModel.uiState.value.items.size)
-
-        viewModel.onDateSelected(null)
-        advanceUntilIdle()
-        assertEquals(null, repository.filters.last().dateStart)
     }
 
     @Test
@@ -167,10 +187,31 @@ class SalesViewModelTest {
         assertEquals(12, viewModel.uiState.value.items.size)
     }
 
-    private fun createViewModel(repository: SalesRepository) = SalesViewModel(
+    private fun createViewModel(
+        repository: SalesRepository,
+        products: Flow<List<ProductModel>> = flowOf(emptyList())
+    ) = SalesViewModel(
         getSalesPage = GetSalesPageUseCase(repository),
-        observeSalesChanges = ObserveSalesChangesUseCase(repository)
+        observeSalesChanges = ObserveSalesChangesUseCase(repository),
+        getProducts = GetProductsUseCase(object : ProductRepository {
+            override suspend fun updateProduct(product: ProductModel) = product
+            override suspend fun deleteProduct(key: String) = Unit
+            override suspend fun createProduct(product: ProductModel) = product
+            override fun observeProducts() = products
+        })
     )
+
+    @Test
+    fun hasProductsFollowsProductCatalog() = runTest(dispatcher) {
+        val products = MutableStateFlow(emptyList<ProductModel>())
+        val viewModel = createViewModel(FakeRepository(mutableListOf(page(1, false))), products)
+        advanceUntilIdle()
+        assertEquals(false, viewModel.uiState.value.hasProducts)
+
+        products.value = listOf(ProductModel(key = "1", cod = "c", name = "p", cost = java.math.BigDecimal.ONE, description = ""))
+        advanceUntilIdle()
+        assertEquals(true, viewModel.uiState.value.hasProducts)
+    }
 
     private fun page(size: Int, hasMore: Boolean) = SalesPage(
         items = (1..size).map {

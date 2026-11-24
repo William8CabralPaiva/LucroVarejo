@@ -116,7 +116,7 @@ class AddProductScreenUiTest {
 
         composeRule.onNodeWithText("Bolsa Feminina").assertIsDisplayed()
         composeRule.onNodeWithText("7891000123456").assertIsDisplayed()
-        composeRule.onNodeWithText("89.90").assertIsDisplayed()
+        composeRule.onNodeWithText("89,90").assertIsDisplayed()
         composeRule.onNodeWithText("EDITAR").performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithTag(DELETE_PRODUCT_BUTTON_TAG).performScrollTo().assertIsDisplayed()
         composeRule.onNodeWithText("CADASTRAR PRODUTO").assertDoesNotExist()

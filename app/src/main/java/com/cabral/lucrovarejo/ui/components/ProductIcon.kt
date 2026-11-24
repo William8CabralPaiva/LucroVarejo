@@ -40,6 +40,8 @@ fun productIconFor(text: String): ImageVector {
     val normalized = Normalizer.normalize(text.lowercase(Locale.ROOT), Normalizer.Form.NFD)
         .replace(Regex("\\p{Mn}+"), "")
     return when {
+        listOf("guarda chuva", "guarda-chuva", "guardachuva", "sombrinha", "pontaria")
+            .any { normalized.contains(it) } -> UmbrellaIcon
         normalized.contains("mochila") -> BackpackIcon
         normalized.contains("bag") -> GymBagIcon
         normalized.contains("bolsa") -> Icons.Outlined.ShoppingBag
@@ -108,6 +110,12 @@ private fun ProductIconTenisPreview() {
 @Composable
 private fun ProductIconChineloPreview() {
     LucroVarejoTheme { Column(Modifier.padding(16.dp)) { ProductIconPreviewRow("Chinelo") } }
+}
+
+@Preview(showBackground = true, name = "Guarda-chuva")
+@Composable
+private fun ProductIconGuardaChuvaPreview() {
+    LucroVarejoTheme { Column(Modifier.padding(16.dp)) { ProductIconPreviewRow("Guarda-chuva") } }
 }
 
 @Preview(showBackground = true, name = "Genérico")

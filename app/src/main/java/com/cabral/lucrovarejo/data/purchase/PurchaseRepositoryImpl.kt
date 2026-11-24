@@ -1,19 +1,16 @@
 package com.cabral.lucrovarejo.data.purchase
 
+import com.cabral.lucrovarejo.data.common.withDataFailure
 import com.cabral.lucrovarejo.data.purchase.datasource.PurchaseRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRequest
 import com.cabral.lucrovarejo.domain.purchase.MonthlyPurchaseSummary
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.PurchaseRepository
-import com.google.firebase.firestore.FirebaseFirestoreException
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 @Singleton
@@ -22,7 +19,7 @@ class PurchaseRepositoryImpl @Inject constructor(
 ) : PurchaseRepository {
     override suspend fun createPurchase(purchase: PurchaseModel): PurchaseModel {
         val request = PurchaseRequest.from(purchase)
-        val documentId = withPurchaseFailure {
+        val documentId = withDataFailure {
             remoteDataSource.createPurchase(request)
         }
         return purchase.copy(key = documentId)
@@ -30,14 +27,14 @@ class PurchaseRepositoryImpl @Inject constructor(
 
     override suspend fun updatePurchase(purchase: PurchaseModel): PurchaseModel {
         val key = requireNotNull(purchase.key) { "Purchase key is required to update" }
-        withPurchaseFailure {
+        withDataFailure {
             remoteDataSource.updatePurchase(key, PurchaseRequest.from(purchase))
         }
         return purchase.copy(key = key)
     }
 
     override suspend fun deletePurchase(key: String) {
-        withPurchaseFailure { remoteDataSource.deletePurchase(key) }
+        withDataFailure { remoteDataSource.deletePurchase(key) }
     }
 
     override fun observeMonthlySummary(start: Date, end: Date): Flow<MonthlyPurchaseSummary> {
@@ -64,44 +61,13 @@ class PurchaseRepositoryImpl @Inject constructor(
                     )
                 }
             }
-            .withPurchaseFailure()
+            .withDataFailure()
     }
 
     override fun observeLatestPurchases(limit: Int): Flow<List<PurchaseModel>> {
         require(limit > 0) { "Latest purchases limit must be positive" }
         return remoteDataSource.observeLatestPurchases(limit)
             .map { records -> records.map(PurchaseRecord::toModel) }
-            .withPurchaseFailure()
+            .withDataFailure()
     }
-
-    private fun <T> Flow<T>.withPurchaseFailure(): Flow<T> =
-        catch { failure -> throw failure.toPurchaseFailure() }
-    private suspend fun <T> withPurchaseFailure(
-        operation: suspend () -> T
-    ): T = try {
-        operation()
-    } catch (cancellation: CancellationException) {
-        throw cancellation
-    } catch (failure: PurchaseFailure) {
-        throw failure
-    } catch (failure: FirebaseFirestoreException) {
-        throw failure.toPurchaseFailure()
-    } catch (failure: Exception) {
-        throw PurchaseFailure(PurchaseFailure.Reason.UNKNOWN, failure)
-    }
-}
-
-internal fun Throwable.toPurchaseFailure(): PurchaseFailure = when (this) {
-    is PurchaseFailure -> this
-    is FirebaseFirestoreException -> {
-        val reason = when (code) {
-            FirebaseFirestoreException.Code.PERMISSION_DENIED ->
-                PurchaseFailure.Reason.PERMISSION_DENIED
-            FirebaseFirestoreException.Code.UNAVAILABLE ->
-                PurchaseFailure.Reason.NETWORK
-            else -> PurchaseFailure.Reason.UNKNOWN
-        }
-        PurchaseFailure(reason, this)
-    }
-    else -> PurchaseFailure(PurchaseFailure.Reason.UNKNOWN, this)
 }

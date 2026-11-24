@@ -3,22 +3,21 @@ package com.cabral.lucrovarejo.ui.screens.addpurchase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cabral.lucrovarejo.R
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.cabral.lucrovarejo.domain.payment.PaymentMachineModel
 import com.cabral.lucrovarejo.domain.payment.PaymentMethods
 import com.cabral.lucrovarejo.domain.payment.TerminalPaymentType
 import com.cabral.lucrovarejo.domain.payment.usecase.GetSaleTariffUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalTariffsUseCase
 import com.cabral.lucrovarejo.domain.payment.usecase.GetTerminalsUseCase
-import com.cabral.lucrovarejo.domain.product.ProductFailure
 import com.cabral.lucrovarejo.domain.product.ProductModel
 import com.cabral.lucrovarejo.domain.product.usecase.GetProductsUseCase
-import com.cabral.lucrovarejo.domain.purchase.PurchaseFailure
 import com.cabral.lucrovarejo.domain.purchase.PurchaseModel
 import com.cabral.lucrovarejo.domain.purchase.usecase.CreatePurchaseUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.DeletePurchaseUseCase
 import com.cabral.lucrovarejo.domain.purchase.usecase.UpdatePurchaseUseCase
 import com.cabral.lucrovarejo.ui.utils.DateUtils
+import com.cabral.lucrovarejo.ui.utils.userMessageRes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -148,6 +147,14 @@ class AddPurchaseViewModel @Inject constructor(
             )
         }
         loadTariffsForSelection()
+        selectSingleTerminal()
+    }
+
+    // Com uma única maquininha ativa para o método, não há o que escolher.
+    private fun selectSingleTerminal() {
+        val state = _uiState.value
+        if (state.form.terminalId != null) return
+        state.terminalOptions.singleOrNull()?.let { onTerminalSelected(it.name) }
     }
 
     fun onTerminalSelected(name: String) {
@@ -220,6 +227,7 @@ class AddPurchaseViewModel @Inject constructor(
     fun savePurchase() {
         val current = _uiState.value
         if (current.isSaving || current.isLoadingProducts || current.isLoadingTariffs) return
+        if (current.hasLoss) return
 
         val form = current.form
         val salePrice = parseSalePrice(form.salePrice)
@@ -256,13 +264,13 @@ class AddPurchaseViewModel @Inject constructor(
                 createPurchase(purchase)
                 _uiState.update { it.resetAfterCreate() }
                 effectChannel.send(Unit)
-            } catch (failure: PurchaseFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isSaving = false,
-                        errorMessage = purchaseErrorMessage(
-                            failure.reason,
-                            R.string.purchase_edit_error_generic.takeIf { purchase.key != null }
+                        errorMessage = failure.userMessageRes(
+                            if (purchase.key != null) R.string.purchase_edit_error_generic
+                            else R.string.purchase_create_error_generic
                         )
                     )
                 }
@@ -290,14 +298,11 @@ class AddPurchaseViewModel @Inject constructor(
                 deletePurchase(key)
                 _uiState.update { it.copy(isSaving = false) }
                 completionChannel.send(Unit)
-            } catch (failure: PurchaseFailure) {
+            } catch (failure: DataFailure) {
                 _uiState.update {
                     it.copy(
                         isSaving = false,
-                        errorMessage = purchaseErrorMessage(
-                            failure.reason,
-                            R.string.purchase_delete_error_generic
-                        )
+                        errorMessage = failure.userMessageRes(R.string.purchase_delete_error_generic)
                     )
                 }
             }
@@ -312,20 +317,11 @@ class AddPurchaseViewModel @Inject constructor(
                 }
             }
             .catch { failure ->
-                when (failure) {
-                    is ProductFailure -> _uiState.update {
-                        it.copy(
-                            isLoadingProducts = false,
-                            errorMessage = productErrorMessage(failure.reason)
-                        )
-                    }
-
-                    else -> _uiState.update {
-                        it.copy(
-                            isLoadingProducts = false,
-                            errorMessage = R.string.purchase_load_products_error_generic
-                        )
-                    }
+                _uiState.update {
+                    it.copy(
+                        isLoadingProducts = false,
+                        errorMessage = failure.userMessageRes(R.string.purchase_load_products_error_generic)
+                    )
                 }
             }
             .launchIn(viewModelScope)
@@ -334,13 +330,26 @@ class AddPurchaseViewModel @Inject constructor(
     private fun observeTerminals() {
         getTerminals()
             .onEach { terminals ->
-                _uiState.update { it.copy(terminals = terminals) }
+                _uiState.update { current ->
+                    val terminalName = terminals
+                        .firstOrNull { it.key != null && it.key == current.form.terminalId }
+                        ?.name
+                    current.copy(
+                        terminals = terminals,
+                        form = if (terminalName != null) {
+                            current.form.copy(terminalName = terminalName)
+                        } else {
+                            current.form
+                        }
+                    )
+                }
                 val state = _uiState.value
                 if (state.form.paymentMethod == PaymentMethods.CASH &&
                     state.tariffs.isEmpty() && !state.isLoadingTariffs
                 ) {
                     loadTariffsForSelection()
                 }
+                if (!_uiState.value.isEditing) selectSingleTerminal()
             }
             .catch {
                 _uiState.update { it.copy(errorMessage = R.string.purchase_terminals_load_error) }
@@ -363,18 +372,23 @@ class AddPurchaseViewModel @Inject constructor(
 
     private fun loadTariffs(terminalIds: List<String>) {
         tariffsJob?.cancel()
-        _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
-        if (terminalIds.isEmpty()) return
-        _uiState.update { it.copy(isLoadingTariffs = true) }
+        if (terminalIds.isEmpty()) {
+            _uiState.update { reconcileTariff(it.copy(tariffs = emptyList(), isLoadingTariffs = false)) }
+            return
+        }
+        _uiState.update { it.copy(tariffs = emptyList(), isLoadingTariffs = true) }
         tariffsJob = viewModelScope.launch {
             try {
                 val loaded = terminalIds.flatMap { id ->
                     tariffsByTerminal[id] ?: getTerminalTariffs(id).also { tariffsByTerminal[id] = it }
                 }
+                // Em edição, a primeira carga substitui o snapshot salvo pela tarifa vigente atual.
                 _uiState.update {
-                    reconcileTariff(it.copy(tariffs = loaded, isLoadingTariffs = false))
+                    reconcileTariff(
+                        it.copy(tariffs = loaded, isLoadingTariffs = false, keepSavedTariff = false)
+                    )
                 }
-            } catch (_: PaymentFailure) {
+            } catch (_: DataFailure) {
                 _uiState.update {
                     it.copy(
                         tariffs = emptyList(),
@@ -416,23 +430,6 @@ class AddPurchaseViewModel @Inject constructor(
             saleDate = Date(form.saleDateMillis)
         )
         return tariff?.let { AppliedTariff(it.key, it.rateBps) } ?: AppliedTariff.NONE
-    }
-
-    private fun productErrorMessage(reason: ProductFailure.Reason): Int = when (reason) {
-        ProductFailure.Reason.NETWORK -> R.string.purchase_load_products_error_network
-        ProductFailure.Reason.PERMISSION_DENIED -> R.string.purchase_load_products_error_permission
-        ProductFailure.Reason.UNAUTHENTICATED -> R.string.purchase_load_products_error_unauthenticated
-        ProductFailure.Reason.UNKNOWN -> R.string.purchase_load_products_error_generic
-    }
-
-    private fun purchaseErrorMessage(
-        reason: PurchaseFailure.Reason,
-        unknownOverride: Int? = null
-    ): Int = when (reason) {
-        PurchaseFailure.Reason.NETWORK -> R.string.purchase_create_error_network
-        PurchaseFailure.Reason.PERMISSION_DENIED -> R.string.purchase_create_error_permission
-        PurchaseFailure.Reason.UNAUTHENTICATED -> R.string.purchase_create_error_unauthenticated
-        PurchaseFailure.Reason.UNKNOWN -> unknownOverride ?: R.string.purchase_create_error_generic
     }
 }
 

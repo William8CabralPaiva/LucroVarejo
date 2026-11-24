@@ -1,5 +1,7 @@
 package com.cabral.lucrovarejo.data.purchase
 
+import com.cabral.lucrovarejo.data.common.toDataFailure
+import com.cabral.lucrovarejo.data.common.withDataFailure
 import com.cabral.lucrovarejo.data.purchase.datasource.SalesRemoteDataSource
 import com.cabral.lucrovarejo.data.purchase.model.PurchaseRecord
 import com.cabral.lucrovarejo.domain.purchase.SalesCursor
@@ -11,7 +13,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 
 @Singleton
 class SalesRepositoryImpl @Inject constructor(
@@ -61,13 +62,13 @@ class SalesRepositoryImpl @Inject constructor(
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (failure: Exception) {
-            throw failure.toPurchaseFailure()
+            throw failure.toDataFailure()
         }
     }
 
     override fun observeSalesChanges(filter: SalesFilter): Flow<Unit> =
         remoteDataSource.observeSalesChanges(filter.dateStart, filter.dateEnd)
-            .catch { failure -> throw failure.toPurchaseFailure() }
+            .withDataFailure()
 
     private fun String.normalizeForSearch(): String =
         Normalizer.normalize(trim(), Normalizer.Form.NFD)

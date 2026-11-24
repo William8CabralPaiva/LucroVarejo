@@ -1,9 +1,10 @@
 package com.cabral.lucrovarejo.data.payment.datasource
 
+import com.cabral.lucrovarejo.data.firestore.FirestoreCollections
 import com.cabral.lucrovarejo.data.payment.model.PaymentTerminalRecord
 import com.cabral.lucrovarejo.data.payment.model.PaymentTerminalRequest
-import com.cabral.lucrovarejo.domain.payment.PaymentFailure
-import com.google.firebase.auth.FirebaseAuth
+import com.cabral.lucrovarejo.data.store.ActiveStoreKeyProvider
+import com.cabral.lucrovarejo.domain.common.DataFailure
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class FirebasePaymentTerminalRemoteDataSource @Inject constructor(
-    private val auth: FirebaseAuth,
+    private val activeStore: ActiveStoreKeyProvider,
     private val firestore: FirebaseFirestore
 ) : PaymentTerminalRemoteDataSource {
     override suspend fun createTerminal(request: PaymentTerminalRequest): String {
@@ -53,15 +54,15 @@ class FirebasePaymentTerminalRemoteDataSource @Inject constructor(
     }
 
     private fun terminalsCollection() =
-        storeDocument().collection(COLLECTION_PAYMENT_TERMINALS)
+        storeDocument().collection(FirestoreCollections.PAYMENT_TERMINALS)
 
     private fun terminalDocument(key: String): DocumentReference =
         terminalsCollection().document(key)
 
     private fun storeDocument(): DocumentReference {
-        val storeKey = auth.currentUser?.uid
-            ?: throw PaymentFailure(PaymentFailure.Reason.UNAUTHENTICATED)
-        return firestore.collection(COLLECTION_STORES).document(storeKey)
+        val storeKey = activeStore.currentStoreKey()
+            ?: throw DataFailure(DataFailure.Reason.UNAUTHENTICATED)
+        return firestore.collection(FirestoreCollections.STORES).document(storeKey)
     }
 
     private fun Query.snapshotFlow(
@@ -100,8 +101,4 @@ class FirebasePaymentTerminalRemoteDataSource @Inject constructor(
         )
     }
 
-    private companion object {
-        const val COLLECTION_STORES = "stores"
-        const val COLLECTION_PAYMENT_TERMINALS = "paymentTerminals"
-    }
 }
